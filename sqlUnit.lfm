@@ -149,6 +149,7 @@ object Form1: TForm1
     Top = 544
     Width = 75
     Caption = 'LoadSQL'
+    OnClick = Button6Click
     TabOrder = 10
   end
   object Edit3: TEdit
@@ -157,15 +158,7 @@ object Form1: TForm1
     Top = 543
     Width = 160
     TabOrder = 11
-    Text = 'createsamson.sql'
-  end
-  object Button7: TButton
-    Left = 328
-    Height = 25
-    Top = 444
-    Width = 75
-    Caption = 'SIMULATE'
-    TabOrder = 12
+    Text = 'test.sql'
   end
   object Label7: TLabel
     Left = 379
@@ -180,7 +173,7 @@ object Form1: TForm1
     Height = 21
     Top = 2
     Width = 123
-    TabOrder = 13
+    TabOrder = 12
     Text = 'root'
   end
   object Edit5: TEdit
@@ -188,15 +181,14 @@ object Form1: TForm1
     Height = 21
     Top = 545
     Width = 59
-    TabOrder = 14
-    Text = 'csv/CSV/'
+    TabOrder = 13
   end
   object Edit6: TEdit
     Left = 363
     Height = 21
     Top = 545
     Width = 80
-    TabOrder = 15
+    TabOrder = 14
     Text = '0'
   end
   object Label8: TLabel
@@ -212,7 +204,7 @@ object Form1: TForm1
     Height = 21
     Top = 187
     Width = 123
-    TabOrder = 16
+    TabOrder = 15
     Text = 'password'
   end
   object Button8: TButton
@@ -222,7 +214,7 @@ object Form1: TForm1
     Width = 75
     Caption = 'CONNECT'
     OnClick = Button8Click
-    TabOrder = 17
+    TabOrder = 16
   end
   object Timer1: TTimer
     Enabled = False

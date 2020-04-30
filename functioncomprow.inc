@@ -13,12 +13,7 @@ var
   stPattern: string;
   RPattern: string;
   RegexObj: TRegExpr;
-  {$IFDEF mongodb}
-  lValueType: TBSONValueType;
-  {$ENDIF}
-  {$IFDEF tablesdb}
   lValueType: string;
-  {$ENDIF}
 begin
   { TODO :  use executeplan or indexes directly to be sure about it }
   setlength(lconditionInstructions, length(conditionInstructions));
@@ -72,61 +67,6 @@ begin
 
             setlength(runstk,length(runstk) + 1);
 
-            {$IFDEF mongodb}
-            lvalueType := resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].ValueType;
-
-            if lvalueType = bvtNull then
-              begin
-                runstk[High(runstk)].caseValue := 7; // Null Value
-                runstk[High(runstk)].strValue := 'NULL';
-              end else
-              case resultTable.resultFields.columns[index1].coltype of
-                booleanType:
-                  begin
-                    runstk[High(runstk)].caseValue := 0;
-                    runstk[High(runstk)].boolValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsBoolean;
-                  end;
-                intType, smallintType:
-                  begin
-                    runstk[High(runstk)].caseValue := 4;
-                    runstk[High(runstk)].extValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsInteger;
-                  end;
-                int64Type:
-                  begin
-                    runstk[High(runstk)].caseValue := 4;
-                    runstk[High(runstk)].extValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsInt64;
-                  end;
-                TDateTimeType, TDateType, TTimeType:
-                  begin
-                    runstk[High(runstk)].caseValue := 8;
-                    runstk[High(runstk)].extValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsFloat;
-                  end;
-                extendedType:
-                  begin
-                    runstk[High(runstk)].caseValue := 4;
-                    runstk[High(runstk)].extValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsFloat;
-                  end;
-                currencyType:
-                  begin
-                    runstk[High(runstk)].caseValue := 4;
-                    runstk[High(runstk)].extValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsFloat;
-                  end;
-                stringType:
-                  begin
-                    runstk[High(runstk)].caseValue := 6;
-                    runstk[High(runstk)].strValue :=
-                      resultTable.resultIBSONInstance.Items[ltblName + tableColumnSeperator + lcolname].AsString;
-                  end;
-              end;
-            {$ENDIF}
-
-            {$IFDEF tablesdb}
               if resultTable.resultrow[index1] = null then
                 begin
                   runstk[High(runstk)].caseValue := 7; // Null Value
@@ -169,9 +109,6 @@ begin
                       runstk[High(runstk)].strValue :=  resultTable.resultrow[index1];
                     end;
                 end;
-
-            {$ENDIF}
-
           end;
 
        45: // IN

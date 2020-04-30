@@ -2,9 +2,6 @@ unit execProgramUnit;
 // usr/local/bin/
 
 
-//{$DEFINE mongodb}
-{$DEFINE tablesdb}
-
 interface
 
 { DONE : To show the databases for a user:
@@ -34,21 +31,13 @@ interface
 
 uses
   sql, lexlib,  yacclib,
-  {$IFDEF tablesdb}   BPlusTreeU, TtableU, {$ENDIF}
+  BPlusTreeU, TtableU,
   BJoinTreeU,
-  {$IFDEF mongodb} Mongo, MongoDB, MongoCollection, MongoDBCursorIntf,
-  BSONTypes, {$ENDIF}
   variants;
 
 const
   lendbOjects = 48;
 
-{$IFDEF mongodb}
-var
-  GMongo: TMongo;
-  GDB: TMongoDB;
-  GCollection: TMongoCollection;
-{$ENDIF}
 
 
 type
@@ -58,12 +47,7 @@ type
   tblStructure = record
     tblName: string;
     // timestamp: TDateTime;
-    {$IFDEF mongodb}
-    Collection: TMongoCollection;
-    {$ENDIF}
-    {$IFDEF tablesdb}
     storage: TTableClass;
-    {$ENDIF}
     numCols: integer;
     columns: array of record
       colname: string;
@@ -129,9 +113,7 @@ type
 
     idxdata: array of record
       idxname: string;
-      {$IFDEF tablesdb}
       idxstorage: BtrPlusClass;
-      {$ENDIF}
       idxkeys: array of record
         colName: string;
         colorder: boolean;
@@ -226,16 +208,9 @@ uses
 const
   tableColumnSeperator: char = '_';
 
-{$IFDEF UNIX}
-const
-   Path: string = 'opt/'; //'/opt/';
-
-{$ELSE}
 var
   Path: string = '';
-{$ENDIF}
 
-{$IFDEF tablesdb}
 var
   DDusers: TTableClass;
   DDroles: TTableClass;
@@ -257,14 +232,6 @@ var
   DDjoinindexes: TTableClass;
   DDkeysjointables: TTableClass;
   outText: TextFile;
-{$ENDIF}
-
-{$IFDEF mongodb}
-var
-  DataDictionaryCollection: TMongoCollection;
-  TransactionsCollection:  TMongoCollection;
-  SequencesCollection:  TMongoCollection;
-{$ENDIF}
 
   { TODO : check all the fields in BSON, if someone is messing put it as default or yyerror }
   { DONE : To put boolean values as a new kind in sqlLex and sql.y }
@@ -274,12 +241,6 @@ var
   index: integer;
   index1: integer;
 begin
-  {$IFDEF mongodb}
-  for index := low(workingSchema.tables) to High(workingSchema.tables) do
-    with workingSchema.tables[index] do Collection.Free;
-  // close join indexes
-  {$ENDIF}
-  {$IFDEF tablesdb}
   for index := low(workingSchema.tables) to High(workingSchema.tables) do
     begin
       workingSchema.tables[index].storage.Free;
@@ -289,61 +250,8 @@ begin
   for index := low(workingSchema.joinidxdata) to high(workingSchema.joinidxdata) do
     workingSchema.joinidxdata[index].idxstorage.Free
   // close indexes
-  {$ENDIF}
 end;
 
-{$IFDEF mongodb}
-procedure connectToMongoDB(DBName: string; CollectionName: string);
-var
-  DataDictionaryInstance: IBSONObject;
-  privilegeArray: IBSONArray;
-begin
-
-  //GRefList := TInterfaceList.Create;
-
-  GMongo := TMongo.Create;
-
-  // GMongo.Connect('50.118.49.133',27017);
-  GMongo.Connect();
-  GDB := GMongo.getDB(DBName);
-
-  GCollection := GDB.GetCollection(CollectionName); // should be removed data if returned in screen
-  DataDictionaryCollection := GDB.GetCollection('datadictionary');
-
-  // create user and privileges for empty datadictionary
-  if DataDictionaryCollection.Count = 0 then
-    begin
-      DataDictionaryInstance := TBSONObject.Create;
-      DataDictionaryInstance.Put('kind','user');
-      DataDictionaryInstance.Put('user_id','root');
-      DataDictionaryInstance.Put('password','password');
-      DataDictionaryInstance.Put('created_by',NULL);
-      DataDictionaryInstance.Put('_id', TBSONObjectId.NewFrom);
-      DataDictionaryCollection.Insert(DataDictionaryInstance);
-
-      privilegeArray := TBSONArray.Create;
-      privilegeArray.Put('create user');
-      privilegeArray.Put('grant any');
-      // privilegeArray.Put('all');
-      privilegeArray.Put('grant option');
-
-      DataDictionaryInstance := TBSONObject.Create;
-      DataDictionaryInstance.Put('kind','privilege');
-      DataDictionaryInstance.Put('privilege_array',privilegeArray);
-
-      // DataDictionaryInstance.Put('dbobject','*.*');
-
-      DataDictionaryInstance.Put('belongs_to','root');
-      DataDictionaryInstance.Put('_id', TBSONObjectId.NewFrom);
-      DataDictionaryCollection.Insert(DataDictionaryInstance);
-    end;
-  Transactionscollection := GDB.GetCollection('sys_transactions');
-  SequencesCollection := GDB.GetCollection('sys_sequences');
-
-end;
-{$ENDIF}
-
-{$IFDEF tablesdb}
 procedure connectToTablesDB(DBName: string; outData: string);
 var
   row: array of variant = nil;
@@ -364,54 +272,22 @@ begin
   rewrite(outText);
   openTables;
 end;
-{$ENDIF}
-
-{$IFDEF mongodb}
-procedure disconnectFromMongoDB;
-begin
-  closeSchemaTables;
-  GCollection.free;
-  DataDictionaryCollection.free;
-  Transactionscollection.Free;
-  SequencesCollection.free;
-  GDB.free;
-  GMongo.free;
-end;
-{$ENDIF}
-
-{$IFDEF tablesdb}
 procedure disconnectFromTablesDB;
 begin
   closeFile(outText);
   closeSchemaTables;
   closeTables;
 end;
-{$ENDIF}
 
 procedure connectToDB(DBName: string; outData: string);
 begin
-  {$IFDEF mongodb}
-  connectToMongoDB(DBName,outData);
-  {$ENDIF}
-  {$IFDEF tablesdb}
   connectToTablesDB(DBName,outData);
-  {$ENDIF}
 end;
 
 procedure disconnectFromDB;
 begin
-  {$IFDEF mongodb}
-  disconnectFromMongoDB;
-  {$ENDIF}
-  {$IFDEF tablesdb}
   disconnectFromTablesDB;
-  {$ENDIF}
 end;
-
-{$IFDEF mongodb}
-var
-  ACursor: IMongoDBCursor;
-{$ENDIF}
 
 function convertType(SQLType: string): string;
 begin
@@ -472,47 +348,6 @@ begin
     end;
 end;
 
-{ Oracle. Oracle's E-Business Suite (also known as Applications/Apps or EB-Suite/EBS)
-  consists of a collection of enterprise resource planning (ERP), customer relationship management (CRM),
-  and supply-chain management (SCM) computer applications either developed or acquired by Oracle. }
-
-{$IFDEF mongodb}
-function createDefaultSchema(userId: string; dbName: string): boolean;
-var
-  NestedUserIdInstance: IBSONObject;
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-begin
-  result := False;
-
- // 'select * from datadicyionary where userid = ' + userId;
-
-  NestedUserIdInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NestedDatabaseInstance.Put('$eq','database');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  if DatabaseCursor.Count <> 0 then
-    begin
-      // if there is a database, should be the Default as the first one
-      // it is created for the user or sys_suid if there is no users yet
-      result := True;
-    end else
-    begin
-      // DATABASE_metaData(DBNAME)
-      DatabaseInstance := TBSONObject.Create;
-      DatabaseInstance.Put('kind','database');
-      DatabaseInstance.Put('database_name',dbName);
-      DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-      GCollection.Insert(DatabaseInstance);
-    end;
-end;
-{$ENDIF}
-
-{$IFDEF tablesdb}
 function createDefaultSchema(dbName: string): boolean;
 var
   rowId: int64;
@@ -540,39 +375,7 @@ begin
       DDdatabases.insertRow(row);
     end;
 end;
-{$ENDIF}
 
-{$IFDEF mongodb}
-function DatabaseExists(dbName: string): boolean;
-var
-  NesteddbNameInstance: IBSONObject;
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-begin
-  dbName := lowercase(dbName);
-  result := False;
-
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedDatabaseInstance.Put('$eq','database');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-  if DatabaseCursor.Count <> 0 then
-    begin
-      // if there is a database, should be the Default as the first one
-      // it is created for the user or sys_suid if there is no users yet
-      result := True;
-    end
-end;
-{$ENDIF}
-
-{$IFDEF tablesdb}
 function DatabaseExists(dbName: string): boolean;
 var
   rowId: int64;
@@ -597,37 +400,7 @@ begin
     rowId := rowId + 1;
   until rowId > DDdatabases.lastRow;
 end;
-{$ENDIF}
 
-{$IFDEF mongodb}
-function ConstraintNameExists(cnstrName: string): boolean;
-var
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-  constraintName: string;
-begin
-  result := False;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NestedDatabaseInstance.Put('$eq','constraint');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance :=  DatabaseCursor.Next;
-      constraintName := DatabaseInstance.Items['constraint_name'].AsString;
-      if cnstrName = constraintName then
-      begin
-        result := True;
-        break;
-      end;
-    end;
-end;
-{$ENDIF}
-
-{$IFDEF tablesdb}
 function ConstraintNameExists(cnstrName: string): boolean;
 var
   rowId: int64;
@@ -649,37 +422,7 @@ begin
     rowId := rowId + 1;
   until rowId > DDconstraints.lastRow;
 end;
-{$ENDIF}
 
-{$IFDEF mongodb}
-function IndexNameExists(IdxName: string): boolean;
-var
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-begin
-  result := false;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NestedDatabaseInstance.Put('$eq','index');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance :=  DatabaseCursor.Next;
-      if IdxName =
-         DatabaseInstance.Items['index_name'].AsString then
-        begin
-          result := True;
-          break;
-        end;
-   end;
-end;
-
-{$ENDIF}
-
-{$IFDEF tablesdb}
 function IndexNameExists(IdxName: string): boolean;
 var
   rowId: Integer;
@@ -699,63 +442,7 @@ begin
     rowId := rowId + 1;
   until rowId > DDIndexes.lastRow;
 end;
-{$ENDIF}
 
-{$IFDEF mongodb}
-function UserIdExists(userId: string): boolean;
-var
-  NestedUserIdInstance: IBSONObject;
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-begin
-  userId := lowercase(userId);
-  result := False;
-
-  NestedUserIdInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NestedUserIdInstance.Put('$eq',userId);
-  NestedDatabaseInstance.Put('$eq','user');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('user_id',NestedUserIdInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-  if DatabaseCursor.Count <> 0 then result := True;
-end;
-
-function UserIdExists(userId: string; Password: string): boolean;
-var
-  NestedUserIdInstance: IBSONObject;
-  NestedPasswordInstance: IBSONObject;
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-begin
-  userId := lowercase(userId);
-  result := False;
-
-  NestedPasswordInstance := TBSONObject.Create;
-  NestedUserIdInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NestedPasswordInstance.Put('$eq',Password);
-  NestedUserIdInstance.Put('$eq',userId);
-  NestedDatabaseInstance.Put('$eq','user');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('user_id',NestedUserIdInstance);
-  DatabaseInstance.Put('password',NestedPasswordInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-  if DatabaseCursor.Count <> 0 then result := true;
-
-
-end;
-{$ENDIF}
-
-{$IFDEF tablesdb}
 function UserIdExists(userId: string): boolean;
 var
   rowId1: int64;
@@ -794,18 +481,15 @@ begin
     rowId1 := rowId1 + 1;
   until rowId1 > DDtables.lastRow;
 end;
-{$ENDIF}
 
 function loadSchema(dbName: string): boolean;
 var
-  {$IFDEF tablesdb}
   rowId1, rowId2, rowId3, rowId4: int64;
   joinindex: boolean;
   idxAsc: array of boolean;
   view_Name: string;
   colsname, colstype: array of string;
   allowcolsNull: array of boolean;
-  {$ENDIF}
   table_Name: string;
   index: integer;
   index1: integer;
@@ -821,15 +505,6 @@ var
   TheKeys: array of string;
   refTableName: string;
   refcolumn_name: string;
-  {$IFDEF mongodb}
-  NestedTypeInstance: IBSONObject;
-  NesteddbNameInstance: IBSONObject;
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-  lcount: Integer;
-  cklcount: Integer;
-  {$ENDIF}
 
 begin
   result := False;
@@ -853,45 +528,6 @@ begin
     end;
 
   // load all the views
-  {$IFDEF mongodb}
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedDatabaseInstance.Put('$eq','view');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance := DatabaseCursor.Next;
-      setLength(workingSchema.views, length(workingSchema.views) + 1);
-      with workingSchema.views[high(workingSchema.views)] do
-        begin
-          viewName := DatabaseInstance.Items['view_name'].AsString;
-          ViewInstructions := nil;
-          lcount := DatabaseInstance.Items['number_of_instructions'].AsInteger;
-          for index1 := 0  to lcount - 1 do
-            begin
-              setlength(ViewInstructions,length(ViewInstructions)+1);
-              with ViewInstructions[high(ViewInstructions)] do
-                begin
-                  mnemonic := DatabaseInstance.Items['mnemonic'+intToStr(index1)].AsInteger;
-                  boolvalue := DatabaseInstance.Items['boolvalue'+intToStr(index1)].AsBoolean;
-                  value := DatabaseInstance.Items['value'+intToStr(index1)].AsInteger;
-                  stvalue := DatabaseInstance.Items['stvalue'+intToStr(index1)].AsString;
-                  printInstruction := DatabaseInstance.Items['printInstruction'+intToStr(index1)].AsString
-                end
-            end;
-          numCols := 0;
-          // load the number of columns (Available in number_of_columns)
-          columns := nil; // to load the columns
-        end;
-    end;
-  {$ENDIF}
-
-  {$IFDEF tablesdb}
   rowId1 := DDviews.firstRow;
   repeat
     if DDviews.existRow(rowId1) then
@@ -938,38 +574,9 @@ begin
       end;
     rowId1 := rowId1 + 1;
   until rowId1 > DDviewinstructions.lastRow;
-  {$ENDIF}
 
   // load all the tables
 
-  {$IFDEF mongodb}
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedDatabaseInstance.Put('$eq','table');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance := DatabaseCursor.Next;
-      setLength(workingSchema.tables, length(workingSchema.tables) + 1);
-      with workingSchema.tables[high(workingSchema.tables)] do
-      begin
-        tblName := DatabaseInstance.Items['table_name'].AsString;
-        collection := nil; // load the table
-        numCols := 0;
-        // load the number of columns (Available in number_of_columns)
-        columns := nil; // to load the columns
-        constraints := nil;
-        idxData := nil; // to load the indexes
-      end;
-    end;
-  {$ENDIF}
-
-  {$IFDEF tablesdb}
   rowId1 := DDtables.firstRow;
   repeat
     if DDtables.existRow(rowId1) then
@@ -992,83 +599,9 @@ begin
     end;
     rowId1 := rowId1 + 1;
   until rowId1 > DDtables.lastRow;
-  {$ENDIF}
 
   // load all the columns
 
-  {$IFDEF mongodb}
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedDatabaseInstance.Put('$eq','tablecolumn');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance := DatabaseCursor.Next;
-      table_Name := DatabaseInstance.Items['table_name'].AsString; // table_name could be view_name
-      for index := low(workingSchema.tables) to high(workingSchema.tables) do
-        if workingSchema.tables[index].tblName = table_name then
-          break;
-      workingSchema.tables[index].numCols := workingSchema.tables[index].numCols + 1;
-      setlength( workingSchema.tables[index].columns, length( workingSchema.tables[index].columns) + 1 );
-      with workingSchema.tables[index].columns[high(workingSchema.tables[index].columns)] do
-        begin
-          colname := DatabaseInstance.Items['column_name'].AsString;
-          colSQLtypeName := DatabaseInstance.Items['type_name'].AsString;
-          if convertType(colSQLtypeName) = 'INTEGER' then
-            coltype := intType;
-          if convertType(colSQLtypeName) = 'SMALLINT' then
-            coltype := smallintType;
-          if convertType(colSQLtypeName) = 'INT64' then
-            coltype := int64Type;
-          if (convertType(colSQLtypeName) = 'SINGLE') or
-            (convertType(colSQLtypeName) = 'DOUBLE') or
-            (convertType(colSQLtypeName) = 'EXTENDED') then
-            begin
-              coltype := extendedType;
-              coltypeScale.precision := DatabaseInstance.Items['dim1'].AsInteger;
-              coltypeScale.scale := DatabaseInstance.Items['dim2'].AsInteger;
-            end;
-          if convertType(colSQLtypeName) = 'CURRENCY' then
-            begin
-              coltype := currencyType;
-              coltypeScale.precision := DatabaseInstance.Items['dim1'].AsInteger;
-              coltypeScale.scale := DatabaseInstance.Items['dim2'].AsInteger;
-            end;
-          if convertType(colSQLtypeName) = 'TDATETIME' then
-            coltype := tdatetimeType;
-          if convertType(colSQLtypeName) = 'TDATE' then
-            coltype := tdateType;
-          if convertType(colSQLtypeName) = 'TIME' then
-            coltype := ttimeType;
-          if convertType(colSQLtypeName) = 'BOOLEAN' then
-            coltype := booleanType;
-          if convertType(colSQLtypeName) = 'STRING' then
-            begin
-              colTypeScale.size := DatabaseInstance.Items['dim1'].AsInteger;
-              coltype := stringType;
-            end;
-          defaultType := DatabaseInstance.Items['kind_default'].AsInteger;
-          colHasAutoIncrement := (defaultType = 8);
-          colHasDefault := (defaultType <> -1) and (defaultType <> 8);
-          case defaultType of
-            0: colDefaultValue := DatabaseInstance.Items['int_default'].Value;
-            2: colDefaultValue := DatabaseInstance.Items['int64_default'].Value;
-            3, 5: colDefaultValue := DatabaseInstance.Items['ext_default'].Value;
-            4: colDefaultValue := DatabaseInstance.Items['currency_default'].Value;
-            6: colDefaultValue := DatabaseInstance.Items['boolean_default'].Value;
-            7: colDefaultValue := DatabaseInstance.Items['st_default'].Value;
-          end;
-        end;
-    end;
-  {$ENDIF}
-
-
-  {$IFDEF tablesdb}
   rowId1 := DDtablecolumns.firstRow;
   repeat
     if DDtablecolumns.existRow(rowId1) then
@@ -1160,171 +693,9 @@ begin
       end;
     rowId1 := rowId1 + 1;
   until rowId1 > DDtablecolumns.lastRow;
-  {$ENDIF}
 
   // load all constraints for the database
 
-  {$IFDEF mongodb}
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedDatabaseInstance.Put('$eq','constraint');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance := DatabaseCursor.Next;
-
-      table_Name := DatabaseInstance.Items['table_name'].AsString;
-      for index := low(workingSchema.tables) to high(workingSchema.tables) do
-        if workingSchema.tables[index].tblName = table_name then
-          break;
-      with workingSchema.tables[index] do
-        begin
-          setLength(constraints, length(constraints) + 1);
-          constraint_Name := DatabaseInstance.Items['constraint_name'].AsString;
-          constraints[high(constraints)].cnstrname := constraint_Name;
-          constraint_type := DatabaseInstance.Items['constraint_type'].AsString;
-
-
-          // check all columns constraints for the table
-
-          for index2 := 0 to DatabaseInstance.Items['column_count'].AsInteger - 1 do
-            begin
-              column_Name := DatabaseInstance.Items['column_name'+intToStr(index2)].AsString;
-
-              if (constraint_type = 'NULL') then
-                begin
-                  for index1 := 0 to numCols - 1 do
-                    if column_name = columns[index1].colname then
-                      with constraints[high(constraints)] do
-                      begin
-                        cnstrtype := 0; // Allow Null Values
-                        nullCol := Index1;
-                        break;
-                      end;
-                end;
-
-              if (constraint_type = 'NOT NULL') then
-                begin
-                  for index1 := 0 to numCols - 1 do
-                    if column_name = columns[index1].colname then
-                      with constraints[high(constraints)] do
-                        begin
-                          cnstrtype := 1; // Doesn't allow Null Values
-                          nnullCol := Index1;
-                          break;
-                        end;
-                end;
-
-              if (constraint_type = 'UNIQUE') then
-                begin
-                  // NOT NULL must be specified to make the column(s) a key.
-                  // It is possible to put UNIQUE constraints on nullable columns but the SQL standard
-                  // states that the constraint does not guarantee uniqueness of nullable columns
-                  // (uniqueness is not enforced for rows where any of the columns contains a null).
-                  for index1 := 0 to numCols - 1 do
-                    if column_name = columns[index1].colname then
-                      with constraints[high(constraints)] do
-                        begin
-                          cnstrtype := 2; // not nullable
-                          uqCols[0] := setbit(uqCols[0], Index1);
-                          break;
-                        end;
-                end;
-
-              if (constraint_type = 'PRIMARY KEY') then
-                begin
-                  for index1 :=
-                    0 to workingSchema.tables[index].numCols - 1 do
-                    if column_name = columns[index1].colname then
-                      with constraints[high(constraints)] do
-                        begin
-                          cnstrtype := 3; // not nullable
-                          pkCols[0] := setbit(pkCols[0], Index1);
-                          break;
-                        end;
-                end;
-
-              if (constraint_type = 'CHECK') then
-                begin
-                  for index1 :=
-                    0 to workingSchema.tables[index].numCols - 1 do
-                    if column_name = columns[index1].colname then
-                      with constraints[high(constraints)] do
-                        begin
-                          cnstrtype := 5; // CHECK
-                          ckCols[0] := setbit(ckCols[0], Index1);
-                          break;
-                        end;
-                end;
-
-              if (constraint_type = 'REFERENCES') then
-                begin
-                  with constraints[high(constraints)] do
-                    begin
-                      cnstrtype := 4; // REFERENCES - FOREIGN KEY
-                      for index1 :=
-                        0 to workingSchema.tables[index].numCols - 1 do
-                        if column_name = columns[index1].colname then
-                          with constraints[high(constraints)] do
-                            begin
-                              Cols[0] := setbit(Cols[0], Index1);
-                              break;
-                            end;
-                    end;
-                end;
-            end;
-
-          if (constraint_type = 'CHECK') then
-            with constraints[high(constraints)] do
-              begin
-                checkCondition := nil;
-                for index1 := 0 to DatabaseInstance.Items['checkinstruction_count'].AsInteger - 1 do
-                  begin
-                    setlength(checkCondition,length(checkCondition)+1);
-                    checkCondition[high(checkCondition)].mnemonic := DatabaseInstance.Items['mnemonic'+intToStr(index1)].AsInteger;
-                    checkCondition[high(checkCondition)].boolvalue := DatabaseInstance.Items['boolvalue'+intToStr(index1)].AsBoolean;
-                    checkCondition[high(checkCondition)].value := DatabaseInstance.Items['value'+intToStr(index1)].AsFloat;
-                    checkCondition[high(checkCondition)].stvalue := DatabaseInstance.Items['stvalue'+intToStr(index1)].AsString;
-                    checkCondition[high(checkCondition)].printInstruction := DatabaseInstance.Items['printinstruction'+intToStr(index1)].AsString;
-                  end;
-              end;
-
-          if (constraint_type = 'REFERENCES') then
-            begin
-              refTableName := DatabaseInstance.Items['references_table'].AsString;
-              constraints[high(constraints)].reftblName := refTableName;
-              tblFields := loadTableFields(refTableName);
-              for index2 := 0 to DatabaseInstance.Items['refcolumn_count'].AsInteger - 1 do
-                begin
-                  refcolumn_Name := DatabaseInstance.Items['refcolumn_name'+intToStr(index2)].AsString;
-                  with constraints[high(constraints)] do
-                    begin
-                      for index1 :=
-                        0 to tblFields.numCols - 1 do
-                        if refcolumn_name = tblFields.columns[index1].colname then
-                          with constraints[high(constraints)] do
-                            begin
-                              refCols[0] := setbit(refCols[0], Index1);
-                              break;
-                            end;
-                    end;
-                end;
-            end;
-
-        end;
-    end;
-
-  for index := low(workingSchema.tables) to high(workingSchema.tables) do
-    with workingSchema.tables[index] do
-      Collection := GDB.GetCollection(tblName + '_' + dbName);
-  {$ENDIF}
-
-  {$IFDEF tablesdb}
   rowId1 := DDconstraints.firstRow;
   repeat
     if DDconstraints.existRow(rowId1) then
@@ -1531,184 +902,9 @@ begin
       workingSchema.tables[index].storage :=
         TTableClass.Create(Path + workingSchema.tables[index].tblName + '_' + workingSchema.dbName, True, colsname, colstype, allowcolsNull);
     end;
-{$ENDIF}
 
 
   { TODO : check for null and call load with null also for indexes }
-
-  {$IFDEF mongodb}
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedTypeInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedTypeInstance.Put('$eq','mono');
-  NestedDatabaseInstance.Put('$eq','index');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('type',NestedTypeInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance := DatabaseCursor.Next;
-      table_Name := DatabaseInstance.Items['table_name'].AsString;
-      for index := low(workingSchema.tables) to high(workingSchema.tables) do
-        if workingSchema.tables[index].tblName = table_Name then
-          break;
-      setLength(workingSchema.tables[index].idxdata, length(
-        workingSchema.tables[index].idxdata) + 1);
-      workingSchema.tables[index].idxdata[high(
-        workingSchema.tables[index].idxdata)].idxname :=
-        DatabaseInstance.Items['index_name'].AsString;
-      with workingSchema.tables[index].idxdata[high(
-            workingSchema.tables[index].idxdata)] do
-        begin
-          lcount := DatabaseInstance.Items['columns_count'].AsInteger;
-          setLength(idxkeys, lcount);
-          for index1 := 0 to lcount - 1 do
-            with idxkeys[index1] do
-              begin
-                colName :=
-                  DatabaseInstance.Items['column_name'+inttostr(index1)].AsString;
-                colOrder :=
-                  DatabaseInstance.Items['column_order'+inttostr(index1)].AsBoolean;
-              end;
-        end;
-    end;
-
-  NesteddbNameInstance := TBSONObject.Create;
-  NestedTypeInstance := TBSONObject.Create;
-  NestedDatabaseInstance := TBSONObject.Create;
-  DatabaseInstance := TBSONObject.Create;
-  NesteddbNameInstance.Put('$eq',dbname);
-  NestedTypeInstance.Put('$eq','join');
-  NestedDatabaseInstance.Put('$eq','index');
-  DatabaseInstance.Put('kind',NestedDatabaseInstance);
-  DatabaseInstance.Put('type',NestedTypeInstance);
-  DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-  DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-  while DatabaseCursor.HasNext do
-    begin
-      DatabaseInstance := DatabaseCursor.Next;
-
-      setLength(workingSchema.joinidxdata, length(workingSchema.joinidxdata) + 1);
-      workingSchema.joinidxdata[high(workingSchema.joinidxdata)].idxname :=
-        DatabaseInstance.Items['index_name'].AsString;
-      workingSchema.joinidxdata[high(workingSchema.joinidxdata)].joincouples := nil;
-      workingSchema.joinidxdata[high(workingSchema.joinidxdata)].idxkeys := nil;
-
-      lcount := DatabaseInstance.Items['basetables_count'].AsInteger;
-      for index1 := 0 to lcount -1 do
-        with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
-          begin
-            setlength(joinbaseTables, length(joinbaseTables) + 1);
-            joinbaseTables[index1] := DatabaseInstance.Items['basetable_name'+inttostr(index1)].AsString;
-          end;
-
-      lcount := DatabaseInstance.Items['columns_count'].AsInteger;
-      for index1 := 0 to lcount -1 do
-        with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
-          begin
-            setlength(idxkeys, length(idxkeys) + 1);
-            with idxkeys[high(idxkeys)] do
-              begin
-                tblName :=
-                  DatabaseInstance.Items['table_name'+inttostr(index1)].AsString;
-                colName :=
-                  DatabaseInstance.Items['column_name'+inttostr(index1)].AsString;
-                ColOrder :=
-                  DatabaseInstance.Items['column_order'+inttostr(index1)].AsBoolean;
-              end;
-
-          end;
-
-      lcount := DatabaseInstance.Items['join_couples'].AsInteger;
-      for index1 := 0 to lcount - 1 do
-        begin
-          with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
-            begin
-              setlength(joincouples, length(joincouples) + 1);
-
-              joincouples[high(joincouples)].fromTable :=
-                  DatabaseInstance.Items['from_table'+inttostr(index1)].AsString;
-
-              joincouples[high(joincouples)].ToTable :=
-                DatabaseInstance.Items['to_table'+inttostr(index1)].AsString;
-
-              cklcount := DatabaseInstance.Items['keys_count'+inttostr(index1)].AsInteger;
-              for index2 := 0 to cklcount - 1 do
-                begin
-                  setLength(joincouples[high(joincouples)].keyNames,
-                    length(joincouples[high(joincouples)].keyNames) + 1);
-                  joincouples[high(joincouples)].keyNames
-                    [high(joincouples[high(joincouples)].keyNames)] :=
-                      DatabaseInstance.Items['key_name'+intToStr(index1)+'-'+intToStr(index2)].AsString;
-                end;
-            end;
-        end;
-
-      //create the bjointree and open it
-      with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
-        begin
-          TheBaseTables := nil;
-          for index1 := 0 to length(joinbaseTables) - 1 do
-            begin
-              setlength(TheBaseTables, length(TheBaseTables) + 1);
-              TheBaseTables[high(TheBaseTables)] := joinbaseTables[index1];
-            end;
-          idxstorage := BJoinTreeClass.Create(Path + idxName, TheBaseTables);
-
-          for index2 := Low(TheBaseTables) to High(TheBaseTables) do
-            begin
-              idxstorage.AddTableToDictionary(TheBaseTables[index2]);
-              // take all his columns and add them to Dictionary
-              // check the null values
-              tblFields := loadTableFields(TheBaseTables[index2]);
-              for index3 := 0 to tblFields.numCols - 1 do
-                begin
-                  colname := tblFields.columns[index3].colname;
-                  case tblFields.columns[index3].coltype of
-                    intType, smallintType, int64Type:
-                      idxstorage.AddColumnToDictionary(
-                        colname, 'Integer', TheBaseTables[index2]);
-                    extendedType:
-                      idxstorage.AddColumnToDictionary(
-                        colname, 'Extended', TheBaseTables[index2]);
-                    TDateTimeType, TDateType, TTimeType:
-                      idxstorage.AddColumnToDictionary(
-                        colname, 'TDateTime', TheBaseTables[index2]);
-                    currencyType:
-                      idxstorage.AddColumnToDictionary(
-                        colname, 'Currency', TheBaseTables[index2]);
-                    booleanType:
-                      idxstorage.AddColumnToDictionary(
-                        colname, 'Boolean', TheBaseTables[index2]);
-                    stringType:
-                      idxstorage.AddColumnToDictionary(colname, 'string[' +
-                        IntToStr(tblFields.columns[index3].coltypescale.size) + ']', TheBaseTables[index2]);
-                  end;
-                end;
-            end;
-
-          for index1 := low(joincouples) to high(joincouples) do
-            with joincouples[index1] do
-              idxstorage.AddJoin(fromTable, toTable, keyNames[0]);
-          TheKeys := nil;
-          setlength(TheKeys, length(idxkeys));
-          for index1 := low(idxkeys) to high(idxkeys) do
-            TheKeys[index1] :=
-              idxkeys[index1].tblName + '.' + idxkeys[index1].colName;
-          idxstorage.createBTrees(TheBaseTables, True, TheKeys);
-        end;
-    end;
-  {$ENDIF}
-
-  {$IFDEF tablesdb}
-
-
-
 
 
   rowId1 := DDindexes.firstRow;
@@ -1741,7 +937,7 @@ begin
               repeat
                 if DDbasetables.existRow(rowId2) then
                   begin
-                    if workingSchema.joinidxdata[high(workingSchema.tables[index].idxdata)].idxname =
+                    if workingSchema.joinidxdata[high(workingSchema.joinidxdata)].idxname =
                          DDbasetables.getValueByColumnName(rowId2, 'index_name') then
                       begin
                         with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
@@ -1934,7 +1130,6 @@ begin
     rowId1 := rowId1 + 1;
   until rowId1 > DDindexes.lastRow;
 
-  {$ENDIF}
 
 end;
 
@@ -2015,12 +1210,7 @@ type
        aliasname: array of string;
      end;
      resultFields: tblStructure;
-     {$IFDEF tablesdb}
      resultRow: array of variant;
-     {$ENDIF}
-     {$IFDEF mongodb}
-     resultIBSONInstance: IBSONObject;
-     {$ENDIF}
    end;
 
  type
@@ -2043,318 +1233,6 @@ type
 
 {$INCLUDE functionselectextractrow.inc}
 {$INCLUDE functioncomprow.inc}
-
-{$IFDEF mongodb}
-procedure sys_LoadCSV(parser: TParser; userId, dbName:string; CSVFileName:string);
-var
-  CSVName: string;
-  FileName: string;
-  ExtName: string;
-  Tablename: string;
-  CSVTextFile: Text;
-  SDFInstance: SDFClass;
-  Line: string;
-  LineCounter: integer;
-  RowsInserted: int64;
-  tblindex: integer;
-  found: boolean;
-  I, J: integer;
-  sqlInsert: string;
-  tmp: string;
-  columnsHeader: array of string;
-  columnsType: array of inttype..stringtype;
-  counter: Integer;
-  StartTime: TDate;
-  Diff: TTime;
-  Hour, Min, Sec, MSec: word;
-  st: string;
-begin
-
-//  CSVFileName := 'hello-pippo-' + CSVFileName;
-  yymiscmsgs := nil;
-  yyerrmsgs := nil;
-
-  StartTime := Now;
-
-
-
-  CSVName := CSVFileName;
-
-
-
-  openTables;
-  loadSchema(dbName);
-  FileName := ExtractFileName(CSVName);
-  ExtName := ExtractFileExt(CSVName);
-  if upCase(ExtName) = '.CSV' then
-    FileName := copy(FileName, 1, Pos('.', FileName) - 1)
-  else
-  begin
-    yyerror('Not a .CSV file');
-    Exit;
-  end;
-  FileName := copy (FileName,pos('-', FileName)+1,length(FileName));
-  FileName := copy (FileName,pos('-', FileName)+1,length(FileName));
-  Tablename := FileName;
-  if not TableExists(TableName) then
-  begin
-    yyerror('Table ' + TableName + ' doesn''t Exist ');
-    Exit;
-  end;
-  if not FileExists(Path+CSVName) then
-  begin
-    yyerror('File ' + CSVName + ' doesn''t Exist ');
-    Exit;
-  end;
-
-
-  // Check if a missing column has default value, if not is nullable
-
-  AssignFile(CSVTextFile, Path + CSVName);
-  Reset(CSVTextFile);
-  SDFInstance := SDFClass.Create();
-  LineCounter := 0;
-  RowsInserted := 0;
-  tblindex := GetTableStructure(FileName);
-  columnsHeader := nil;
-  setlength(columnsHeader,workingSchema.tables[tblIndex].numCols);
-  columnsType := nil;
-  setlength(columnsType,workingSchema.tables[tblIndex].numCols);
-  counter := 0;
-
-  while not EOF(CSVTextFile) do
-    begin
-      readLn(CSVTextFile, Line);
-      if Line = '' then
-        continue;
-      SDFInstance.GetLexemes(Line);
-      Inc(LineCounter);
-
-
-      if LineCounter = 1 then
-      begin
-        // Check for the columns Name
-        with workingSchema.tables[tblIndex] do
-          begin
-            if SDFInstance.CountLexemes < Length(columns) then
-            begin
-              yyacceptmessage('Number of columns in CSV file are less than ' +
-                'the number of columns in the table');
-              Exit;
-            end;
-            found := True;
-            for I := 0 to SDFInstance.CountLexemes - 1 do
-            begin
-              found := False;
-              for J := 0 to Length(columns) - 1 do
-                if uppercase(columns[J].colname) =
-                  trim(upperCase(SDFInstance.Lexemes[I])) then
-                begin
-                  found := True;
-                  columnsHeader[counter] := columns[J].colname;
-                  columnsType[counter] := columns[J].coltype;
-                  counter := counter + 1;
-                  break;
-                end;
-              if not found then
-                break;
-            end;
-            if not found then
-            begin
-              yyerror('Missing columns');
-              Exit;
-            end;
-          end;
-          continue;
-      end;
-      with workingSchema.tables[tblIndex] do
-        begin
-          sqlInsert := 'INSERT INTO ' + Filename + ' (';
-          for J := 0 to Length(columns) - 1 do
-            sqlInsert := sqlInsert + columnsHeader[J] + ', ';
-          sqlInsert := copy(sqlInsert, 1, length(sqlInsert) - 2) + ') VALUES (';
-
-          for I := 0 to SDFInstance.CountLexemes - 1 do
-          begin
-            tmp := '';
-
-            tmp := columns[I].colname;
-
-
-
-            tmp := '';
-            if (columnsType[I] = TDateTimeType) or (columnstype[I] = stringtype) then
-              begin
-                tmp := ''' ';
-                tmp := trim(tmp);
-              end;
-            for j := 1 to length(SDFInstance.Lexemes[I]) do
-              tmp := tmp + SDFInstance.Lexemes[I][j];
-            if (columnsType[I] = TDateTimeType) or (columnsType[I] = stringtype) then
-                sqlInsert := sqlInsert + trim(tmp) +'''' + ',' else sqlInsert := sqlInsert + trim(tmp) + ',';
-            TMP := TRIM(TMP);
-          end;
-          sqlInsert := copy(sqlInsert, 1, length(sqlInsert) - 1) + ');';
-
-          //memo4.Lines.add(sqlinsert);
-          sqlMemProg := nil;
-          yyInputText := sqlInsert;
-
-
-          repeat
-            parser.parse();
-          until (sqlMemProg <> nil) or (yyerrmsgs <> nil);
-
-          RowsInserted := RowsInserted + 1;
-
-          {
-          if IsConsole then
-            WriteLn(RowsInserted) else
-            begin
-              sqlUnit.Form1.Edit6.Text := inttostr(RowsInserted);
-              sqlUnit.Form1.Edit6.Repaint;
-            end;
-          }
-
-          if yyerrmsgs <> nil then
-            yyerror('at row' + inttostr(Rowsinserted));
-          selectColsInstructions := nil;
-
-          executeProgram(sqlMemProg, userId, dbName);
-        end;
-    end;
-
-  yymiscmsgs := nil;
-  if yyerrmsgs = nil then
-   yyacceptmessage(intToStr(Rowsinserted) + ': Rows inserted in ' + TableName);
-
-  Diff := Now - StartTime;
-  DecodeTime(Diff, Hour, Min, Sec, MSec);
-  st := 'Elapsed Time = ';
-  if Hour <> 0 then
-    st := st + IntToStr(Hour) + ' Hours ';
-  if Min <> 0 then
-    st := st + IntToStr(Min) + ' Minutes ';
-  if sec <> 0 then
-    st := st + IntToStr(Sec) + ' Seconds ';
-  st := st + IntToStr(Msec) + ' MilliSeconds';
-  // Writeln('Elapsed Time: ' + st);
-  // form1.memo4.Lines.Add(st);
-
-
-end;
-
-procedure sys_LoadSQL(parser: TParser; userId: string; dbName:string; SQLFileName:string);
-var
-  ExtName: string;
-  SQLInstructions: array of string;
-  SQLTextFile: Text;
-  Line: string;
-  I: Integer;
-  flagCreate: boolean;
-  IBSONInstance: IBSONObject;
-  flagcomment: boolean;
-  QueryCollection: TMongoCollection;
-begin
-  yymiscmsgs := nil;
-  yyerrmsgs := nil;
-  SQLFileName := ExtractFileName(SQLFileName);
-  ExtName := ExtractFileExt(SQLFileName);
-  if not (upCase(ExtName) = '.SQL') then
-   begin
-    yyerror('Not a .SQL file');
-    Exit;
-  end;
-
-  if not FileExists( Path + SQLFileName) then
-  begin
-    yyerror('File ' + SQLFileName + ' doesn''t Exist ');
-    Exit;
-  end;
-
-  SQLInstructions := nil;
-  setlength(SQLInstructions,1);
-  AssignFile(SQLTextFile, Path + SQLFileName);
-  Reset(SQLTextFile);
-  flagcomment := false;
-  while not EOF(SQLTextFile) do
-    begin
-      readLn(SQLTextFile, Line);
-
-      if pos('//',Line) <> 0 then
-       Line := copy(Line,1,pos('//',Line)-1);
-      if pos('/*',Line) <> 0 then
-        begin
-          flagComment := true;
-          Line := copy(Line,1,pos('/*',Line)-1);
-        end;
-      if flagcomment then
-        if pos('*/',Line) <> 0 then
-          begin
-            Line := copy(Line,pos('*/',Line)+2,length(Line));
-            flagComment := false;
-          end else Line := '';
-
-      if pos(';', Line) = 0 then
-        SQLInstructions[High(SQLInstructions)] :=  SQLInstructions[High(SQLInstructions)] + ' ' + Line
-       else
-        begin
-          SQLInstructions[High(SQLInstructions)] := SQLInstructions[High(SQLInstructions)] + copy(Line,1,pos(';',Line));
-          setlength(SQLInstructions,length(SQLInstructions)+1);
-          SQLInstructions[High(SQLInstructions)] := SQLInstructions[High(SQLInstructions)] + copy(Line,pos(';',Line)+1,length(Line));
-        end;
-    end;
-  setlength(SQLInstructions,length(SQLInstructions)-1);
-
-
-
-  QueryCollection := GDB.GetCollection('query');
-  for I := low(SQLInstructions) to high(SQLInstructions) do
-  begin
-
-    IBSONInstance :=  TBSONObject.Create;
-
-    IBSONInstance.Put('queryname','sys_' + SQLFileName + '_q'+ IntToStr(I+1));
-
-    IBSONInstance.Put('querytext',SQLInstructions[I]);
-
-    IBSONInstance.Put('querydbname',dbName);
-
-    IBSONInstance.Put('userId',userID);
-
-    IBSONInstance.Put('username','undefined');
-
-    IBSONInstance.Put('submitted',123456789);
-
-    IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-
-    QueryCollection.Insert(IBSONInstance);
-
-
-    sqlMemProg := nil;
-
-    yyInputText := SQLInstructions[I];
-
-
-    repeat
-      parser.parse();
-    until (sqlMemProg <> nil) or (yyerrmsgs <> nil);
-
-    selectColsInstructions := nil;
-
-    flagCreate := Pos('CREATE DATABASE ', UpperCase(yyInputText)) <> 0;
-    openTables;
-    {if not flagCreate then
-      loadSchema(userId, dbName);}
-    if trim(yyInputText) <> '' then
-      executeProgram(sqlMemProg, userId, dbName);
-    {if not flagCreate then
-      closeSchemaTables;}
-    closeTables;
-  end;
-
-end;
-{$ENDIF}
 
 function SupUser(userId: string): string;
 begin
@@ -2946,10 +1824,6 @@ var
     name: string;
     declared: boolean;
     open: boolean;
-    {$IFDEF mongodb}
-    Collection: TMongoCollection;
-    Cursor: IMongoDBCursor;
-    {$ENDIF}
   end = nil;
 
 
@@ -2990,10 +1864,6 @@ var
     aliasname: array of string;
     fromFields: tblStructure;
     fromRow: array of variant;
-    {$IFDEF mongodb}
-    fromIBSONInstance: IBSONObject;
-    Cursor: IMongoDBCursor;
-    {$ENDIF}
   end = nil;
 
   ldbName: string = '';
@@ -3095,51 +1965,6 @@ var
   Maxdataref: array of dataPointerType = nil;
   dataref: array of dataPointerType = nil;
   index4: Integer;
-  {$IFDEF mongodb}
-  IBSONInstance: IBSONObject;
-  oldIBSONInstance: IBSONObject;
-  IBSONInstance2: IBSONObject;
-  lValueType: TBSONValueType;
-  NestedTypeInstance: IBSONObject;
-  NestedtblNameInstance: IBSONObject;
-  NesteddbNameInstance: IBSONObject;
-  NestedUserIdInstance: IBSONObject;
-  NestedDatabaseInstance: IBSONObject;
-  DatabaseInstance: IBSONObject;
-  DatabaseCursor: IMongoDBCursor;
-  BaseCursor: IMongoDBCursor;
-  BaseIBSONInstance: IBSONObject;
-  oldDatabaseInstance: IBSonObject;
-  distinctCollection: TMongoCollection;
-  NestedTransactionInstance: IBSonObject;
-  TransactionInstance: IBSonObject;
-  TransactionsCursor: IMongoDBCursor;
-  NestedcolNameInstance: IBSONObject;
-  oldsequencesInstance: IBSONObject;
-  sequencesInstance: IBSONObject;
-  sequencesCursor: IMongoDBCursor;
-  AggregateCollection: TMongoCollection;
-  AggregateCursor: IMongoDBCursor;
-  AggregateInstance: IBSONObject;
-  DistinctAggregateCursor: IMongoDBCursor;
-  DistinctAggregateInstance: IBSONObject;
-  NestedDistinctAggregateInstance: IBSONObject;
-  NestedGroupByInstance: IBSONObject;
-  GroupByInstance: IBSONObject;
-  GroupByCursor: IMongoDBCursor;
-  SortIBSONInstance: IBSonObject;
-  HintIBSONInstance: IBSonObject;
-  GroupBy_Collection: TMongoCollection;
-  GroupBy_Instance: IBSONObject;
-  GroupBy_Cursor: IMongoDBCursor;
-  oldGroupBy_Instance: IBSONObject;
-  NestedPrivilegeInstance: IBSONObject;
-  privilegeArray: IBSONArray;
-  DataDictionaryInstance: IBSONObject;
-  updInstance: IBSONObject;
-  GCursor: IMongoDBCursor;
-  GInstance: IBSONObject;
-  {$ENDIF}
   extendedFieldValue: double;
   currencyFieldValue: currency;
   stringFieldValue: string;
@@ -3191,7 +2016,6 @@ var
     colorder: boolean;
   end = nil;
 
-  errorcode: Integer;
 
   cursorName: string;
   useSelect: boolean = false;
@@ -3215,12 +2039,9 @@ var
   lPassword: string;
   lPrivilege: array of string = nil;
   dbObject: string = '';
-  flagOptionGrant: Boolean;
-  flagAll: Boolean;
   setstk: runstacktype = nil;
   reftblName: string = '';
   vardef: variant;
-  code: Integer;
   inscols: array of record
     name: string;
     value: variant
@@ -3233,14 +2054,10 @@ var
   viewName: string = '';
   flagSubquery: boolean = false;
   subqueryMemProg: progInstrunctionsType = nil;
-  {$IFDEF tablesdb}
   rowid: DataPointerType;
   rowId1, rowId2: Int64;
   colsTxt: string = '';
   idxstorage: BtrPlusClass;
-  {$ENDIF}
-
-
 begin
   if not ((sqlMemProg[high(sqlMemProg)].mnemonic = 1) or
           (sqlMemProg[high(sqlMemProg)].mnemonic = 157) or
@@ -3390,18 +2207,6 @@ begin
         end;
   *)
 
-        {$IFDEF mongodb}
-        186: // LOADCSV
-        begin
-          sys_LoadCSV(parser, dbuserId, dbName, file_Name);
-        end;
-
-        187: // LOADSQL
-        begin
-          sys_LoadSQL(parser, dbuserId, dbName, file_Name);
-        end;
-        {$ENDIF}
-
         188: // FILE NAME
         begin
           file_name := stk[High(stk)].strValue;
@@ -3441,15 +2246,6 @@ begin
         207: // SET TRANSACTION
         begin
           // save into log file: START TRANSACTION PROCESSID, PROCESS NUMBER / NAME TIMESTAMP
-          {$IFDEF mongodb}
-          TransactionInstance := TBSONObject.Create;
-          TransactionInstance.Put('trn_kind','START');
-          TransactionInstance.Put('p_id',GetProcessID);
-          //// TransactionInstance.Put('trn_counter',TransactionsCollection.Count);
-          TransactionInstance.Put('trn_name',TransactionName);
-          TransactionInstance.Put('ts',now);
-          TransactionsCollection.Insert(TransactionInstance);
-          {$ENDIF}
           TransactionName := '';
         end;
 
@@ -3470,38 +2266,6 @@ begin
           TransactionName := '';
           }
 
-          {$IFDEF mongodb}
-          NestedTransactionInstance := TBSonObject.Create;
-          TransactionInstance := TBSonObject.Create;
-          NestedTransactionInstance.Put('$eq',GetProcessID);
-          TransactionInstance.Put('p_id',NestedTransactionInstance);
-
-          TransactionsCursor := TransactionsCollection.Find(TransactionInstance);
-
-          HintIBSONInstance := TBSonObject.Create;
-          HintIBSONInstance.Put('$natural',-1);
-          TransactionsCursor.Hint(SortIBSONInstance);
-          while TransactionsCursor.HasNext do
-            begin
-              TransactionInstance := TransactionsCursor.Next;
-              // in database, rows are saved into ram commit wrote to log file and redo it in case of failure
-              // rollback just cancel all the instruction, till save point or start transaction, from the log file
-  {            stKind := TransactionInstance.Items['trn_kind'].AsString;
-              if stKind = 'start' then finish;
-              if stKind = 'read' then nothing;
-              if stKind = 'insert' then delete;
-              if stKind = 'update' then restore old value;
-              if stKind = 'delete' then insert;
-  }
-
-
-
-
-              // go back till you find start
-            end;
-          {$ENDIF}
-
-
 
 
           // Go back and return to undo all the staff done by Getprocessid
@@ -3515,12 +2279,6 @@ begin
           // check for the name if exist
           // go back  to savepoint
 
-          {$IFDEF mongodb}
-          TransactionInstance.Put('trn_kind','ROLLBACK TO');
-          TransactionInstance.Put('p_id',GetProcessID);
-          TransactionInstance.Put('trn_name',TransactionName);
-          TransactionInstance.Put('ts',now);
-          {$ENDIF}
           // Go back and return to undo all the staff done by Getprocessid till
           // savepoint, delete all saveoints that come after it
         end;
@@ -3531,12 +2289,6 @@ begin
           // check for the name if exist
           // COMMIT
 
-          {$IFDEF mongodb}
-          TransactionInstance.Put('trn_kind','COMMIT');
-          TransactionInstance.Put('p_id',GetProcessID);
-          TransactionInstance.Put('trn_name',TransactionName);
-          TransactionInstance.Put('ts',now);
-          {$ENDIF}
         end;
 
         211: // TRANSACTION NAME
@@ -3548,13 +2300,6 @@ begin
         212: // HOLD SAVEPOINT
         begin
           // CREATE A SAVEPOINT
-          {$IFDEF mongodb}
-          TransactionInstance.Put('trn_kind','HOLD SAVEPOINT');
-          TransactionInstance.Put('p_id',GetProcessID);
-          TransactionInstance.Put('trn_counter',TransactionsCollection.Count);
-          TransactionInstance.Put('trn_name',TransactionName);
-          TransactionInstance.Put('ts',now);
-          {$ENDIF}
         end;
 
         213:  // SAVEPOINT NAME
@@ -3603,9 +2348,6 @@ begin
               cursors[high(Cursors)].name := cursorName;
               cursors[high(Cursors)].declared := false;
               cursors[high(Cursors)].open := false;
-              {$IFDEF mongodb}
-              cursors[high(Cursors)].Collection := GDB.GetCollection(CursorName);
-              {$ENDIF}
             end;
         end;
 
@@ -3624,10 +2366,6 @@ begin
                     begin
                       cursors[index].declared := true;
                       useSelect := true;
-                      {$IFDEF mongodb}
-                      GCollection.Drop;
-                      cursors[index].Collection.Drop;
-                      {$ENDIF}
                       break;
                     end;
                 end;
@@ -3649,9 +2387,6 @@ begin
                     yyerror('Cursor not declared: ' + cursorname) else
                     begin
                       cursors[index].open := true;
-                      {$IFDEF mongodb}
-                      cursors[index].Cursor := cursors[index].Collection.Find();
-                      {$ENDIF}
                     end;
                   break;
                 end;
@@ -3667,20 +2402,6 @@ begin
                   if not cursors[index].open then
                     yyerror('Cursor not open: ' + cursorname) else
                     begin
-                      {$IFDEF mongodb}
-                      if cursors[index].Cursor.HasNext then
-                        begin
-                          IBSONInstance := cursors[index].Cursor.Next;
-                          resParams := nil;
-                          for index1 := 4 to IBSONInstance.Count - 1 do
-                            begin
-                              setLength(resParams,length(resParams)+1);
-                              resParams[High(resParams)] := IBSONInstance.Item[index1].AsString;
-                            end;
-                        end
-                       else
-                        yyerror('End of data in: ' + cursorName);
-                      {$ENDIF}
                     end;
                   break;
                 end;
@@ -3696,10 +2417,6 @@ begin
                   if not cursors[index].open then
                     yyerror('Cursor not open: ' + cursorname) else
                     begin
-                      {$IFDEF mongodb}
-                      cursors[index].Collection.Drop;
-                      cursors[index].Collection.Free;
-                      {$ENDIF}
                     end;
                   break;
                 end;
@@ -3818,57 +2535,6 @@ begin
 
           if luserId = '' then luserId := dbuserId;
 
-          {$IFDEF mongodb}
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedDatabaseInstance.Put('$eq','database');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              if not found then
-                begin
-                  sqlResults := nil;
-                  if luserId <> dbuserId then
-                    begin
-                      setLength(sqlResults, length(sqlResults) + 1);
-                      sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'REQUEST FOR',True);
-                    end;
-                  setLength(sqlResults, length(sqlResults) + 1);
-                  sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'DATABASE NAME',True);
-                end;
-              database_Name := DatabaseInstance.Items['database_name'].AsString;
-              (* The dbuserId is the one that issue the command.
-                 If luserId is created by him, so he can requests to see
-                   all his databases *)
-              if CanUserUseDatabase(luserId,database_Name) then
-                begin
-                  if luserId <> dbuserId then
-                    begin
-                      setLength(sqlResults, length(sqlResults) + 1);
-                      sqlResults[high(sqlResults)] :=  SDFInstance.AddString(sqlResults[high(sqlResults)],luserId,True);
-                    end;
-                  setLength(sqlResults, length(sqlResults) + 1);
-                  sqlResults[high(sqlResults)] :=  SDFInstance.AddString(sqlResults[high(sqlResults)],database_Name,True);
-
-                  resultRows := dbCounter + 1;
-                  IBSONInstance := TBSONObject.Create;
-                  IBSONInstance.Put('sys_queryId', lqueryId);
-                  IBSONInstance.Put('sys_user', dbuserId);
-                  IBSONInstance.Put('rowId', resultRows);
-                  IBSONInstance.Put('request_for', luserId);
-                  IBSONInstance.Put('DATABASE NAME', database_name);
-                  IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-                  GCollection.Insert(IBSONInstance);
-                  dbCounter := dbCounter + 1;
-                  found := True;
-                end;
-            end;
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           rowId1 := DDdatabases.firstRow;
           repeat
             if DDdatabases.existRow(rowId1) then
@@ -3929,7 +2595,6 @@ begin
               end;
             rowId1 := rowId1 + 1;
           until rowId1 > DDdatabases.lastRow;
-          {$ENDIF}
 
           SDFInstance.Free;
 
@@ -3950,25 +2615,6 @@ begin
               Exit;
             end;
 
-          {$IFDEF mongodb}
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NesteddbNameInstance.Put('$eq',ldbname);
-          NestedDatabaseInstance.Put('$eq','database');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          if DatabaseCursor.Count <> 0 then
-            begin
-              loadSchema(ldbname);
-              yyacceptmessage( 'Switch to Database: ' + ldbName )
-             end
-           else yyerror( 'Database ' + ldbName + ' don''t exist' );
-           {$ENDIF}
-
-           {$IFDEF tablesdb}
            rowId1 := DDdatabases.firstRow;
            repeat
              if DDdatabases.existRow(rowId1) then
@@ -3985,7 +2631,6 @@ begin
              rowId1 := rowId1 + 1;
            until rowId1 > DDdatabases.lastRow;
            if rowId1 > DDdatabases.lastRow then yyerror( 'Database ' + ldbName + ' don''t exist' );
-           {$ENDIF}
 
         end;
 
@@ -4001,47 +2646,6 @@ begin
               Exit;
             end;
 
-          {$IFDEF mongodb}
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NesteddbNameInstance.Put('$eq',ldbname);
-          NestedDatabaseInstance.Put('$eq','table');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance :=  DatabaseCursor.Next;
-              if not found then
-                begin
-                  sqlResults := nil;
-                  setLength(sqlResults, length(sqlResults) + 1);
-                  sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'TABLE NAME',True);
-                end;
-              table_Name := DatabaseInstance.Items['table_name'].AsString;
-              if CanUserUseTable(dbuserId,ldbName,table_Name) then
-                begin
-                  setLength(sqlResults, length(sqlResults) + 1);
-                  sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],table_Name,True);
-
-                  resultRows := dbCounter + 1;
-                  IBSONInstance := TBSONObject.Create;
-                  IBSONInstance.Put('sys_queryId', lqueryId);
-                  IBSONInstance.Put('sys_user', dbuserId);
-                  IBSONInstance.Put('rowId', resultRows);
-                  IBSONInstance.Put('TABLE NAME', table_name);
-                  IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-                  GCollection.Insert(IBSONInstance);
-
-                  dbCounter := dbCounter + 1;
-                  found := True;
-                end;
-            end;
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           rowId1 := DDtables.firstRow;
           repeat
             if DDtables.existRow(rowId1) then
@@ -4079,7 +2683,6 @@ begin
               end;
             rowId1 := rowId1 + 1;
           until rowId1 > DDtables.lastRow;
-          {$ENDIF}
 
           SDFInstance.Free;
 
@@ -4108,114 +2711,6 @@ begin
               Exit;
             end;
 
-          {$IFDEF mongodb}
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblName);
-
-          NesteddbNameInstance.Put('$eq',dbname);
-          NestedDatabaseInstance.Put('$eq','tablecolumn');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance :=  DatabaseCursor.Next;
-
-              if not found then
-                begin
-                  sqlResults := nil;
-                  setLength(sqlResults, length(sqlResults) + 1);
-                  sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'COLUMN NAME',True);
-                  sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'TYPE',True);
-                  sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'DEFAULT',True);
-                end;
-
-              column_Name := DatabaseInstance.Items['column_name'].AsString;
-
-              type_name := DatabaseInstance.Items['type_name'].AsString;
-              dim1 := DatabaseInstance.Items['dim1'].AsInteger;
-              dim2 := DatabaseInstance.Items['dim2'].AsInteger;
-              if dim1 <> 0 then
-                begin
-                  type_name := type_name + '(' + intToStr(dim1);
-                  if dim2 <> 0 then
-                    type_name := type_name + ',' + intToStr(dim2);
-                  type_name := type_name + ')'
-                end;
-
-              defaultType := DatabaseInstance.Items['kind_default'].AsInteger;
-              case defaultType of
-                0: colDefaultValue := DatabaseInstance.Items['int_default'].AsInteger;
-                2: colDefaultValue := DatabaseInstance.Items['int64_default'].AsInt64;
-                3, 5: colDefaultValue := DatabaseInstance.Items['ext_default'].AsFloat;
-                4: colDefaultValue := DatabaseInstance.Items['currency_default'].AsFloat;
-                6: colDefaultValue := DatabaseInstance.Items['boolean_default'].AsBoolean;
-                7: colDefaultValue := DatabaseInstance.Items['st_default'].AsString;
-                8: colDefaultValue := 'AUTOINCREMENT';
-               -1: colDefaultValue := ''
-              end;
-
-{
-              cnsNestedtblNameInstance := TBSONObject.Create;
-              cnsNesteddbNameInstance := TBSONObject.Create;
-              cnsNestedUserIdInstance := TBSONObject.Create;
-              cnsNestedDatabaseInstance := TBSONObject.Create;
-              cnsDatabaseInstance := TBSONObject.Create;
-              cnsNestedtblNameInstance.Put('$eq',tblName);
-
-              cnsNesteddbNameInstance.Put('$eq',dbname);
-              cnsNestedUserIdInstance.Put('$eq',dbuserId);
-              cnsNestedDatabaseInstance.Put('$eq','constraint');
-              cnsDatabaseInstance.Put('kind',cnsNestedDatabaseInstance);
-              cnsDatabaseInstance.Put('user_id',cnsNestedUserIdInstance);
-              cnsDatabaseInstance.Put('database_name',cnsNesteddbNameInstance);
-              cnsDatabaseInstance.Put('table_name',cnsNestedtblNameInstance);
-
-              cnsDatabaseCursor := DataDictionaryCollection.Find(cnsDatabaseInstance);
-              while cnsDatabaseCursor.HasNext do
-                begin
-                  cnsDatabaseInstance :=  DatabaseCursor.Next;
-                  lcount := cnsDatabaseInstance.Items['columns_count'].AsInteger;
-                  for index2 := 0 to lcount - 1 do
-                    if column_name = cnsDatabaseInstance.Items['column_name'+inttostr(index2)].AsString then
-                      begin
-                        constraint_Type := cnsDatabaseInstance.Items['constraint_type'].AsString;
-                        column_constraint := column_constraint  + constraint_Type;
-                      end;
-                end;
-}
-
-              setLength(sqlResults, length(sqlResults) + 1);
-              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],column_Name,True);
-              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],type_Name,True);
-              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],colDefaultValue,True);
-
-
-              resultRows := dbCounter + 1;
-              IBSONInstance := TBSONObject.Create;
-              IBSONInstance.Put('sys_queryId', lqueryId);
-              IBSONInstance.Put('sys_user', dbuserId);
-              IBSONInstance.Put('rowId', resultRows);
-              IBSONInstance.Put('TABLE NAME', tblname);
-              IBSONInstance.Put('COLUMN NAME', column_Name);
-              IBSONInstance.Put('TYPE NAME', type_name);
-              IBSONInstance.Put('DEFAULT VALUE', colDefaultValue);
-
-              IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-              GCollection.Insert(IBSONInstance);
-
-              dbCounter := dbCounter + 1;
-              found := True;
-
-            end;
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           rowId1 := DDtablecolumns.firstRow;
           repeat
             if DDtablecolumns.existRow(rowId1) then
@@ -4354,8 +2849,6 @@ begin
             rowId1 := rowId1 + 1;
           until rowId1 > DDtablecolumns.lastRow;
 
-          {$ENDIF}
-
           SDFInstance.Free;
 
           if dbCounter <> 0 then
@@ -4387,106 +2880,6 @@ begin
 
           if ldbName = '' then ldbName := dbName;
 
-          {$IFDEF mongodb}
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblname);
-          NesteddbNameInstance.Put('$eq',ldbname);
-          NestedDatabaseInstance.Put('$eq','table');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          if DatabaseCursor.HasNext then
-            begin
-              DatabaseInstance :=  DatabaseCursor.Next;
-              DataDictionaryCollection.Remove(DatabaseInstance);
-              tblFields := loadTableFields(tblName);
-              tblFields.Collection.Drop;  // drop indexes are droped automatically
-              tblFields.Collection.Free;
-            end;
-
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblname);
-          NesteddbNameInstance.Put('$eq',ldbname);
-          NestedDatabaseInstance.Put('$eq','tablecolumn');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              DataDictionaryCollection.Remove(DatabaseInstance);
-            end;
-
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblname);
-          NesteddbNameInstance.Put('$eq',ldbname);
-          NestedDatabaseInstance.Put('$eq','constraint');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              DataDictionaryCollection.Remove(DatabaseInstance);
-            end;
-
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NesteddbNameInstance.Put('$eq',ldbname);
-          NestedDatabaseInstance.Put('$eq','index');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              if DatabaseInstance.Items['type'].AsString = 'mono' then
-                begin
-                  if DatabaseInstance.Items['table_name'].AsString = tblname then
-                    DataDictionaryCollection.Remove(DatabaseInstance);
-                end else
-                begin
-                  index_name := DatabaseInstance.Items['index_name'].AsString;
-                  lcount := DatabaseInstance.Items['tables_count'].AsInteger;
-                  lcount := 2 * lcount - 1;
-                  for index := 0 to lcount - 1 do
-                    begin
-                      DeleteFile(Path + index_Name + intTostr(index) + '.idx');
-                      (*
-                      tmpCollection := GDB.GetCollection(index_name + intToStr(index));
-                      tmpCollection.Drop;
-                      tmpCollection.Free;
-                      *)
-                    end;
-                  DataDictionaryCollection.Remove(DatabaseInstance);
-                  for index1 := 0 to high(workingschema.joinidxdata ) do
-                    if (workingschema.joinidxdata[index1].idxname = index_Name) then break;
-                  for index2 := index1+1 to high(workingschema.joinidxdata) do
-                    workingschema.joinidxdata[index2-1] := workingschema.joinidxdata[index2];
-                  setLength(workingSchema.joinidxdata,length(workingSchema.joinidxdata)-1);
-                end;
-            end;
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           for rowId1 := DDtables.firstRow to DDtables.lastRow do
             begin
               database_Name :=
@@ -4576,7 +2969,6 @@ begin
                       end;
                 end;
             end;
-          {$ENDIF}
 
           for index1 := 0 to high(workingschema.tables) do
             if (workingschema.tables[index1].tblName = tblName) then break;
@@ -4589,41 +2981,6 @@ begin
 
         191: // DROP INDEX
         begin
-          {$IFDEF mongodb}
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NesteddbNameInstance.Put('$eq',dbname);
-          NestedDatabaseInstance.Put('$eq','index');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              index_name := DatabaseInstance.Items['index_name'].AsString;
-              if indexName + '_' + workingSchema.dbName = index_name then
-                begin
-                  index_Type := DatabaseInstance.Items['type'].AsString;
-                  if index_Type = 'mono' then
-                    begin
-                      table_name := DatabaseInstance.Items['table_name'].AsString;
-                      DataDictionaryCollection.Remove(DatabaseInstance);
-                      for index1 := 0 to high(workingschema.tables) do
-                        if (workingschema.tables[index1].tblName = table_Name) then break;
-                      for index2 := low(workingschema.tables[index1].idxdata) to high(workingschema.tables[index1].idxdata) do
-                        if workingschema.tables[index1].idxdata[index2].idxname = index_name then
-                          break;
-                      for index3 := index2+1 to high(workingschema.tables[index1].idxdata) do
-                        workingschema.tables[index1].idxdata[index3-1] := workingschema.tables[index1].idxdata[index3];
-                      setLength(workingschema.tables[index1].idxdata,length(workingschema.tables[index1].idxdata)-1) ;
-                    end else
-                    yyerror('Use command drop join index instead');
-                end;
-            end;
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           // table_name = 'sys_joinindex' mean join index
           for rowId1 := DDindexes.firstRow to DDindexes.lastRow do
             begin
@@ -4657,56 +3014,10 @@ begin
                     end;
                 end;
             end;
-          {$ENDIF}
-
         end;
 
         192: // DROP JOIN INDEX
         begin
-          {$IFDEF mongodb}
-          NestedTypeInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NesteddbNameInstance.Put('$eq',dbname);
-          NestedTypeInstance.Put('$eq','join');
-          NestedDatabaseInstance.Put('$eq','index');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('type',NestedTypeInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          while DatabaseCursor.HasNext do
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              index_name := DatabaseInstance.Items['index_name'].AsString;
-              if indexname + workingSchema.dbName = index_name then
-                begin
-                  lcount := DatabaseInstance.Items['tables_count'].AsInteger;
-                  lcount := 2 * lcount - 1;
-                  for index := 0 to lcount - 1 do
-                    begin
-                      DeleteFile(Path + index_Name + intTostr(index) + '.idx');
-                      (*
-                      tmpCollection := GDB.GetCollection(index_name + intToStr(index));
-                      tmpCollection.Drop;
-                      tmpCollection.Free;
-                      *)
-                    end;
-                  DataDictionaryCollection.Remove(DatabaseInstance);
-                  break;
-                end;
-            end;
-          for index1 := 0 to high(workingschema.joinidxdata ) do
-            if (workingschema.joinidxdata[index1].idxname = index_Name) then break;
-          for index2 := index1+1 to high(workingschema.joinidxdata) do
-            workingschema.joinidxdata[index2-1] := workingschema.joinidxdata[index2];
-          setLength(workingSchema.joinidxdata,length(workingSchema.joinidxdata)-1);
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
-
-          {$ENDIF}
 
         end;
 
@@ -4933,48 +3244,6 @@ end;
         begin
           // dbUserID is the user who issue the command, should have "GRANT ALL" and "CREATE USERS" Privileges
 
-          {$IFDEF mongodb}
-          NestedUserIdInstance := TBSONObject.Create;
-          PrivilegeArray := TBSONArray.Create;
-          NestedPrivilegeInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedUserIdInstance.Put('$eq',dbUserId);
-          PrivilegeArray.Put('grant option');
-          PrivilegeArray.Put('create users');
-          NestedPrivilegeInstance.Put('$in',privilegearray);
-          NestedDatabaseInstance.Put('$eq','privilege');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('belongs_to',NestedUserIdInstance);
-          DatabaseInstance.Put('privilege_array',NestedPrivilegeInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          if DatabaseCursor.count = 0 then
-            begin
-              yyerror('USER ID: ' +  dbUserID + ' cannot GRANT PRIVILEGES ');
-              Exit;
-            end;
-
-          found := UserIdExists(lUserID);
-          if found then
-            begin
-              yyerror('USER ID: ' +  lUserID + ' already exist ');
-              Exit;
-            end;
-
-          yyacceptmessage(lUserId + ' has been created');
-          // USERID_metaData(NEWUSERID, PASSWORD, CREATED_BY)
-          DatabaseInstance := TBSONObject.Create;
-          DatabaseInstance.Put('kind','user');
-          DatabaseInstance.Put('user_id',luserId);
-          DatabaseInstance.Put('password',lPassword);
-          DatabaseInstance.Put('created_by',dbuserId);
-          DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-          DataDictionaryCollection.Insert(DatabaseInstance);
-          {$ENDIF}
-
-
         end;
 
 
@@ -5000,14 +3269,9 @@ end;
           begin
             for index := low(workingSchema.tables) to High(workingSchema.tables) do
               begin
-                {$IFDEF mongodb}
-                workingSchema.tables[index].Collection.Free;
-                {$ENDIF}
-                {$IFDEF tablesdb}
                 for index2 := 0 to high(workingSchema.tables[index].idxdata) do
                   workingSchema.tables[index].idxdata[index2].idxstorage.Free;
                 workingSchema.tables[index].storage.Free;
-                {$ENDIF}
               end;
             for index := low(workingSchema.joinidxdata) to High(workingSchema.joinidxdata) do
               workingSchema.joinidxdata[index].idxstorage.Free;
@@ -5018,23 +3282,11 @@ end;
         workingSchema.joinidxdata := nil;
         yyacceptmessage('Found New Schema ' + ldbName);
 
-
-        {$IFDEF mongodb}
-        // DATABASE_metaData(DBNAME)
-        DatabaseInstance := TBSONObject.Create;
-        DatabaseInstance.Put('kind','database');
-        DatabaseInstance.Put('database_name',ldbname);
-        DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-        DataDictionaryCollection.Insert(DatabaseInstance);
-        {$ENDIF}
-
-        {$IFDEF tablesdb}
         // DATABASE_metaData(DBNAME)
         row := nil;
         setLength(row, 1);
         row[0] := ldbName;
         DDdatabases.insertRow(row);
-        {$ENDIF}
 
       end;
 
@@ -5071,21 +3323,6 @@ end;
 
         // Table_metaData(table_name,database_name,numberOfAttributes)
 
-        {$IFDEF mongodb}
-        DatabaseInstance := TBSONObject.Create;
-        DatabaseInstance.Put('kind','table');
-        DatabaseInstance.Put('database_name',workingSchema.dbName);
-        DatabaseInstance.Put('table_name',tblname);
-        lcount := Length(columnList);
-        DatabaseInstance.Put('number_of_columns',lcount); // Number Of Attributes
-        DatabaseInstance.Put('number_of_documents',0); // Number Of Rows
-        tbltimestamp := now;
-        DatabaseInstance.Put('timestamp',tbltimestamp);
-        DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-        DataDictionaryCollection.Insert(DatabaseInstance);
-        {$ENDIF}
-
-        {$IFDEF tablesdb}
         row := nil;
         setLength(row, 4);
         row[0] := tblName;
@@ -5094,122 +3331,7 @@ end;
         row[3] := Integer(0); // Number Of Rows
         DDtables.insertRow(row);
         DDtables.returnRow(DDtables.lastRow,row);
-        {$ENDIF}
 
-        {$IFDEF mongodb}
-        for index1 := low(columnList) to high(columnList) do
-          begin
-            // Column_metaData(column_name,table_name,database_name,position,type_name,Default)
-            DatabaseInstance := TBSONObject.Create;
-            DatabaseInstance.Put('kind','tablecolumn');
-            DatabaseInstance.Put('database_name',workingSchema.dbName);
-            DatabaseInstance.Put('table_name',tblname);
-            DatabaseInstance.Put('column_name',columnlist[index1].columnName);
-            setLength(colsName, length(colsName) + 1);
-            colsName[high(colsName)] := columnlist[index1].columnName;
-            DatabaseInstance.Put('position',index1);
-            DatabaseInstance.Put('type_name',columnlist[index1].columnTypeName);
-            setLength(colsType, length(colsType) + 1);
-            colsType[high(colsType)] := convertType(columnlist[index1].columnTypeName);
-            with columnlist[index1] do
-              if charTypeSize <> 0 then
-                begin
-                  dimSize := charTypeSize;
-                  colsType[high(colsType)] :=
-                    colsType[high(colsType)] + '[' + IntToStr(charTypeSize) + ']';
-                end
-               else dimSize := numTypeSize[0];
-            DatabaseInstance.Put('dim1',dimSize); // 'dim1'
-            DatabaseInstance.Put('dim2',columnlist[index1].numTypeSize[1]); // 'dim2'
-
-            with columnlist[index1] do
-              if hascolumnAutoIncrement then
-                begin
-                  sequencesInstance := TBSONObject.Create;
-                  sequencesInstance.Put('database_name',dbName);
-                  sequencesInstance.Put('table_name',tblName);
-                  sequencesInstance.Put('column_name',colsName[high(colsName)]);
-                  sequencesInstance.Put('counter',1);
-                  sequencesCollection.Insert(sequencesInstance);
-                  DatabaseInstance.Put('kind_default',8)  // AUTOINCREMENT
-                end
-               else
-                begin
-                  if hascolumnDefault then
-                    begin
-                      if (convertType(columnTypeName) = 'INTEGER') or
-                        (convertType(columnTypeName) = 'SMALLINT') then
-                        begin
-                          DatabaseInstance.Put('kind_default',0);  // INTEGER
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          DatabaseInstance.Put('int_default',varDef);
-                        end;
-                      if convertType(columnTypeName) = 'INT64' then
-                        begin
-                          DatabaseInstance.Put('kind_default',2);  // INT64
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          DatabaseInstance.Put('int64_default',varDef);
-                        end;
-                      if (convertType(columnTypeName) = 'SINGLE') or
-                         (convertType(columnTypeName) = 'DOUBLE') or
-                         (convertType(columnTypeName) = 'EXTENDED') then
-                        begin
-                          DatabaseInstance.Put('kind_default',3);  // EXTENDED
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          DatabaseInstance.Put('ext_default',varDef);
-                        end;
-                      if convertType(columnTypeName) = 'CURRENCY' then
-                        begin
-                          DatabaseInstance.Put('kind_default',4);  // CURRENCY
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          DatabaseInstance.Put('currency_default',varDef);
-                        end;
-                      if (convertType(columnTypeName) = 'TDATETIME') or
-                         (convertType(columnTypeName) = 'TDATE') or
-                         (convertType(columnTypeName) = 'TTIME') then
-                        begin
-                          DatabaseInstance.Put('kind_default',5);  // TDATETIME
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          DatabaseInstance.Put('ext_default',varDef);
-                        end;
-                      if convertType(columnTypeName) = 'BOOLEAN' then
-                        begin
-                          DatabaseInstance.Put('kind_default',6);  // BOOLEAN
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          DatabaseInstance.Put('boolean_default',varDef);
-                        end;
-                      if convertType(columnTypeName) = 'STRING' then
-                        begin
-                          DatabaseInstance.Put('kind_default',7);  // STRING
-                          with columnlist[index1] do
-                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,charTypeSize,numTypeSize[1]);
-                          DatabaseInstance.Put('st_default',varDef);
-                        end;
-                    end
-                   else
-                    begin
-                      (* If you specify NULL as the default value for a column, you cannot
-                         specify a NOT NULL constraint as part of the column definition.
-                         NULL is not a valid default value for a column that is part of a
-                         primary key.
-                      *)
-                      DatabaseInstance.Put('kind_default',-1);  // DEFAULT NOT AVAILABLE
-                    end;
-                end;
-
-              DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-              DataDictionaryCollection.Insert(DatabaseInstance);
-
-          end;
-        {$ENDIF}
-
-        {$IFDEF tablesdb}
         for index1 := low(columnList) to high(columnList) do
           begin
             // Column_metaData(column_name,table_name,database_name,position,type_name,Default)
@@ -5333,58 +3455,7 @@ end;
             DDtablecolumns.insertRow(row);
             DDtablecolumns.returnRow(DDtablecolumns.lastRow,row);
           end;
-        {$ENDIF}
 
-        {$IFDEF mongodb}
-        for index1 := Low(constraintList) to high(constraintList) do
-        begin
-
-          // Constraint_metaData(constraint_name,column_name,...,column_name,constraint_kind,constraint_type)
-          // column_name,...,column_name is ColumnsConstrain_metaData(column_name,table_name,database_name,constraint_name)
-          // constraint_kind: column / table
-          // constraint_type: FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK, REFERENCES
-
-          // Table_metaData(table_name,database_name,numberOfAttributes)
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          DatabaseInstance.Put('kind','constraint');
-          DatabaseInstance.Put('database_name',workingSchema.dbName);
-          DatabaseInstance.Put('table_name',tblname);
-          DatabaseInstance.Put('constraint_name',constraintList[index1].constraintname);
-          DatabaseInstance.Put('constraint_kind',constraintList[index1].constraintkind); // constraint_kind: column / table
-          DatabaseInstance.Put('constraint_type',constraintList[index1].constraintType);
-
-
-          lcount := length(constraintList[index1].columnsName);
-          DatabaseInstance.Put('column_count',lcount);
-
-          for index2 := Low(constraintList[index1].columnsName) to high(constraintList[index1].columnsName) do
-            DatabaseInstance.Put('column_name'+intToStr(index2),constraintList[index1].columnsName[index2]);
-          lcount := length(constraintList[index1].checkInstructions);
-          DatabaseInstance.Put('checkinstruction_count',lcount);
-          if constraintList[index1].constraintType = 'CHECK' then
-            for index2 := Low(constraintList[index1].checkInstructions) to high(constraintList[index1].checkInstructions) do
-              begin
-                DatabaseInstance.Put('mnemonic'+intToStr(index2),constraintList[index1].checkInstructions[index2].mnemonic);
-                DatabaseInstance.Put('boolvalue'+intToStr(index2),constraintList[index1].checkInstructions[index2].boolvalue);
-                DatabaseInstance.Put('value'+intToStr(index2),constraintList[index1].checkInstructions[index2].value);
-                DatabaseInstance.Put('stvalue'+intToStr(index2),constraintList[index1].checkInstructions[index2].stvalue);
-                DatabaseInstance.Put('printInstruction'+intToStr(index2),constraintList[index1].checkInstructions[index2].printInstruction);
-              end;
-          if constraintList[index1].constraintType = 'REFERENCES' then
-            begin
-              DatabaseInstance.Put('references_table',constraintList[index1].refTable);
-              lcount := length(constraintList[index1].refcolumnsName);
-              DatabaseInstance.Put('refcolumn_count',lcount);
-              for index2 := Low(constraintList[index1].refcolumnsName) to high(constraintList[index1].refcolumnsName) do
-                DatabaseInstance.Put('refcolumn_name'+intToStr(index2),constraintList[index1].refcolumnsName[index2]);
-            end;
-          DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-          DataDictionaryCollection.Insert(DatabaseInstance);
-        end;
-        {$ENDIF}
-
-        {$IFDEF tablesdb}
         for index1 := Low(constraintList) to high(constraintList) do
           begin
 
@@ -5443,7 +3514,6 @@ end;
                   DDcheckinstructions.insertRow(row);
                 end;
           end;
-        {$ENDIF}
 
         (*** Loading into Working Schema ***)
         setLength(allowcolsNull, length(colsName));
@@ -5592,17 +3662,11 @@ end;
                 end;
             idxdata := nil;
 
-            {$IFDEF mongodb}
-            Collection := GDB.GetCollection(tblName + '_' + dbName);
-            {$ENDIF}
-
-            {$IFDEF tablesdb}
             storage := TTableClass.Create(Path + tblName + '_' + dbName,
               False, colsName, colsType, allowcolsNull);
             storage.Free;
             storage := TTableClass.Create(Path + tblName + '_' + dbName,
               True, colsName, colsType, allowcolsNull);
-            {$ENDIF}
 
 
             {
@@ -5742,48 +3806,6 @@ end;
                     end
               end;
 
-
-            {$IFDEF mongodb}
-            DatabaseInstance := TBSONObject.Create;
-            DatabaseInstance.Put('kind','view');
-            DatabaseInstance.Put('database_name',workingSchema.dbName);
-            DatabaseInstance.Put('view_name',viewname);
-            lcount := length(selectColsInstructions);
-            DatabaseInstance.Put('number_of_columns',lcount); // Number Of Attributes
-            // DatabaseInstance.Put('number_of_documents',0); // Number Of Rows
-            tbltimestamp := now;
-            DatabaseInstance.Put('timestamp',tbltimestamp);
-            DatabaseInstance.Put('index_name',idxname);
-            lcount := length(sqlMemProg) - 3;
-            DatabaseInstance.Put('number_of_instructions',lcount); // Number Of Instructions
-            for index1 := low(sqlMemProg) + 2  to high(sqlMemProg) - 1 do
-              begin
-                DatabaseInstance.Put('mnemonic'+intToStr(index1-2),sqlMemProg[index1].mnemonic);
-                DatabaseInstance.Put('boolvalue'+intToStr(index1-2),sqlMemProg[index1].boolvalue);
-                DatabaseInstance.Put('value'+intToStr(index1-2),sqlMemProg[index1].value);
-                DatabaseInstance.Put('stvalue'+intToStr(index1-2),sqlMemProg[index1].stvalue);
-                DatabaseInstance.Put('printInstruction'+intToStr(index1-2),sqlMemProg[index1].printInstruction);
-              end;
-            DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-            DataDictionaryCollection.Insert(DatabaseInstance);
-
-            for index1 := 0 to length(columns) - 1 do
-              with columns[index1] do
-                begin
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance.Put('kind','viewcolumn');
-                  DatabaseInstance.Put('database_name',workingSchema.dbName);
-                  DatabaseInstance.Put('view_name',viewname);
-                  DatabaseInstance.Put('table_name',tblName);
-                  DatabaseInstance.Put('column_name',colName);
-                  DatabaseInstance.Put('alias_name',aliasName);
-                  DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-                  DataDictionaryCollection.Insert(DatabaseInstance);
-                end;
-            {$ENDIF}
-
-
-            {$IFDEF tablesdb}
             row := nil;
             setLength(row, 4);
             row[0] := viewName;
@@ -5805,7 +3827,6 @@ end;
                   row[4] := aliasName;
                   DDviewColumns.insertRow(row);
                 end;
-            {$ENDIF}
           end;
 
         // Select column list will be the columnlist for a view unless specified
@@ -6060,76 +4081,6 @@ end;
               yyerror('USER ID: ' +  lUserID + ' not exist exist ');
               Exit;
             end;
-
-          {$IFDEF mongodb}
-          NestedUserIdInstance := TBSONObject.Create;
-          NestedPrivilegeInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedUserIdInstance.Put('$eq',dbUserId);
-          NestedDatabaseInstance.Put('$eq','privilege');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('belongs_to',NestedUserIdInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-          if DatabaseCursor.HasNext then
-            begin
-              DatabaseInstance := DatabaseCursor.Next;
-              //PrivilegeArray := TBSONArray.Create;
-              PrivilegeArray  := DatabaseInstance.Items['privilege_array'].AsBSONArray;
-              flagOptionGrant := false;
-              flagAll := false;
-              index3 := PrivilegeArray.Count;
-              for index1 := 0 to PrivilegeArray.Count - 1 do
-                begin
-                  if PrivilegeArray[index1].AsString  = 'grant option' then
-                    flagOptionGrant := true;
-                  if PrivilegeArray[index1].AsString  = 'all' then
-                    flagAll := true;
-
-                end;
-              if not flagOptionGrant then
-                begin
-                  yyerror('USER ID: ' +  dbUserID + ' cannot GRANT PRIVILEGES ');
-                  Exit;
-                end;
-
-              if not flagAll then
-                for index2 := 0 to length(lPrivilege) - 1 do
-                  begin
-                    found := false;
-                    for index1 := 0 to PrivilegeArray.Count - 1 do
-                      begin
-                        if lPrivilege[index2] = PrivilegeArray[index1].AsString then
-                          begin
-                            found := true;
-                            break
-                          end;
-
-
-                      end;
-                    if found then continue else
-                      begin
-                        yyerror('USER ID: ' +  dbUserID + ' cannot GRANT PRIVILEGE ' + lPrivilege[index2]);
-                        Exit;
-                      end;
-                  end;
-              end;
-          // if a privilege line for a luserid exist then update it
-          privilegeArray := TBSONArray.Create;
-          for index1 := 0 to length(lPrivilege) - 1 do
-            privilegeArray.Put(lPrivilege[index1]);
-
-          DataDictionaryInstance := TBSONObject.Create;
-          DataDictionaryInstance.Put('kind','privilege');
-          DataDictionaryInstance.Put('privilege_array',privilegeArray);
-          DataDictionaryInstance.Put('dbobject',dbObject);
-          DataDictionaryInstance.Put('belongs_to',luserId);
-          DataDictionaryInstance.Put('_id', TBSONObjectId.NewFrom);
-          DataDictionaryCollection.Insert(DataDictionaryInstance);
-          {$ENDIF}
-
         end;
 
       233: // PRIVILEGE
@@ -6153,14 +4104,6 @@ end;
         end;
        180: // ALL COLUMNS AGGREGATE
         begin
-          {$IFDEF mongodb}
-          if not flagAggregate then
-            begin
-              aggregateCollection := GDB.GetCollection('sys_aggregate');
-              if aggregateCollection.count <> 0 then
-                aggregateCollection.drop();
-            end;
-          {$ENDIF}
           flagAllColumnsAggregate := true;
           flagAggregate := true;
 
@@ -6174,14 +4117,6 @@ end;
 
        181: // EXPRESSION AGGREGATE
         begin
-          {$IFDEF mongodb}
-          if not flagAggregate then
-            begin
-              aggregateCollection := GDB.GetCollection('sys_aggregate');
-              if aggregateCollection.count <> 0 then
-                aggregateCollection.drop();
-            end;
-          {$ENDIF}
           flagExpressionAggregate := true;
           flagAggregate := true;
 
@@ -6193,14 +4128,6 @@ end;
 
        182: // DISTINCT AGGREGATE
         begin
-          {$IFDEF mongodb}
-          if not flagAggregate then
-            begin
-              aggregateCollection := GDB.GetCollection('sys_aggregate');
-              if aggregateCollection.count <> 0 then
-                aggregateCollection.drop();
-            end;
-          {$ENDIF}
           flagExpressionAggregate := true;
           flagAggregate := true;
           setlength(expr,length(expr) + 1);
@@ -6211,11 +4138,6 @@ end;
 
         36: //DISTINCT
         begin
-          {$IFDEF mongodb}
-          distinctcollection := GDB.GetCollection('sys_distinct');
-          if distinctcollection.count <> 0 then
-            distinctcollection.drop();
-          {$ENDIF}
           flagDistinctClause := true;
         end;
 
@@ -6315,89 +4237,9 @@ end;
             end;
 
           setLength(Row, tblFields.numCols);
-          {$IFDEF tablesdb}
           resulttable.resultRow := nil;
           setLength(resulttable.resultRow, length(resulttable.resultRow) +
             tblFields.numCols);
-          {$ENDIF}
-
-          {$IFDEF mongodb}
-          IBSONInstance :=  TBSONObject.Create;
-          ACursor := tblFields.Collection.Find();
-          while ACursor.HasNext do
-            begin
-              IBSONInstance := ACursor.Next;
-              resultTable.resultIBSONInstance := TBSONObject.Create;
-
-              for index := 0 to tblFields.numCols - 1 do
-                begin
-                  case tblFields.columns[index].coltype of
-                    inttype, smallinttype:
-                      begin
-                        IntFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsInteger;
-                        resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                          tblFields.columns[index].colname, IntFieldValue );
-                      end;
-                    int64type:
-                      begin
-                        Int64FieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsInt64;
-                        resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                          tblFields.columns[index].colname, Int64FieldValue );
-                      end;
-                    extendedtype, tdatetimetype, TDateType, TTimeType:
-                      begin
-                        extendedFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsFloat;
-                        resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                          tblFields.columns[index].colname, extendedFieldValue );
-                      end;
-                    currencytype:
-                      begin
-                        extendedFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsFloat;
-                        resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                          tblFields.columns[index].colname, extendedFieldValue );
-                      end;
-                    booleantype:
-                      begin
-                        booleanFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsBoolean;
-                        resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                          tblFields.columns[index].colname, booleanFieldValue );
-                      end;
-                    stringtype:
-                      begin
-                        stringFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsString;
-                        resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                          tblFields.columns[index].colname, stringFieldValue );
-                      end;
-                  end;
-                end;
-
-              {$IFDEF tablesdb}
-              for resultindex := 0 to length(row) - 1 do
-                resulttable.resultRow[resultindex] := row[resultindex];
-              {$ENDIF}
-
-              if rowcondition( conditionInstructions, resultTable ) then
-                begin
-                  for index1 := 0 to length(setInstructions) - 1  do
-                    begin
-                      for index2 := low(setInstructions[index1]) + 1 to high(setInstructions[index1]) - 1 do
-                        begin
-                          runstack(setInstructions[index1,index2],setstk);
-                        end;
-                      updInstance := TBSONObject.Create;
-                      updInstance := IBSONInstance;
-                      colName := copy(setInstructions[index1,0].stvalue,pos('.',setInstructions[index1,0].stvalue)+1, length(setInstructions[index1,0].stvalue));
-                      if setstk[0].caseValue = 6 then updInstance.Put(colName,setstk[0].strValue) else
-                        if setstk[0].caseValue = 7 then updInstance.Put(colName,NULL) else
-                          updInstance.Put(colName,setstk[0].extValue);
-                      tblFields.Collection.Update(IBSONInstance,updInstance);
-                    end;
-                  UpdatedRows := UpdatedRows + 1;
-                end;
-            end;
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           resultTable.resultFields.storage := nil;
 
           for rowId1 :=
@@ -6475,8 +4317,6 @@ end;
                     end;
                 end;
             end;
-          {$ENDIF}
-
 
              yyacceptmessage(intToStr(UpdatedRows) + ' ROWS UPDATED ');
         end;
@@ -6635,88 +4475,12 @@ end;
               end;
 
             setLength(Row, tblFields.numCols);
-            {$IFDEF tablesdb}
             resulttable.resultRow := nil;
             setLength(resulttable.resultRow, length(resulttable.resultRow) +
               tblFields.numCols);
-            {$ENDIF}
-
 
             resultTable.resultFields.storage := nil;
 
-
-
-
-
-
-
-            {$IFDEF mongodb}
-            IBSONInstance :=  TBSONObject.Create;
-            ACursor := tblFields.Collection.Find();
-            while ACursor.HasNext do
-              begin
-                IBSONInstance := ACursor.Next;
-                resultTable.resultIBSONInstance := TBSONObject.Create;;
-
-
-                for index := 0 to tblFields.numCols - 1 do
-                  begin
-                    case tblFields.columns[index].coltype of
-                      inttype, smallinttype:
-                        begin
-                          IntFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsInteger;
-                          resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                            tblFields.columns[index].colname, IntFieldValue );
-                        end;
-                      int64type:
-                        begin
-                          Int64FieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsInt64;
-                          resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                            tblFields.columns[index].colname, Int64FieldValue );
-                        end;
-                      extendedtype, tdatetimetype, TDateType, TTimeType:
-                        begin
-                          extendedFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsFloat;
-                          resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                            tblFields.columns[index].colname, extendedFieldValue );
-                        end;
-                      currencytype:
-                        begin
-                          extendedFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsFloat;
-                          resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                            tblFields.columns[index].colname, extendedFieldValue );
-                        end;
-                      booleantype:
-                        begin
-                          booleanFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsBoolean;
-                          resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                            tblFields.columns[index].colname, booleanFieldValue );
-                        end;
-                      stringtype:
-                        begin
-                          stringFieldValue := IBSONInstance.Items[tblFields.columns[index].colname].AsString;
-                          resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                            tblFields.columns[index].colname, stringFieldValue );
-                        end;
-                    end;
-                  end;
-
-                {$IFDEF tablesdb}
-                for resultindex := 0 to length(row) - 1 do
-                begin
-                  resulttable.resultRow[resultindex] := row[resultindex];
-                end;
-                {$ENDIF}
-
-                if rowcondition( conditionInstructions, resultTable ) then
-                  begin
-                    tblFields.Collection.Remove(IBSONInstance);
-                    DeletedRows := DeletedRows + 1;
-                  end;
-              end;
-            {$ENDIF}
-
-            {$IFDEF tablesdb}
             for rowId1 :=
               tblFields.storage.firstRow to tblFields.storage.LastRow do
               begin
@@ -6755,8 +4519,6 @@ end;
                       end;
                   end;
               end;
-
-            {$ENDIF}
 
             yyacceptmessage(inttostr(DeletedRows) + ' ROWS DELETED ');
           end;
@@ -6846,18 +4608,8 @@ end;
           *)
 
               // if there is no name the system will give it a name
-              {$IFDEF mongodb}
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-              cnstrName :=
-                'sys_CONSTRAINT_' +  DataBaseInstance.GetOid.GetOID ;
-              //cnstrType + colsname[0] + Inttostr(DataDictionaryCollection.Count);
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
               cnstrName :=
                 'sys_CONSTRAINT' + cnstrType + colsname[0] + IntToStr((DDconstraints.lastRow+1));
-              {$ENDIF}
 
               for index1 := low(constraintList) to high(constraintList) do
                 if constraintList[index1].constraintname = cnstrName then
@@ -6923,37 +4675,15 @@ end;
             end
             else
             begin
-              {$IFDEF mongodb}
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-              cnstrName :=
-                'sys_CONSTRAINT_' +  DataBaseInstance.GetOid.GetOID ;
-              //cnstrType + colsname[0] + Inttostr(DataDictionaryCollection.Count);
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
               cnstrName :=
                 'sys_CONSTRAINT' + cnstrType + colsname[0] + IntToStr((DDconstraints.lastRow+1));
-              {$ENDIF}
 
               // if there is no name the system will give it a name
 
-              {$IFDEF mongodb}
-              // Use a sequence for the name in datadictionary
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-              cnstrName :=
-                'sys_CONSTRAINT_' +  DataBaseInstance.GetOid.GetOID ;
-              { cnstrName :=
-                  'sys_CONSTRAINT' + cnstrType + Inttostr(DataDictionaryCollection.Count); }
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
               cnstrName := 'sys_CONSTRAINT' + cnstrType;
               for index1 := 0 to high(colsname) do
                 cnstrName := cnstrName + '_' + colsname[index1];
               cnstrName := cnstrName + IntToStr((DDconstraints.lastRow+1));
-              {$ENDIF}
 
               for index1 := low(constraintList) to high(constraintList) do
                 if constraintList[index1].constraintname = cnstrName then
@@ -7184,12 +4914,12 @@ end;
         120: // Opr CREATE Index
         begin
           // Check the Table Name
-          tblFields := loadTableFields(tblName);
           if not TableExists(tblName) then
-          begin
-            yyerror('Table Name not exist: ' + tblName);
-            exit;
-          end;
+            begin
+              yyerror('Table Name not exist: ' + tblName);
+              exit;
+            end;
+          tblFields := loadTableFields(tblName);
 
           Thekeys := nil;
           // Check the Columns Name
@@ -7240,27 +4970,6 @@ end;
           // Index_metaData(index_name,table_name,database_name,key_name,order_name...,key_name,order_name)
           // key_name,order...,key_name,order is KeysIndex_metaData(key_name,order,table_name,database_name,index_name)
 
-          {$IFDEF mongodb}
-          DatabaseInstance := TBSONObject.Create;
-          DatabaseInstance.Put('kind','index');
-          DatabaseInstance.Put('type','mono');
-          DatabaseInstance.Put('database_name',workingSchema.dbName);
-          DatabaseInstance.Put('index_name',indexName);
-          DatabaseInstance.Put('table_name',tblname);
-          lcount := length(colsName);
-          DatabaseInstance.Put('columns_count',lcount);
-
-          for index1 := low(colsName) to high(colsName) do
-            begin
-              DatabaseInstance.Put('column_name'+inttostr(index1),colsName[index1]);
-              DatabaseInstance.Put('column_order'+inttostr(index1),idxASC[index1]);
-            end;
-
-          DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-          DataDictionaryCollection.Insert(DatabaseInstance);
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           row := nil;
           setLength(row, 3);
           row[0] := indexName;
@@ -7279,7 +4988,6 @@ end;
               row[3] := idxASC[index1];
               DDkeysindexes.insertRow(row);
             end;
-          {$ENDIF}
 
           for index2 := low(workingSchema.tables) to high(workingSchema.tables) do
             if workingSchema.tables[index2].tblName = tblName then
@@ -7301,18 +5009,6 @@ end;
                             end;
                         end;
 
-                      {$IFDEF mongodb}
-                      IBSONInstance :=  TBSONObject.Create;
-                      for index := 0 to length(idxkeys) - 1 do
-                        begin
-                          if idxkeys[index].colorder then
-                              with idxkeys[index] do IBSONInstance.Put(colName,1) else
-                              with idxkeys[index] do IBSONInstance.Put(colName,-1);
-                        end;
-                      tblFields.Collection.CreateIndex(IBSONInstance,indexname);
-                      {$ENDIF}
-
-                      {$IFDEF tablesdb}
                       idxstorage :=
                         BtrPlusClass.Create(Path + indexName, False, Thekeys, idxAsc);
                       idxstorage.Free;
@@ -7354,7 +5050,6 @@ end;
                                 workingSchema.tables[index2].IdxData)].idxstorage.AddKey(keys, rowId);
                             end;
                         end;
-                      {$ENDIF}
 
                 yyacceptmessage('Index created');
 
@@ -7388,51 +5083,6 @@ end;
            else
             indexName := indexName  + '_' + workingSchema.dbName;
 
-           {$IFDEF mongodb}
-          // Index_metaData(index_name,table_name,database_name,key_name,order_name...,key_name,order_name)
-          // key_name,order...,key_name,order is KeysIndex_metaData(key_name,order,table_name,database_name,index_name)
-          DatabaseInstance := TBSONObject.Create;
-          DatabaseInstance.Put('kind','index');
-          DatabaseInstance.Put('type','join');
-          DatabaseInstance.Put('database_name',workingSchema.dbName);
-          DatabaseInstance.Put('index_name',indexName);
-
-          DatabaseInstance.Put('basetables_count', length(ljoinbaseTables));
-          for index1 := low(ljoinbaseTables) to high(ljoinbaseTables) do
-            DatabaseInstance.Put('basetable_name'+inttostr(index1),ljoinbaseTables[index1]);
-
-          lcount := length(lidxkeys);
-          DatabaseInstance.Put('columns_count',lcount);
-          // KeysIndex_metaData(key_name,order,table_name,database_name,index_name)
-          for index1 := low(lidxkeys) to high(lidxkeys) do
-            begin
-              DatabaseInstance.Put('table_name'+inttostr(index1),lidxkeys[index1].tblName);
-              DatabaseInstance.Put('column_name'+inttostr(index1),lidxkeys[index1].colName);
-              DatabaseInstance.Put('column_order'+inttostr(index1),lidxkeys[index1].colOrder);
-            end;
-
-          // joinKeysIndex_metaData(from_table_name,to_table_name,join_column_name,database_name,index_name)
-          lcount := length(ljoincouples);
-          DatabaseInstance.Put('join_couples',lcount);
-          for index1 := low(ljoincouples) to high(ljoincouples) do
-            begin
-              DatabaseInstance.Put('from_table'+inttostr(index1),ljoincouples[index1].fromTable);
-              DatabaseInstance.Put('to_table'+inttostr(index1),ljoincouples[index1].toTable);
-              lcount := length(ljoincouples[index1].keyNames);
-              DatabaseInstance.Put('keys_count'+inttostr(index1),lcount);
-              for index2 :=
-                low(ljoincouples[index1].keyNames)
-                to high(ljoincouples[index1].keyNames) do
-                begin
-                  DatabaseInstance.Put('key_name'+inttostr(index1)+'-'+inttostr(index2),
-                                       ljoincouples[index1].keyNames[Index2]);
-                end;
-            end;
-          DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-          DataDictionaryCollection.Insert(DatabaseInstance);
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           // Index_metaData(index_name,relation_name,database_name,key_name,order_name...,key_name,order_name)
           // key_name,order...,key_name,order is KeysIndex_metaData(key_name,order,relation_name,database_name,index_name)
           row := nil;
@@ -7496,12 +5146,12 @@ end;
 
                 DDkeysjointables.insertRow(row);
               end;
-          {$ENDIF}
 
           (*** Loading into Working Schema ***)
 
           setLength(workingSchema.joinidxdata, length(workingSchema.joinidxdata) + 1);
           workingSchema.joinidxdata[high(workingSchema.joinidxdata)].idxname := indexname;
+          workingSchema.joinidxdata[high(workingSchema.joinidxdata)].joinBaseTables := nil;
           workingSchema.joinidxdata[high(workingSchema.joinidxdata)].joincouples := nil;
           workingSchema.joinidxdata[high(workingSchema.joinidxdata)].idxkeys := nil;
 
@@ -7602,98 +5252,67 @@ end;
                   idxkeys[index1].tblName + '.' + idxkeys[index1].colName;
               idxstorage.createBTrees(TheBaseTables, False, TheKeys);
               idxstorage.Free;
+            end;
 
+          with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
+            begin
+              TheBaseTables := nil;
+              for index1 := 0 to length(joinbaseTables) - 1 do
+                begin
+                  setlength(TheBaseTables, length(TheBaseTables) + 1);
+                  TheBaseTables[high(TheBaseTables)] := joinbaseTables[index1];
+                end;
               idxstorage := BJoinTreeClass.Create(Path + idxName, TheBaseTables);
-              for index2 := Low(TheBaseTables) to High(TheBaseTables) do
-                with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
+            end;
+
+          for index2 := Low(TheBaseTables) to High(TheBaseTables) do
+            with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
+              begin
+                idxstorage.AddTableToDictionary(TheBaseTables[index2]);
+                // take all his columns and add them to Dictionary
+                // check the null values
+                tblFields := loadTableFields(TheBaseTables[index2]);
+                for index3 := 0 to tblFields.numCols - 1 do
                   begin
-                    idxstorage.AddTableToDictionary(TheBaseTables[index2]);
-                    // take all his columns and add them to Dictionary
-                    // check the null values
-                    tblFields := loadTableFields(TheBaseTables[index2]);
-                    for index3 := 0 to tblFields.numCols - 1 do
-                      begin
-                        colname := tblFields.columns[index3].colname;
-                        case tblFields.columns[index3].coltype of
-                          intType, smallintType:
-                            idxstorage.AddColumnToDictionary(
-                              colname, 'Integer', TheBaseTables[index2]);
-                          int64Type:
-                            idxstorage.AddColumnToDictionary(
-                              colname, 'Int64', TheBaseTables[index2]);
-                          extendedType:
-                            idxstorage.AddColumnToDictionary(
-                              colname, 'Extended', TheBaseTables[index2]);
-                          TDateTimeType, TDateType, TTimeType:
-                            idxstorage.AddColumnToDictionary(
-                              colname, 'TDateTime', TheBaseTables[index2]);
-                          currencyType:
-                            idxstorage.AddColumnToDictionary(
-                              colname, 'Currency', TheBaseTables[index2]);
-                          booleanType:
-                            idxstorage.AddColumnToDictionary(
-                              colname, 'Boolean', TheBaseTables[index2]);
-                          stringType:
-                            idxstorage.AddColumnToDictionary(colname, 'string[' +
-                              IntToStr(tblFields.columns[index3].coltypescale.size) + ']', TheBaseTables[index2]);
-                        end;
-                      end;
+                    colname := tblFields.columns[index3].colname;
+                    case tblFields.columns[index3].coltype of
+                      intType, smallintType, int64Type:
+                        idxstorage.AddColumnToDictionary(
+                          colname, 'Integer', TheBaseTables[index2]);
+                      extendedType:
+                        idxstorage.AddColumnToDictionary(
+                          colname, 'Extended', TheBaseTables[index2]);
+                      TDateTimeType, TDateType, TTimeType:
+                        idxstorage.AddColumnToDictionary(
+                          colname, 'TDateTime', TheBaseTables[index2]);
+                      currencyType:
+                        idxstorage.AddColumnToDictionary(
+                          colname, 'Currency', TheBaseTables[index2]);
+                      booleanType:
+                        idxstorage.AddColumnToDictionary(
+                          colname, 'Boolean', TheBaseTables[index2]);
+                      stringType:
+                        idxstorage.AddColumnToDictionary(colname, 'string[' +
+                          IntToStr(tblFields.columns[index3].coltypescale.size) + ']', TheBaseTables[index2]);
+                    end;
                   end;
+              end;
+
+          with workingSchema.joinidxdata[high(workingSchema.joinidxdata)] do
+            begin
               for index1 := low(joincouples) to high(joincouples) do
                 with joincouples[index1] do
                   idxstorage.AddJoin(fromTable, toTable, keyNames[0]);
+              TheKeys := nil;
+              setlength(TheKeys, length(idxkeys));
+              for index1 := low(idxkeys) to high(idxkeys) do
+                TheKeys[index1] :=
+                  idxkeys[index1].tblName + '.' + idxkeys[index1].colName;
               idxstorage.createBTrees(TheBaseTables, True, TheKeys);
             end;
 
           // case of base tables not empty
-          {$IFDEF mongodb}
-          for index := 0 to length(TheBaseTables) - 1 do
-            begin
-             // for every base table: load the rows and insert them in a join
-             tblFields := loadTableFields(TheBaseTables[index]);
-             BaseCursor := tblFields.Collection.Find();
-             while BaseCursor.HasNext do
-               begin
-                 Row2 := nil;
-                 BaseIBSONInstance := BaseCursor.Next;
-                 for index1 := 0 to tblFields.numCols - 1 do
-                   begin
-                     setLength( Row2, length(Row2) + 1);
-                     // setLength(colsNull, length(colsNull) + 1);
-                     case BaseIBSONInstance.Items[tblFields.columns[index1].colname ].ValueType of
-                       bvtNull:
-                         begin
-                           stringFieldValue := 'Null';
-                           Row2[high(Row2)] := stringFieldvalue;
-                         end;
-                       bvtBoolean:
-                         begin
-                           Row2[high(Row2)] := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsBoolean;
-                         end;
-                       bvtInteger:
-                         begin
-                           Row2[high(Row2)] := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsInteger;
-                         end;
-                       bvtInt64:
-                         begin
-                           Row2[high(Row2)] := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsInt64;
-                         end;
-                       bvtDouble:
-                         begin
-                           Row2[high(Row2)] := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsFloat;
-                         end;
-                       bvtString:
-                         begin
-                           Row2[high(Row2)] := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsString;
-                         end;
-                     end;
-                   end;
-                 workingschema.joinidxdata[index1].idxstorage.AddKey(tblFields.tblName, Row2, BaseIBSONInstance.GetOid.GetOID);
-               end;
-           end;
-          {$ENDIF}
 
-          {$IFDEF tablesdb}
           for index := 0 to length(TheBaseTables) - 1 do
             begin
              // for every base table: load the rows and insert them in a join
@@ -7703,7 +5322,7 @@ end;
                  begin
                    tblFields.storage.returnRow(rowId1, row);
                    Row2 := nil;
-
+                   setLength(row,tblFields.numCols);
                    for index1 := 0 to tblFields.numCols - 1 do
                      begin
                        setLength( Row2, length(Row2) + 1);
@@ -7740,11 +5359,10 @@ end;
                                end;
                            end;
                          end;
-                       workingschema.joinidxdata[index1].idxstorage.AddKey(tblFields.tblName, Row2, rowId1);
                      end;
+                   workingschema.joinidxdata[high(workingSchema.joinidxdata)].idxstorage.AddKey(tblFields.tblName, Row2, rowId1);
                 end;
             end;
-          {$ENDIF}
 
           yyacceptmessage('Join Index Created ');
 
@@ -7759,76 +5377,125 @@ end;
               yyerror('Table Name ' + tblName + ' doesn''t exist');
               exit;
             end;
+          tblFields := loadTableFields(tblName);
 
-          setlength(ljoinbaseTables,length(ljoinbaseTables) + 1);
-          ljoinbaseTables[high(ljoinbaseTables)] := tblName;
+
+          // Check the Columns Name
+          for index1 := low(colsName) to high(colsName) do
+            begin
+              found := False;
+              for index2 := 0 to tblFields.numCols - 1 do
+                if colsName[index1] = tblFields.columns[index2].colname then
+                  begin
+                    found := True;
+                    break;
+                  end;
+              if not found then
+                begin
+                  yyerror('Column Name not exist: ' + colsName[high(colsName)]);
+                  exit;
+                end;
+            end;
+
+          for index1 := low(colsName) to high(colsName) do
+            begin
+              setlength(lidxKeys,length(lidxKeys) + 1);
+              lidxKeys[high(lidxKeys)].colName := colsName[index1];
+              lidxKeys[high(lidxKeys)].colOrder := idxASC[index1];
+              lidxKeys[high(lidxKeys)].tblName  := tblName
+            end;
+
+          colsName := nil;
+          idxASC := nil;
+          expr := nil;
+
+
+
+
+
+          // check if the table belongs to the schema
+
+          found := false;
+          for index := Low(ljoinbaseTables) to high(ljoinbaseTables) do
+            if tblName = ljoinbaseTables[index] then
+              begin
+                found := true;
+                break;
+              end;
+          if not found then
+            begin
+              setlength(ljoinbaseTables,length(ljoinbaseTables) + 1);
+              ljoinbaseTables[high(ljoinbaseTables)] := tblName
+            end
         end;
 
         154: // JOIN TABLES CONDITION
         begin
-          if length(expr) <> 3 then
-            begin
-              yyerror('Error in the join index');
+{          if (length(expr) < (length(ljoinBaseTables) * 3)) or ((length(expr) div 3) <> 0) then
+            begin;
+              yyerror('Error in the join condition');
               exit;
-            end else
+            end;
+ }         while expr <> nil do
             begin
+              if expr[high(expr)].mnemonic = 44 then
+                setlength(expr,length(expr)-1);
+              index := length(expr);
               if not ((expr[high(expr)-2].mnemonic = 151) and (expr[high(expr)-1].mnemonic = 151) and (expr[high(expr)].mnemonic = 50)) then
                 begin
                   yyerror('Error in the join condition');
                   exit;
                 end;
+
+              setlength(ljoincouples,length(ljoincouples) + 1);
+              with ljoinCouples[high(ljoinCouples)] do
+                begin
+                  fromtblName := copy(expr[high(expr)-2].stvalue,1,pos('.',expr[high(expr)-2].stvalue)-1);
+                  totblName := copy(expr[high(expr)-1].stvalue,1,pos('.',expr[high(expr)-1].stvalue)-1);
+                  fromtocolName := copy(expr[high(expr)-2].stvalue,pos('.',expr[high(expr)-2].stvalue)+1,length(expr[high(expr)-2].stvalue));
+                  fromTable := fromtblName;
+                  toTable := totblName;
+                  setLength(KeyNames,1);
+                  keyNames[0] := fromtocolName
+                end;
+
+              found := false;
+              for index := 0 to length(ljoinbaseTables) -1 do
+                if fromtblName = ljoinbaseTables[index] then
+                  begin
+                    found := true;
+                    break
+                  end;
+              if not found then
+                yyerror('Table ' + fromtblName + ' don''t exists');
+
+              found := false;
+              for index := 0 to length(ljoinbaseTables) -1 do
+                if totblName = ljoinbaseTables[index] then
+                  begin
+                    found := true;
+                    break
+                  end;
+              if not found then
+                yyerror('Table ' + totblName + ' don''t exists');
+
+              setlength(ljoincouples,length(ljoincouples) + 1);
+              with ljoinCouples[high(ljoinCouples)] do
+                begin
+                  tofromcolName := copy(expr[high(expr)-1].stvalue,pos('.',expr[high(expr)-1].stvalue)+1,length(expr[high(expr)-1].stvalue));
+                  fromTable := totblName;
+                  toTable := fromtblName;
+                  setLength(KeyNames,1);
+                  keyNames[0] := tofromcolName
+                end;
+              // check fromtocolNames
+              // check tofromcolNames
+              setlength(expr,length(expr)-3);
+
             end;
-
-          setlength(ljoincouples,length(ljoincouples) + 1);
-          with ljoinCouples[high(ljoinCouples)] do
-            begin
-              fromtblName := copy(expr[high(expr)-2].stvalue,1,pos('.',expr[high(expr)-2].stvalue)-1);
-              totblName := copy(expr[high(expr)-1].stvalue,1,pos('.',expr[high(expr)-1].stvalue)-1);
-              fromtocolName := copy(expr[high(expr)-2].stvalue,pos('.',expr[high(expr)-2].stvalue)+1,length(expr[high(expr)-2].stvalue));
-              fromTable := fromtblName;
-              toTable := totblName;
-              setLength(KeyNames,1);
-              keyNames[0] := fromtocolName
-            end;
-
-          found := false;
-          for index := 0 to length(ljoinbaseTables) -1 do
-            if fromtblName = ljoinbaseTables[index] then
-              begin
-                found := true;
-                break
-              end;
-          if not found then
-            yyerror('Table ' + fromtblName + ' don''t exists');
-
-          found := false;
-          for index := 0 to length(ljoinbaseTables) -1 do
-            if totblName = ljoinbaseTables[index] then
-              begin
-                found := true;
-                break
-              end;
-          if not found then
-            yyerror('Table ' + totblName + ' don''t exists');
-
-          setlength(ljoincouples,length(ljoincouples) + 1);
-          with ljoinCouples[high(ljoinCouples)] do
-            begin
-              tofromcolName := copy(expr[high(expr)-1].stvalue,pos('.',expr[high(expr)-1].stvalue)+1,length(expr[high(expr)-1].stvalue));
-              fromTable := totblName;
-              toTable := fromtblName;
-              setLength(KeyNames,1);
-              keyNames[0] := tofromcolName
-            end;
-          fromTablesLen := length(fromTables);
-          expr := nil;
-          colsname := nil;
-
-          // check fromtocolNames
-          // check tofromcolNames
-
+         fromTablesLen := length(fromTables);
+         colsname := nil;
         end;
-
         166: // ALTER TABLE
         begin
           if ladd_column then
@@ -7866,12 +5533,7 @@ end;
                                   columnList[index3].hascolumnDefault or
                                   columnList[index3].hascolumnAutoIncrement) then
                                  begin
-                                   {$IFDEF mongodb}
-                                   if tblFields.Collection.Count <> 0 then
-                                   {$ENDIF}
-                                   {$IFDEF tablesdb}
                                    if not DDTables.emptyTable then
-                                   {$ENDIF}
                                      begin
                                        yyerror('Table could be empty in a NOT NULL column');
                                        exit;
@@ -7884,112 +5546,6 @@ end;
               colsType := nil;
               allowcolsNull := nil;
 
-              {$IFDEF mongodb}
-              for index1 := low(columnList) to high(columnList) do
-                begin
-                  // Column_metaData(column_name,table_name,database_name,position,type_name,Default)
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance.Put('kind','tablecolumn');
-                  DatabaseInstance.Put('database_name',workingSchema.dbName);
-                  DatabaseInstance.Put('table_name',tblname);
-                  DatabaseInstance.Put('column_name',columnlist[index1].columnName);
-                  setLength(colsName, length(colsName) + 1);
-                  colsName[high(colsName)] := columnlist[index1].columnName;
-                  DatabaseInstance.Put('position',index1);
-                  DatabaseInstance.Put('type_name',columnlist[index1].columnTypeName);
-                  setLength(colsType, length(colsType) + 1);
-                  colsType[high(colsType)] := convertType(columnlist[index1].columnTypeName);
-                  with columnlist[index1] do
-                    if charTypeSize <> 0 then
-                      begin
-                        dimSize := charTypeSize;
-                        colsType[high(colsType)] :=
-                          colsType[high(colsType)] + '[' + IntToStr(charTypeSize) + ']';
-                      end
-                     else dimSize := numTypeSize[0];
-                  DatabaseInstance.Put('dim1',dimSize); // 'dim1'
-                  DatabaseInstance.Put('dim2',columnlist[index1].numTypeSize[1]); // 'dim2'
-
-                  with columnlist[index1] do
-                    if hascolumnAutoIncrement then
-                      DatabaseInstance.Put('kind_default',8)  // AUTOINCREMENT
-                     else
-                      begin
-                        if hascolumnDefault then
-                          begin
-                            if (convertType(columnTypeName) = 'INTEGER') or
-                              (convertType(columnTypeName) = 'SMALLINT') then
-                              begin
-                                DatabaseInstance.Put('kind_default',0);  // INTEGER
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                                DatabaseInstance.Put('int_default',varDef);
-                              end;
-                            if convertType(columnTypeName) = 'INT64' then
-                              begin
-                                DatabaseInstance.Put('kind_default',2);  // INT64
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                                DatabaseInstance.Put('int64_default',varDef);
-                              end;
-                            if (convertType(columnTypeName) = 'SINGLE') or
-                               (convertType(columnTypeName) = 'DOUBLE') or
-                               (convertType(columnTypeName) = 'EXTENDED') then
-                              begin
-                                DatabaseInstance.Put('kind_default',3);  // EXTENDED
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                                DatabaseInstance.Put('ext_default',varDef);
-                              end;
-                            if convertType(columnTypeName) = 'CURRENCY' then
-                              begin
-                                DatabaseInstance.Put('kind_default',4);  // CURRENCY
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                                DatabaseInstance.Put('currency_default',varDef);
-                              end;
-                            if (convertType(columnTypeName) = 'TDATETIME') or
-                               (convertType(columnTypeName) = 'TDATE') or
-                               (convertType(columnTypeName) = 'TTIME') then
-                              begin
-                                DatabaseInstance.Put('kind_default',5);  // TDATETIME
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                                DatabaseInstance.Put('ext_default',varDef);
-                              end;
-                            if convertType(columnTypeName) = 'BOOLEAN' then
-                              begin
-                                DatabaseInstance.Put('kind_default',6);  // BOOLEAN
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                                DatabaseInstance.Put('boolean_default',varDef);
-                              end;
-                            if convertType(columnTypeName) = 'STRING' then
-                              begin
-                                DatabaseInstance.Put('kind_default',7);  // STRING
-                                with columnlist[index1] do
-                                  vardef := IsCompatibleType(columnDefaultValue,columnTypeName,charTypeSize,numTypeSize[1]);
-                                DatabaseInstance.Put('st_default',varDef);
-                              end;
-                          end
-                         else
-                          begin
-                            (* If you specify NULL as the default value for a column, you cannot
-                               specify a NOT NULL constraint as part of the column definition.
-                               NULL is not a valid default value for a column that is part of a
-                               primary key.
-                            *)
-                            DatabaseInstance.Put('kind_default',-1);  // DEFAULT NOT AVAILABLE
-                          end;
-                      end;
-
-                    DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-                    DataDictionaryCollection.Insert(DatabaseInstance);
-
-                end;
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
               for index1 := low(columnList) to high(columnList) do
                 begin
                   // Column_metaData(column_name,table_name,database_name,position,type_name,Default)
@@ -8088,61 +5644,8 @@ end;
 
                   DDtablecolumns.insertRow(row);
                 end;
-              {$ENDIF}
 
-              {$IFDEF mongodb}
               for index1 := Low(constraintList) to high(constraintList) do
-                begin
-
-                  // Constraint_metaData(constraint_name,column_name,...,column_name,constraint_kind,constraint_type)
-                  // column_name,...,column_name is ColumnsConstrain_metaData(column_name,table_name,database_name,constraint_name)
-                  // constraint_kind: column / table
-                  // constraint_type: FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK, REFERENCES
-
-                  // Table_metaData(table_name,database_name,numberOfAttributes)
-                  NestedDatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance.Put('kind','constraint');
-                  DatabaseInstance.Put('database_name',workingSchema.dbName);
-                  DatabaseInstance.Put('table_name',tblname);
-                  DatabaseInstance.Put('constraint_name',constraintList[index1].constraintname);
-                  DatabaseInstance.Put('constraint_kind',constraintList[index1].constraintkind); // constraint_kind: column / table
-                  DatabaseInstance.Put('constraint_type',constraintList[index1].constraintType);
-
-
-                  lcount := length(constraintList[index1].columnsName);
-                  DatabaseInstance.Put('column_count',lcount);
-
-                  for index2 := Low(constraintList[index1].columnsName) to high(constraintList[index1].columnsName) do
-                    DatabaseInstance.Put('column_name'+intToStr(index2),constraintList[index1].columnsName[index2]);
-                  lcount := length(constraintList[index1].checkInstructions);
-                  if constraintList[index1].constraintType = 'CHECK' then
-                    begin
-                      DatabaseInstance.Put('checkinstruction_count',lcount);
-                      for index2 := Low(constraintList[index1].checkInstructions) to high(constraintList[index1].checkInstructions) do
-                        begin
-                          DatabaseInstance.Put('mnemonic'+intToStr(index2),constraintList[index1].checkInstructions[index2].mnemonic);
-                          DatabaseInstance.Put('boolvalue'+intToStr(index2),constraintList[index1].checkInstructions[index2].boolvalue);
-                          DatabaseInstance.Put('value'+intToStr(index2),constraintList[index1].checkInstructions[index2].value);
-                          DatabaseInstance.Put('stvalue'+intToStr(index2),constraintList[index1].checkInstructions[index2].stvalue);
-                          DatabaseInstance.Put('printInstruction'+intToStr(index2),constraintList[index1].checkInstructions[index2].printInstruction);
-                        end;
-                    end;
-                  if constraintList[index1].constraintType = 'REFERENCES' then
-                    begin
-                      DatabaseInstance.Put('references_table',constraintList[index1].refTable);
-                      lcount := length(constraintList[index1].refcolumnsName);
-                      DatabaseInstance.Put('refcolumn_count',lcount);
-                      for index2 := Low(constraintList[index1].refcolumnsName) to high(constraintList[index1].refcolumnsName) do
-                        DatabaseInstance.Put('refcolumn_name'+intToStr(index2),constraintList[index1].refcolumnsName[index2]);
-                    end;
-                  DatabaseInstance.Put('_id', TBSONObjectId.NewFrom);
-                  DataDictionaryCollection.Insert(DatabaseInstance);
-                end;
-                {$ENDIF}
-
-                {$IFDEF tablesdb}
-                for index1 := Low(constraintList) to high(constraintList) do
                   begin
 
                     // Constraint_metaData(constraint_name,column_name,...,column_name,constraint_kind,constraint_type)
@@ -8232,7 +5735,6 @@ end;
                           DDcolumnsconstraint.insertRow(row);
                         end;
                 end;
-              {$ENDIF}
 
               (*** Loading into Working Schema ***)
               setLength(allowcolsNull, length(colsName));
@@ -8381,33 +5883,6 @@ end;
                       end;
                 end;
 
-              {$IFDEF mongodb}
-              NestedtblNameInstance := TBSONObject.Create;
-              NestedtblNameInstance.Put('$eq',tblName);
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','table');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('table_name',NestedtblNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              if DatabaseCursor.HasNext then
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  lcount := DataBaseInstance.Items['number_of_columns'].AsInteger;
-                  lcount := lcount + Length(columnList);
-                  DatabaseInstance.Put('number_of_columns',lcount); // Number Of Attributes
-                  DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                end;
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
               for RowId1 := DDTables.firstRow to DDTables.lastRow do
                 begin
                   table_name := DDTables.getValueByColumnName(RowId1,'table_name');
@@ -8418,7 +5893,6 @@ end;
               lcount := lcount + Length(columnList);
               Row[2] := lcount;
               DDTables.putRow(RowId1,Row);
-              {$ENDIF}
 
               setlength(inscols, length(columnList));
               for index1 := 0 to high(columnList) do
@@ -8436,55 +5910,6 @@ end;
                         inscols[index1].value := null
                 end;
 
-              {$IFDEF mongodb}
-              ACursor := tblFields.Collection.Find();
-              while ACursor.HasNext do
-                begin
-                  oldIBSONInstance := ACursor.Next;
-                  IBSONInstance := oldIBSONInstance;
-                  for index1 := low(columnList) to high(columnList) do
-                    begin
-                      oldIBSONInstance.Put(inscols[index1].name,inscols[index1].value);
-                      tblFields.Collection.Update(oldIBSONInstance,IBSONInstance);
-
-                      if columnList[index1].hascolumnAutoIncrement then
-                        inscols[index1].value := inscols[index1].value + 1;
-                    end;
-                end;
-
-              for index1 := low(columnList) to high(columnList) do
-                begin
-                  if columnList[index1].hascolumnAutoIncrement then
-                    begin
-                      NesteddbNameInstance := TBSONObject.Create;
-                      NesteddbNameInstance.Put('$eq',dbname);
-
-                      NestedtblNameInstance := TBSONObject.Create;
-                      NestedtblNameInstance.Put('$eq',tblFields.tblName);
-                      NestedcolNameInstance := TBSONObject.Create;
-                      NestedcolNameInstance.Put('$eq',columnList[index1].columnName);
-
-                      sequencesInstance := TBSONObject.Create;
-                      sequencesInstance.Put('database_name',NesteddbNameInstance);
-                      sequencesInstance.Put('table_name',NestedtblNameInstance);
-                      sequencesInstance.Put('column_name',NestedcolNameInstance);
-                      sequencesCursor := SequencesCollection.Find(sequencesInstance);
-
-                      if sequencesCursor.HasNext then
-                        begin
-                          oldsequencesInstance := sequencesCursor.Next;
-                          sequencesInstance := oldsequencesInstance;
-                          seq_counter := inscols[index1].value;
-                          sequencesInstance.Put('counter',seq_counter);
-                          sequencesCollection.Update(oldsequencesInstance,sequencesInstance);
-                        end;
-                    end;
-                end;
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
-                // same as above
-              {$ENDIF}
 
               colsName := nil;
               yyacceptmessage('Alter table succeed');
@@ -8554,188 +5979,6 @@ end;
                       end;
                   end
                 end;
-
-              {$IFDEF mongodb}
-              NestedtblNameInstance := TBSONObject.Create;
-              NestedtblNameInstance.Put('$eq',fromTables[0].Name);
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','table');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('table_name',NestedtblNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              if DatabaseCursor.HasNext then
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  DatabaseInstance.Put('table_name',tblname);
-                  DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                end;
-
-
-              NestedtblNameInstance := TBSONObject.Create;
-              NestedtblNameInstance.Put('$eq',fromTables[0].Name);
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','table');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('table_name',NestedtblNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              if DatabaseCursor.HasNext then
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  DatabaseInstance.Put('table_name',tblname);
-                  DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                end;
-
-              NestedtblNameInstance := TBSONObject.Create;
-              NestedtblNameInstance.Put('$eq',fromTables[0].Name);
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','tablecolumn');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('table_name',NestedtblNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              while DatabaseCursor.HasNext do
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  DatabaseInstance.Put('table_name',tblname);
-                  DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                end;
-
-
-              NestedtblNameInstance := TBSONObject.Create;
-              NestedtblNameInstance.Put('$eq',fromTables[0].Name);
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','constraint');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('table_name',NestedtblNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              while DatabaseCursor.HasNext do
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  DatabaseInstance.Put('table_name',tblname);
-                  DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                end;
-
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','constraint');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              while DatabaseCursor.HasNext do
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  constraint_type := oldDatabaseInstance.Items['constraint_type'].AsString;
-                  if constraint_type = 'REFERENCES' then
-                    if fromTables[0].Name = oldDatabaseInstance.Items['references_table'].AsString then
-                      begin
-                        DatabaseInstance.Put('references_table',tblname);
-                        DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                      end;
-                  if constraint_type = 'CHECK' then
-                    begin
-                      lcount :=  oldDatabaseInstance.Items['checkinstruction_count'].AsInteger;
-                      for index2 := 0 to lcount - 1 do
-                        begin
-                          if oldDatabaseInstance.Items['mnemonic'+IntToStr(index2)].AsInteger = 151 then
-                            begin
-                              table_name := copy(oldDatabaseInstance.Items['stvalue'+IntToStr(index2)].AsString,
-                                                 1, pos('.',oldDatabaseInstance.Items['stvalue'+IntToStr(index2)].AsString)-1);
-                              if table_name = fromTables[0].Name then
-                                begin
-                                  column_name := copy(oldDatabaseInstance.Items['stvalue'+IntToStr(index2)].AsString,
-                                                      pos('.',oldDatabaseInstance.Items['stvalue'+IntToStr(index2)].AsString)+1,
-                                                      length(oldDatabaseInstance.Items['stvalue'+IntToStr(index2)].AsString));
-                                  DatabaseInstance.Put('stvalue'+IntToStr(index2),tblName + '.' + column_name);
-                                  DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                                end;
-                            end;
-                        end;
-                    end;
-                end;
-
-
-              NesteddbNameInstance := TBSONObject.Create;
-              NesteddbNameInstance.Put('$eq',dbName);
-              NestedDatabaseInstance := TBSONObject.Create;
-              NestedDatabaseInstance.Put('$eq','index');
-              DatabaseInstance := TBSONObject.Create;
-              DatabaseInstance.Put('database_name',NesteddbNameInstance);
-              DatabaseInstance.Put('kind',NestedDatabaseInstance);
-
-              DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-
-              while DatabaseCursor.HasNext do
-                begin
-                  oldDatabaseInstance := DatabaseCursor.Next;
-                  DatabaseInstance := TBSONObject.Create;
-                  DatabaseInstance := oldDatabaseInstance;
-                  index_type := oldDatabaseInstance.Items['type'].AsString;
-                  if index_type = 'mono' then
-                    begin
-                      if fromTables[0].Name = oldDatabaseInstance.Items['table_name'].AsString then
-                        begin
-                          DatabaseInstance.Put('table_name',tblname);
-                        end
-                    end else
-                    if index_type = 'join' then
-                      begin
-                        lcount := oldDatabaseInstance.Items['tbasetables_count'].AsInteger;
-                        for index1 := 0 to lcount - 1 do
-                          begin
-                            fromtblName := oldDatabaseInstance.Items['from_table'+IntToStr(index1)].AsString;
-                            if fromTables[0].Name = fromtblName then
-                              DatabaseInstance.Put('from_table'+IntToStr(index1),tblname);
-                            totblName := oldDatabaseInstance.Items['to_table'+IntToStr(index1)].AsString;
-                            if fromTables[0].Name = totblName then
-                              DatabaseInstance.Put('to_table'+IntToStr(index1),tblname);
-                          end
-                      end;
-                    DataDictionaryCollection.Update(oldDatabaseInstance,DatabaseInstance);
-                end;
-
-              // check the views and triggers
-              {$ENDIF}
-
-              {$IFDEF tablesdb}
-
-              {$ENDIF}
 
               lrename_table := false;
             end;
@@ -8815,121 +6058,6 @@ end;
           // scan till this number
           // run add join index
 
-          {$IFDEF mongodb}
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblName);
-
-          NesteddbNameInstance.Put('$eq',dbname);
-          NestedDatabaseInstance.Put('$eq','table');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-
-          found := False;
-          dbCounter := 0;
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          if DatabaseCursor.HasNext then
-            begin
-              DatabaseInstance :=  DatabaseCursor.Next;
-              RowsInserted := DatabaseInstance.Items['number_of_documents'].AsInteger;
-            end;
-
-          counter := 0;
-
-          tblFields := loadTableFields(tblName);
-          BaseCursor := tblFields.Collection.Find();
-          while BaseCursor.HasNext do
-            begin
-              BaseIBSONInstance := BaseCursor.Next;
-              counter := counter + 1;
-              if counter <= RowsInserted then continue else
-                begin
-
-                  {
-                  sqlUnit.Form1.Edit6.Text := inttostr(counter);
-                  sqlUnit.Form1.Edit6.Repaint;
-                  if IsConsole then
-                    writeln(counter);
-                  }
-
-                  Row2 := nil;
-                  for index1 := 0 to tblFields.numCols - 1 do
-                    begin
-                      setLength( Row2, length(Row2) + 1);
-                      if BaseIBSONInstance.Items[tblFields.columns[index1].colname ].ValueType = bvtNull then
-                          begin
-                            stringFieldValue := 'Null';
-                            Row2[high(Row2)] := stringFieldvalue;
-                          end else
-
-                      case tblFields.columns[index1].coltype of
-                        intType, smallintType:
-                        begin
-                          intFieldValue := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsInteger;
-                          Row2[high(Row2)] := intFieldValue;
-                        end;
-                        int64Type:
-                        begin
-                          int64FieldValue := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsInt64;
-                          Row2[high(Row2)] := Int64FieldValue;
-                        end;
-                        extendedType, TDateTimeType, TDateType, TTimeType:
-                        begin
-                          extendedFieldValue := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsFloat;
-                          Row2[high(Row2)] := ExtendedFieldValue;
-                        end;
-                        currencyType:
-                        begin
-                          currencyFieldValue := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsFloat;
-                          Row2[high(Row2)] := CurrencyFieldValue;
-                        end;
-                        booleanType:
-                        begin
-                          booleanFieldValue := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsBoolean;
-                          Row2[high(Row2)] := booleanFieldValue;
-                        end;
-                        stringType:
-                        begin
-                          stringFieldValue := BaseIBSONInstance.Items[tblFields.columns[index1].colname ].AsString;
-                          Row2[high(Row2)] := stringFieldValue;
-                        end;
-                      end;
-
-                    end;
-                  if BaseIBSONInstance.HasOid then
-                    stID := BaseIBSONInstance.GetOid.GetOID else
-                    stID := BaseIBSONInstance.Items['_id'].AsString;
-                  workingschema.joinidxdata[0].idxstorage.AddKey(tblFields.tblName, Row2, stID);
-                end;
-            end;
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblName);
-          NesteddbNameInstance.Put('$eq',dbname);
-          NestedDatabaseInstance.Put('$eq','table');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          if DatabaseCursor.HasNext then
-            begin
-              DatabaseInstance :=  DatabaseCursor.Next;
-              RowsInserted := DatabaseInstance.Items['number_of_documents'].AsInteger;
-              RowsInserted := counter;
-              DatabaseInstance.Put('number_of_documents',RowsInserted);
-              DataDictionaryCollection.Update(DatabaseInstance,DatabaseInstance);
-
-            end;
-
-          //////put the number of rows
-          yyacceptmessage('Updated Join Index');
-          {$ENDIF}
         end;
 
         78: // VALUES
@@ -9022,35 +6150,8 @@ end;
                       if tblFields.columns[index1].colhasAutoIncrement then
                         begin
 
-                          {$IFDEF mongodb}
                           // make sure when you drop a table or alter the table, you delete the row from sequences table
                           // when you create an autoincrement field, create the sequence row
-                          NesteddbNameInstance := TBSONObject.Create;
-                          NesteddbNameInstance.Put('$eq',dbname);
-
-                          NestedtblNameInstance := TBSONObject.Create;
-                          NestedtblNameInstance.Put('$eq',tblFields.tblName);
-                          NestedcolNameInstance := TBSONObject.Create;
-                          NestedcolNameInstance.Put('$eq',tblFields.columns[index1].colname);
-                          sequencesInstance := TBSONObject.Create;
-                          sequencesInstance.Put('database_name',NesteddbNameInstance);
-                          sequencesInstance.Put('table_name',NestedtblNameInstance);
-                          sequencesInstance.Put('column_name',NestedcolNameInstance);
-                          sequencesCursor := SequencesCollection.Find(sequencesInstance);
-
-                          if sequencesCursor.HasNext then
-                            begin
-                              oldsequencesInstance := sequencesCursor.Next;
-                              sequencesInstance := oldsequencesInstance;
-                              seq_counter := oldsequencesInstance.Items['counter'].AsInt64;
-                              inscols[index1].value := seq_counter;
-                              seq_counter := seq_counter + 1;
-                              sequencesInstance.Put('counter',seq_counter);
-                              sequencesCollection.Update(oldsequencesInstance,sequencesInstance);
-                            end;
-                          {$ENDIF}
-
-                          {$IFDEF tablesdb}
                           rowId1 := DDtablecolumns.firstRow;
                           repeat
                             if DDtablecolumns.existRow(rowId1) then
@@ -9078,7 +6179,6 @@ end;
                               end;
                             rowId1 := rowId1 + 1;
                           until rowId1 > DDtablecolumns.lastRow;
-                          {$ENDIF}
                         end else
                         if tblFields.columns[index1].colSQLtypename = 'TIMESTAMP' then
                           begin
@@ -9095,14 +6195,12 @@ end;
                           end;
                end;
 
-              {$IFDEF tablesdb}
               row := nil;
               for index1 := 0 to tblFields.numCols - 1 do
                 begin
                   setlength(row,length(row)+1);
                   row[High(row)] := inscols[index1].value;
                 end;
-              {$ENDIF}
 
               for index2 := 0 to length(tblFields.constraints) - 1 do
                 begin
@@ -9143,46 +6241,6 @@ end;
                           end;
                         resultTable.resultFields := tblFields;
 
-                        {$IFDEF mongodb}
-                        resultTable.resultIBSONInstance := TBSONObject.Create;
-                        for index := 0 to tblFields.numCols - 1 do
-                          begin
-                            case tblFields.columns[index].coltype of
-                              inttype, smallinttype:
-                                begin
-                                  resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                                    tblFields.columns[index].colname, inscols[index].value );
-                                end;
-                              int64type:
-                                begin
-                                  resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                                    tblFields.columns[index].colname, inscols[index].value );
-                                end;
-                              extendedtype, tdatetimetype, TDateType, TTimeType:
-                                begin
-                                  resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                                    tblFields.columns[index].colname, inscols[index].value );
-                                end;
-                              currencytype:
-                                begin
-                                  resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                                    tblFields.columns[index].colname, inscols[index].value );
-                                end;
-                              booleantype:
-                                begin
-                                  resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                                    tblFields.columns[index].colname, inscols[index].value );
-                                end;
-                              stringtype:
-                                begin
-                                  resultTable.resultIBSONInstance.Put( tblFields.tblName + tableColumnSeperator +
-                                    tblFields.columns[index].colname, inscols[index].value );
-                                end;
-                            end;
-                          end;
-                        {$ENDIF}
-
-                        {$IFDEF tablesdb}
                         with resultTable do
                           begin
                             resultRow := nil;
@@ -9192,7 +6250,6 @@ end;
                                 resultRow[High(resultRow)] := inscols[index1].value;
                               end;
                           end;
-                        {$ENDIF}
 
                         if not rowcondition(tblFields.constraints[index2].checkCondition ,resulttable) then
                           begin
@@ -9204,19 +6261,7 @@ end;
                 end;
             end;
 
-          {$IFDEF mongodb}
-          IBSONInstance :=  TBSONObject.Create;
-          for index1 := 0 to tblFields.numCols - 1 do
-            begin
-              IBSONInstance.Put(inscols[index1].name, inscols[index1].Value);
-            end;
-          IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-          tblFields.Collection.Insert(IBSONInstance);
-          {$ENDIF}
-
-          {$IFDEF tablesdb}
           tblFields.storage.insertRow(row);
-          {$ENDIF}
 
 
           //// search for indexes and fill them
@@ -9242,33 +6287,6 @@ end;
 
               tblFields.idxdata[index1].idxstorage.AddKey(keys,{strToint(}rowId{)});
             end;
-
-
-          {$IFDEF mongodb}
-          NestedtblNameInstance := TBSONObject.Create;
-          NesteddbNameInstance := TBSONObject.Create;
-          NestedDatabaseInstance := TBSONObject.Create;
-          DatabaseInstance := TBSONObject.Create;
-          NestedtblNameInstance.Put('$eq',tblName);
-          NesteddbNameInstance.Put('$eq',dbname);
-          NestedDatabaseInstance.Put('$eq','table');
-          DatabaseInstance.Put('kind',NestedDatabaseInstance);
-          DatabaseInstance.Put('database_name',NesteddbNameInstance);
-          DatabaseInstance.Put('table_name',NestedtblNameInstance);
-
-          DatabaseCursor := DataDictionaryCollection.Find(DatabaseInstance);
-          if DatabaseCursor.HasNext then
-            begin
-              DatabaseInstance :=  DatabaseCursor.Next;
-              RowsInserted := DatabaseInstance.Items['number_of_documents'].AsInteger;
-              RowsInserted := RowsInserted + 1;
-              DatabaseInstance.Put('number_of_documents',RowsInserted);
-              DataDictionaryCollection.Update(DatabaseInstance,DatabaseInstance);
-
-            end;
-          {$ENDIF}
-
-
 
           yyacceptmessage('Row inserted ');
         end;
@@ -9820,17 +6838,13 @@ end;
             end;
           end;
 
-          {$IFDEF tablesdb}
           resulttable.resultRow := nil;
-          {$ENDIF}
           for fromindex := 0 to fromTablesLen - 1 do
           begin
             setLength(fromTables[fromindex].fromRow,
               fromTables[fromindex].fromFields.numCols);
-            {$IFDEF tablesdb}
             setLength(resulttable.resultRow, length(resulttable.resultRow) +
               fromTables[fromindex].fromFields.numCols);
-            {$ENDIF}
           end;
 
 
@@ -10037,9 +7051,6 @@ end;
           // ****** EXECUTE PLAN ******
 
           ResultRows := 0;
-          {$IFDEF mongodb}
-          resultTable.resultIBSONInstance := TBSONObject.Create;
-          {$ENDIF}
 
           executePlan.useIndex := false;
 
@@ -10083,83 +7094,6 @@ end;
             begin
               if not executePlan.joinFlag then
                 begin
-                  {$IFDEF mongodb}
-                  IBSONInstance := TBSONObject.Create;
-                  IBSONInstance2 := TBSONObject.Create;
-                  for index := 0 to length(executeplan.Index) - 1 do
-                    begin
-                      varFieldvalue := executeplan.Index[index].Value;
-                      case executeplan.Index[index].mnemonic of
-                        50: stcondition := '$eq';
-                        51: stcondition := '$lt';
-                        52: stcondition := '$gt';
-                        53: stcondition := '$ne';
-                        54: stcondition := '$lte';
-                        55: stcondition := '$gte';
-                      end;
-                      IBSONInstance2.Put(stcondition,varFieldValue);
-                      IBSONInstance.Put(executeplan.Index[index].colName,IBSONInstance2);
-                    end;
-
-                  fromTables[0].Cursor := tblFields.Collection.Find(IBSONInstance);
-
-                  while fromTables[0].Cursor.HasNext do
-                    begin
-                      fromTables[0].fromIBSONInstance := fromTables[0].Cursor.Next;
-
-                      for index := 0 to fromTables[0].fromFields.numCols - 1 do
-                        begin
-                          setlength( colNames, length(colNames) + 1 );
-                          colNames[index] := fromTables[0].fromFields.columns[index].colname;
-                          setlength( colTypes, length(colTypes) + 1 );
-                          colTypes[index] := fromTables[0].fromFields.columns[index].coltype;
-                          case fromTables[0].fromFields.columns[index].coltype of
-                            inttype, smallinttype:
-                              begin
-                                IntFieldValue := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].AsInteger;
-                                resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                  fromTables[0].fromFields.columns[index].colname, IntFieldValue );
-                              end;
-                            int64type:
-                              begin
-                                Int64FieldValue := fromTables[0].fromIBSONInstance.Items[tblFields.columns[index].colname].AsInt64;
-                                resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                  fromTables[0].fromFields.columns[index].colname, Int64FieldValue );
-                              end;
-                            extendedtype, tdatetimetype, TDateType, TTimeType:
-                              begin
-                                extendedFieldValue := fromTables[0].fromIBSONInstance.Items[tblFields.columns[index].colname].AsFloat;
-                                resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                  fromTables[0].fromFields.columns[index].colname, extendedFieldValue );
-                              end;
-                            currencytype:
-                              begin
-                                extendedFieldValue := fromTables[0].fromIBSONInstance.Items[tblFields.columns[index].colname].AsFloat;
-                                resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                  fromTables[0].fromFields.columns[index].colname, extendedFieldValue );
-                              end;
-                            booleantype:
-                              begin
-                                booleanFieldValue := fromTables[0].fromIBSONInstance.Items[tblFields.columns[index].colname].AsBoolean;
-                                resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                  fromTables[0].fromFields.columns[index].colname, booleanFieldValue );
-                              end;
-                            stringtype:
-                              begin
-                                stringFieldValue := fromTables[0].fromIBSONInstance.Items[tblFields.columns[index].colname].AsString;
-                                resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                  fromTables[0].fromFields.columns[index].colname, stringFieldValue );
-                              end;
-                          end;
-                        end;
-                      if rowcondition(conditionInstructions,resultTable) then
-                        begin
-                          resultRows := ResultRows + 1;
-                          extractselect(dbUserId, selectColsInstructions, resultTable, distinctCollection, flagDistinctClause, AggregateCollection,flagAggregate,resultRows);
-                        end;
-                    end;
-                  {$ENDIF}
-                  {$IFDEF tablesdb}
                   if executeplan.Index[index].mnemonic = 50 then // eq
                     begin
                       if (fromTables[0].fromFields.idxdata[0].idxname =  executeplan.Index[index].Name) and
@@ -10215,120 +7149,11 @@ end;
                         end;
                     end;
 
-                  {$ENDIF}
                 end
               else
                 begin
-                  {$IFDEF mongodb}
                   // get all the data and put them
                   // BTree_Collection := workingSchema.joinidxdata[Executeplan.Index[0].Number].idxstorage.Collection;
-
-                  resultTable.resultIBSONInstance := TBSONObject.create;
-                  setlength(Keys,length(theBaseTables));
-                  setlength(keys,2);
-                  /////BTree_Cursor := BTree_Collection.Find();
-                  TheBaseTables := workingSchema.joinidxdata[Executeplan.Index[0].Number].idxstorage.BaseTables;
-                  setlength(dataref,length(theBaseTables));
-                  setlength(Maxdataref,length(theBaseTables));
-                  workingSchema.joinidxdata[Executeplan.Index[0].Number].idxstorage.MaxKey(Keys,MaxDataRef);
-                  // if MaxDataRef[0] = '' then exit;
-                  workingSchema.joinidxdata[Executeplan.Index[0].Number].idxstorage.ClearKey;
-
-                  repeat
-                    workingSchema.joinidxdata[Executeplan.Index[0].Number].idxstorage.NextKey(keys,dataref);
-                    found := true;
-                    for index1 := 0 to length(dataref) - 1 do
-                      found := found and (MaxDataRef[index1] = DataRef[index1]);
-
-                    for index := 0 to length(TheBaseTables) - 1 do
-                      begin
-
-                        for index5 := 0 to length(TheBaseTables) - 1 do
-                          if fromTables[index5].Name = TheBaseTables[index] then
-                            begin
-                              break
-                            end;
-
-                        fromTables[index5].fromFields := LoadTableFields(TheBaseTables[index5]);
-
-                       stringFieldValue := Dataref[index5];
-
-                        //lvalueType := BTREE_IBSONInstance.Items['DATA_REFERENCE' + intToStr(index5)].ValueType;
-                        if true{lvalueType = bvtstring} then
-                            begin
-                              //stringFieldValue := BTREE_IBSONInstance.Items['DATA_REFERENCE' + intToStr(index5)].AsString;
-
-                              fromTables[index5].fromIBSONInstance := TBSONObject.Create;
-
-                              {InnerIBSONInstance := TBSONObject.create;
-                              InnerIBSONInstance.Put('$eq',stringFieldValue);}
-
-                              fromTables[index5].fromIBSONInstance.Put('_id',stringFieldValue);
-
-                              nextfound := false;
-                              fromTables[index5].Cursor :=
-                                fromTables[index5].fromFields.Collection.Find(fromTables[index5].fromIBSONInstance);
-                              if fromTables[index5].Cursor.hasNext then
-                                begin
-                                  nextfound := true;
-
-                                fromTables[index5].fromIBSONInstance := fromTables[index5].Cursor.Next;
-
-                              for index3 := 0 to fromTables[index5].fromFields.numCols - 1 do
-                                begin
-                                  lvalueType := fromTables[index5].fromIBSONInstance.Items[fromTables[index5].fromFields.columns[index3].colname].ValueType;
-
-                                  case lvaluetype of
-                                    bvtNull:
-                                      begin
-                                        resultTable.resultIBSONInstance.Put( fromTables[index5].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index5].fromFields.columns[index3].colname, null );
-                                      end;
-                                    bvtBoolean:
-                                      begin
-                                        booleanFieldValue := fromTables[index5].fromIBSONInstance.Items[fromTables[index5].fromFields.columns[index3].colname].AsBoolean;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index5].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index5].fromFields.columns[index3].colname, BooleanFieldValue );
-                                      end;
-                                    bvtInteger:
-                                      begin
-                                        IntFieldValue := fromTables[index5].fromIBSONInstance.Items[fromTables[index5].fromFields.columns[index3].colname].AsInteger;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index5].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index5].fromFields.columns[index3].colname, IntFieldValue );
-                                      end;
-                                    bvtInt64:
-                                      begin
-                                        Int64FieldValue := fromTables[index5].fromIBSONInstance.Items[fromTables[index5].fromFields.columns[index3].colname].AsInt64;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index5].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index5].fromFields.columns[index3].colname, Int64FieldValue );
-                                      end;
-                                    bvtDouble:
-                                      begin
-                                        extendedFieldValue := fromTables[index5].fromIBSONInstance.Items[fromTables[index5].fromFields.columns[index3].colname].AsFloat;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index5].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index5].fromFields.columns[index3].colname, extendedFieldValue );
-                                      end;
-                                    bvtString:
-                                      begin
-                                        stringFieldValue := fromTables[index5].fromIBSONInstance.Items[fromTables[index5].fromFields.columns[index3].colname].AsString;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index5].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index5].fromFields.columns[index3].colname, stringFieldValue );
-                                      end;
-                                  end;
-                                end;
-
-                                end;
-                            end;
-                      end;
-                    if nextfound then
-                    if rowcondition(conditionInstructions,resultTable) then
-                    begin
-                      resultRows := ResultRows + 1;
-                      extractselect(dbUserId, selectColsInstructions, resultTable, distinctCollection, flagDistinctClause, AggregateCollection, flagAggregate, resultRows);
-                    end;
-
-                  until found;
-                  {$ENDIF}
                 end
 
             end
@@ -10336,74 +7161,6 @@ end;
             case fromTablesLen of
               1:
               begin
-                {$IFDEF mongodb}
-                fromTables[0].fromIBSONInstance :=  TBSONObject.Create;
-                fromTables[0].Cursor := fromTables[0].fromFields.Collection.Find;
-                if flagOrderClause then
-                  begin
-                    SortIBSONInstance := TBSONObject.Create;
-                    for index1 := 0 to length(ordercolumnList) - 1 do
-                      if ordercolumnList[index1].colorder then
-                        SortIBSONInstance.Put(ordercolumnList[index1].colname,1) else
-                        SortIBSONInstance.Put(ordercolumnList[index1].colname,-1);
-                    fromTables[0].Cursor.Sort(SortIBSONInstance);
-                end;
-                while fromTables[0].Cursor.HasNext do
-                  begin
-                    fromTables[0].fromIBSONInstance := fromTables[0].Cursor.Next;
-                    for index := 0 to fromTables[0].fromFields.numCols - 1 do
-                      begin
-                        lvalueType := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].ValueType;
-                        case lvaluetype of
-                          bvtNull:
-                            begin
-                              resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                                                   fromTables[0].fromFields.columns[index].colname, NULL );
-                            end;
-                          bvtBoolean:
-                            begin
-                              booleanFieldValue := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].AsBoolean;
-                              resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                                                   fromTables[0].fromFields.columns[index].colname, BooleanFieldValue );
-                            end;
-                          bvtInteger:
-                            begin
-                              IntFieldValue := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].AsInteger;
-                              resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                                                   fromTables[0].fromFields.columns[index].colname, IntFieldValue );
-                            end;
-                          bvtInt64:
-                            begin
-                              Int64FieldValue := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].AsInt64;
-                              resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                                                   fromTables[0].fromFields.columns[index].colname, Int64FieldValue );
-                            end;
-                          bvtDouble:
-                            begin
-                              extendedFieldValue := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].AsFloat;
-                              resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                                                   fromTables[0].fromFields.columns[index].colname, extendedFieldValue );
-                            end;
-                          bvtString:
-                            begin
-                              stringFieldValue := fromTables[0].fromIBSONInstance.Items[fromTables[0].fromFields.columns[index].colname].AsString;
-                              resultTable.resultIBSONInstance.Put( fromTables[0].fromFields.tblName + tableColumnSeperator +
-                                                                   fromTables[0].fromFields.columns[index].colname, stringFieldValue );
-                            end;
-                        end;
-                      end;
-                    if rowcondition(conditionInstructions,resultTable) then
-                    begin
-                      resultRows := ResultRows + 1;
-                      extractselect(dbUserId, selectColsInstructions, resultTable, distinctCollection, flagDistinctClause, AggregateCollection, flagAggregate, resultRows);
-                      end;
-                  end;
-                {$ENDIF}
-
-                {$IFDEF tablesdb}
-
-
-
                 if flagOrderClause then
                   begin
                     // try it for one column now ascending
@@ -10469,556 +7226,45 @@ end;
                           end
                       end
                   end;
-                {$ENDIF}
-
               end;
 
               2..254:
               begin
-                {$IFDEF mongodb}
-                resultRows := 0;
-                for index := 0 to fromTablesLen - 1 do
-                  begin
-                    fromTables[Index].fromIBSONInstance :=  TBSONObject.Create;
-                    fromTables[Index].Cursor := fromTables[Index].fromFields.Collection.Find;
-
-                    if flagOrderClause then
+                for rowId1 :=
+                  fromTables[0].fromFields.storage.firstRow to
+                  fromTables[0].fromFields.storage.LastRow do
+                  if fromTables[0].fromFields.storage.existRow(rowId1) then
+                    for rowId2 :=
+                      fromTables[1].fromFields.storage.firstRow to
+                      fromTables[1].fromFields.storage.LastRow do
+                      if fromTables[1].fromFields.storage.existRow(rowId2) then
                       begin
-                        SortIBSONInstance := TBSONObject.Create;
-                        for index1 := 0 to length(ordercolumnList) - 1 do
-                          if ordercolumnList[index1].tblName = fromTables[Index].Name then
-                            if ordercolumnList[index1].colorder then
-                              SortIBSONInstance.Put(ordercolumnList[index1].colname,1) else
-                              SortIBSONInstance.Put(ordercolumnList[index1].colname,-1);
-                        fromTables[index].Cursor.Sort(SortIBSONInstance);
-                      end;
-
-                    RowIndex[Index] := 0;
-                    if fromTables[index].Cursor.HasNext then
-                      fromTables[index].fromIBSONInstance := fromTables[index].Cursor.Next
-                  end;
-
-                flagdone := false;
-                repeat
-                  flag := false;
-                  currentTableIndex := FromTablesLen - 1;
-                  while not flag do
-                    begin
-                      repeat
-                        if RowIndex[currenttableindex] >= fromTables[currenttableIndex].Cursor.Count then
-                          begin
-                            if currenttableindex = 0 then
-                              begin
-                                flag := true;
-                                flagdone := true;
-                                break;
-                              end;
-                            RowIndex[CurrentTableIndex] := 0;
-                            fromTables[CurrentTableIndex].Cursor := fromTables[CurrentTableIndex].fromFields.Collection.Find;
-
-                            if flagOrderClause then
-                              begin
-                                SortIBSONInstance := TBSONObject.Create;
-                                for index1 := 0 to length(ordercolumnList) - 1 do
-                                  if ordercolumnList[index1].tblName = fromTables[CurrentTableIndex].Name then
-                                    if ordercolumnList[index1].colorder then
-                                      SortIBSONInstance.Put(ordercolumnList[index1].colname,1) else
-                                      SortIBSONInstance.Put(ordercolumnList[index1].colname,-1);
-                                fromTables[CurrentTableIndex].Cursor.Sort(SortIBSONInstance);
-                              end;
-
-                            if fromTables[currentTableIndex].Cursor.HasNext then
-                              fromTables[currentTableIndex].fromIBSONInstance := fromTables[currentTableIndex].Cursor.Next;
-
-                            CurrentTableIndex := CurrentTableIndex - 1;
-                            RowIndex[currentTableIndex] := RowIndex[currentTableIndex] + 1;
-
-                            if fromTables[currentTableIndex].Cursor.HasNext then
-                              fromTables[currentTableIndex].fromIBSONInstance := fromTables[currentTableIndex].Cursor.Next;
-
-                          end else flag := true;
-                      until flag or flagdone;
-                      if not flagdone then
+                        fromTables[0].fromFields.storage.returnRow(
+                          rowId1, fromTables[0].fromrow);
+                        fromTables[1].fromFields.storage.returnRow(
+                          rowId2, fromTables[1].fromrow);
+                        for resultindex :=
+                          0 to length(fromTables[0].fromrow) - 1 do
                         begin
-                          for index1 := 0 to fromtableslen -1 do
-                            begin
-
-                              for index := 0 to fromTables[index1].fromFields.numCols - 1 do
-                                begin
-
-                                  lvalueType := fromTables[index1].fromIBSONInstance.Items[fromTables[index1].fromFields.columns[index].colname].ValueType;
-                                  case lvaluetype of
-                                    bvtNull:
-                                      begin
-                                        resultTable.resultIBSONInstance.Put( fromTables[index1].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index1].fromFields.columns[index].colname, null );
-                                      end;
-                                    bvtBoolean:
-                                      begin
-                                        booleanFieldValue := fromTables[index1].fromIBSONInstance.Items[fromTables[index1].fromFields.columns[index].colname].AsBoolean;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index1].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index1].fromFields.columns[index].colname, BooleanFieldValue );
-                                      end;
-                                    bvtInteger:
-                                      begin
-                                        IntFieldValue := fromTables[index1].fromIBSONInstance.Items[fromTables[index1].fromFields.columns[index].colname].AsInteger;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index1].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index1].fromFields.columns[index].colname, IntFieldValue );
-                                      end;
-                                    bvtInt64:
-                                      begin
-                                        Int64FieldValue := fromTables[index1].fromIBSONInstance.Items[fromTables[index1].fromFields.columns[index].colname].AsInt64;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index1].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index1].fromFields.columns[index].colname, Int64FieldValue );
-                                      end;
-                                    bvtDouble:
-                                      begin
-                                        extendedFieldValue := fromTables[index1].fromIBSONInstance.Items[fromTables[index1].fromFields.columns[index].colname].AsFloat;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index1].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index1].fromFields.columns[index].colname, extendedFieldValue );
-                                      end;
-                                    bvtString:
-                                      begin
-                                        stringFieldValue := fromTables[index1].fromIBSONInstance.Items[fromTables[index1].fromFields.columns[index].colname].AsString;
-                                        resultTable.resultIBSONInstance.Put( fromTables[index1].fromFields.tblName + tableColumnSeperator +
-                                                                             fromTables[index1].fromFields.columns[index].colname, stringFieldValue );
-                                      end;
-                                  end;
-                                end;
-                            end;
-                          if rowcondition(conditionInstructions,resultTable) then
-                            begin
-                              resultRows := ResultRows + 1;
-                              extractselect(dbUserId, selectColsInstructions, resultTable, distinctCollection, flagDistinctClause, AggregateCollection, flagAggregate, resultRows);
-                            end;
-                          rowindex[fromTablesLen - 1] := rowindex[fromTablesLen - 1] + 1;
-                          if fromTables[fromTablesLen - 1].Cursor.HasNext then
-                            begin
-                              fromTables[fromTablesLen - 1].fromIBSONInstance := fromTables[fromTablesLen - 1].Cursor.Next;
-                            end
-
+                          resulttable.resultRow[resultindex] :=
+                            fromTables[0].fromrow[resultindex];
                         end;
-                    end;
-
-
-                  until flagdone;
-
-                  {$ENDIF}
+                        for resultindex :=
+                          0 to length(fromTables[1].fromrow) - 1 do
+                        begin
+                          resulttable.resultRow[resultindex +
+                            length(fromTables[0].fromrow)] :=
+                            fromTables[1].fromrow[resultindex];
+                        end;
+                        if rowcondition(conditionInstructions,resultTable) then
+                        begin
+                          resultRows := ResultRows + 1;
+                          extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                        end;
+                      end;
               end;
             end;
 
-           {
-           SortIBSONInstance := TBSONObject.Create;
-           //SortIBSONInstance.Put('t_a', -1);
-           SortIBSONInstance.Put('$natural', -1);
-           distinctCursor := distinctCollection.find();
-           distinctCursor.Sort(SortIBSONInstance);
-           while distinctCursor.HasNext do
-             begin
-               distinctIBSONInstance := distinctCursor.Next;
-               st := distinctIBSONInstance.Items['t_a'].AsString;
-             end;
-           }
-
-           {$IFDEF mongodb}
-           GroupBy_Instance := TBSONObject.create;
-           oldGroupBy_Instance := TBSONObject.create;
-
-           if flagAggregate then
-             begin
-               conditionstk := nil;
-               // if GroupByColumns <> nil create the collection below
-               GroupBY_Collection :=  GDB.GetCollection('sys_group_by');
-               if GroupBy_Collection.Count <> 0 then
-                 GroupBy_Collection.drop();
-
-
-
-               flagAggregate := false;
-               AggregateCursor := aggregateCollection.Find();
-               while AggregateCursor.HasNext do
-                 begin
-                   GroupBy_Instance := TBSONObject.create;
-                   oldGroupBy_Instance := TBSONObject.create;
-                   AggregateInstance := AggregateCursor.Next;
-                   aggregateRowId := AggregateInstance.Items['rowId'].AsInteger;
-                   AggregateCol := 0; // length(GroupByColumns);
-                   for index1 := low(aggregateColsInstructions) to high(aggregateColsInstructions) do
-                     for index2 := low(aggregateColsInstructions[index1]) to high(aggregateColsInstructions[index1]) do
-                       begin
-                         if flagAggregate then
-                           aggregateConditionInstruction := aggregateColsInstructions[index1,index2];
-                         case aggregateColsInstructions[index1,index2].mnemonic of
-                           112..116:
-                              begin
-                                grpkind := aggregateset(aggregateColsInstructions[index1,index2].Mnemonic - 111);
-                                aggregatestk := nil;
-                                flagAggregate := true;
-                             end;
-
-                           151:
-                             begin
-                               tblName := copy(aggregateColsInstructions[index1,index2].stValue,1,pos('.',aggregateColsInstructions[index1,index2].stValue)-1);
-                               colName := copy(aggregateColsInstructions[index1,index2].stValue,pos('.',aggregateColsInstructions[index1,index2].stValue)+1,length(aggregateColsInstructions[index1,index2].stValue));
-                               st := AggregateInstance.Items[tblName + tableColumnSeperator + colName].AsString;
-                               tblFields := loadTableFields(tblName);
-                               for index3 := 0 to tblFields.numCols - 1 do
-                                 if tblFields.columns[index3].colname = colname then
-                                   begin
-                                     colType := tblFields.columns[index3].coltype;
-                                     if flagAggregate then     //// check for the boolean type. DateTime should be implemented as push date to put the right case value
-                                       if colType = stringType then
-                                         begin
-                                           AggregateConditionInstruction.mnemonic := 89;
-                                           AggregateConditionInstruction.value := 0;
-                                           AggregateConditionInstruction.stvalue := st;
-                                           AggregateConditionInstruction.printInstruction := 'PUSH LITERAL ' + st;
-                                         end else
-                                         begin
-                                           AggregateConditionInstruction.mnemonic := 88;
-                                           AggregateConditionInstruction.value := strtoFloatDef(st,0);
-                                           AggregateConditionInstruction.stvalue := '';
-                                           AggregateConditionInstruction.printInstruction := 'PUSH  ' + st;
-                                         end
-                                      else
-                                       begin
-                                         if GroupByColumns <> nil then
-                                           begin
-                                             aggregateColsInstructions[index1,index2].mnemonic := 129;
-                                             aggregateColsInstructions[index1,index2].value := 0;
-                                             aggregateColsInstructions[index1,index2].stvalue := tblName + tableColumnSeperator + colName;
-                                             aggregateColsInstructions[index1,index2].printInstruction := 'COLUMN NAME';
-                                           end else
-                                           if colType = stringType then
-                                             begin
-                                               aggregateColsInstructions[index1,index2].mnemonic := 89;
-                                               aggregateColsInstructions[index1,index2].value := 0;
-                                               aggregateColsInstructions[index1,index2].stvalue := st;
-                                               aggregateColsInstructions[index1,index2].printInstruction := 'PUSH LITERAL ' + st;
-                                             end else
-                                             begin
-                                               aggregateColsInstructions[index1,index2].mnemonic := 88;
-                                               aggregateColsInstructions[index1,index2].value := strtoFloatDef(st,0);
-                                               aggregateColsInstructions[index1,index2].stvalue := '';
-                                               aggregateColsInstructions[index1,index2].printInstruction := 'PUSH  ' + st;
-                                             end;
-                                           if length(aggregateColsInstructions[index1]) = 2 then
-                                             begin
-                                               setlength(aggregateColsInstructions[index1],length(aggregateColsInstructions[index1])+1);
-                                               aggregateColsInstructions[index1,high(aggregateColsInstructions[index1])] :=
-                                                 aggregateColsInstructions[index1,high(aggregateColsInstructions[index1])-1];
-                                               with aggregateColsInstructions[index1,high(aggregateColsInstructions[index1])-1] do
-                                                 begin
-                                                   mnemonic := 179;
-                                                   value := 0;
-                                                   stvalue := tblName + tableColumnSeperator + colName;
-                                                   printInstruction := 'EXPRESSION ALIAS';
-                                                 end
-                                             end;
-                                       end;
-                                     break;
-                                   end;
-                               if flagAggregate then
-                                 runstack(aggregateConditionInstruction,aggregatestk)
-                             end;
-
-                           180, 181:
-                             begin
-                               if aggregateConditionInstruction.mnemonic = 180 then
-                                 if aggregateConditionInstruction.value <> 113 then
-                                   begin
-                                     yyError('syntax error');
-                                     exit;
-                                   end;
-                               ConditionInstruction.mnemonic := 88;
-                               ConditionInstruction.stvalue := '';
-                               case grpKind of
-                                 countKind:
-                                   begin
-                                     ConditionInstruction.value := 1;
-                                     ConditionInstruction.printInstruction := 'PUSH 1';
-                                   end;
-                                 sumKind:
-                                   begin
-                                     ConditionInstruction.value := aggregatestk[high(aggregatestk)].extvalue;
-                                     ConditionInstruction.printInstruction := 'PUSH ' + floatToStr(ConditionInstruction.value);
-                                   end;
-                               end;
-
-                               runstack(ConditionInstruction,conditionstk);
-
-                               if GroupByColumns <> nil then
-                                 begin
-                                   GroupByInstance := TBSONObject.create;
-                                   for index := 0 to length(GroupByColumns) - 1 do
-                                     begin
-                                       NestedGroupByInstance := TBSONObject.create;
-                                       st := AggregateInstance.Items[tblName + tableColumnSeperator + GroupByColumns[index]].AsString;
-                                       NestedGroupByInstance.Put('$eq',st);
-                                       GroupByInstance.Put(tblName + tableColumnSeperator + GroupByColumns[index],NestedGroupByInstance);
-                                     end;
-                                   if AggregateCol = 0 then
-                                      begin
-                                        GroupByCursor := aggregateCollection.Find(GroupByInstance);
-                                        if GroupByCursor.HasNext then
-                                          begin
-                                            GroupByInstance :=  GroupByCursor.Next;
-                                            GroupByRowId := GroupByInstance.Items['rowId'].AsInteger;
-                                          end;
-
-                                        if GroupByRowId = AggregateRowId then
-                                          begin
-                                            aggregateColumns := nil;
-                                          end else
-                                          begin
-                                            GroupBy_Instance := TBSONObject.create;
-                                            for index := 0 to length(GroupByColumns) - 1 do
-                                              begin
-                                                st := AggregateInstance.Items[tblName + tableColumnSeperator + GroupByColumns[index]].AsString;
-                                                NestedGroupByInstance := TBSONObject.create;
-                                                NestedGroupByInstance.Put('$eq',st);
-                                                GroupBy_Instance.Put(tblName + tableColumnSeperator + GroupByColumns[index],NestedGroupByInstance);
-                                              end;
-                                            GroupBy_Cursor := GroupBy_Collection.Find(GroupBy_Instance);
-                                            if GroupBy_Cursor.HasNext then
-                                              begin
-                                                GroupBy_Instance :=  GroupBy_Cursor.Next;
-                                                for index := 0 to GroupBy_instance.count - 1 - length(GroupByColumns) - 1  do
-                                                  if GroupBy_Instance.Contain('c'+intToStr(index)) then
-                                                    aggregateColumns[index] := GroupBy_Instance.Items['c'+intToStr(index)].AsString
-                                                   else break
-                                              end;
-                                          end;
-
-                                      end;
-                                 end;
-
-                               AggregateValue := 0;
-                               if AggregateCol > length(aggregateColumns) - 1 then
-                                 setlength(aggregateColumns,length(aggregateColumns)+1) else
-                                 AggregateValue := StrToInt(aggregateColumns[aggregateCol]);
-                               AggregateValue :=  AggregateValue + conditionStk[High(conditionStk)].extValue;
-                               aggregateColumns[aggregateCol] := floatToStr(aggregateValue);
-                               aggregateCol := AggregateCol + 1;
-
-                               conditionstk := nil;
-
-                               aggregatestk := nil;
-                               flagAggregate := False;
-                             end;
-
-
-                           182:
-                             begin
-                               //find the one with the same value for the column
-                               NestedDistinctAggregateInstance := TBSONObject.create;
-                               DistinctAggregateInstance := TBSONObject.create;
-                               NestedDistinctAggregateInstance.Put('$eq',st);
-                               DistinctAggregateInstance.Put(tblName + tableColumnSeperator + colName,NestedDistinctAggregateInstance);
-                               DistinctAggregateCursor := aggregateCollection.Find(DistinctAggregateInstance);
-                               if DistinctAggregateCursor.HasNext then
-                                 begin
-                                   DistinctAggregateInstance :=  DistinctAggregateCursor.Next;
-                                   DistinctAggregateRowId := DistinctAggregateInstance.Items['rowId'].AsInteger;
-                                   if DistinctAggregateRowId = AggregateRowId then
-                                     begin
-                                       ConditionInstruction.mnemonic := 88;
-                                       ConditionInstruction.stvalue := '';
-                                       case grpKind of
-                                         countKind:
-                                           begin
-                                             ConditionInstruction.value := 1;
-                                             ConditionInstruction.printInstruction := 'PUSH 1';
-                                           end;
-                                         sumKind:
-                                           begin
-                                             ConditionInstruction.value := aggregatestk[high(aggregatestk)].extvalue;
-                                             ConditionInstruction.printInstruction := 'PUSH ' + floatToStr(ConditionInstruction.value);
-                                           end;
-                                       end;
-                                       runstack(ConditionInstruction,conditionstk);
-                                       AggregateValue := 0;
-                                       if AggregateCol > length(aggregateColumns) - 1 then
-                                         setlength(aggregateColumns,length(aggregateColumns)+1) else
-                                         AggregateValue := StrToInt(aggregateColumns[aggregateCol]);
-                                       AggregateValue :=  AggregateValue + conditionStk[High(conditionStk)].extValue;
-                                       aggregateColumns[aggregateCol] := floatToStr(aggregateValue);
-                                     end;
-                                 end;
-                               aggregateCol := AggregateCol + 1;
-                               conditionstk := nil;
-                               aggregatestk := nil;
-                               flagAggregate := False;
-                             end
-                           else
-                            if flagAggregate then
-                              runstack(aggregateConditionInstruction,aggregatestk)
-                          end;
-                       end;
-
-                   if GroupByColumns <> nil then
-                     if (GroupByRowId = AggregateRowId) then
-                       begin
-                         GroupBy_Instance := AggregateInstance;
-                         for index := 0 to length(aggregateColumns) - 1 do
-                           begin
-                             GroupBy_Instance.Put('c'+intToStr(index),aggregateColumns[index]);
-                           end;
-                         GroupBy_Collection.Insert(GroupBy_Instance);
-
-                       end
-                      else
-                       begin
-                         oldGroupBy_Instance := GroupBy_Instance;
-                         for index := 0 to length(aggregateColumns) - 1 do
-                           begin
-                             GroupBy_Instance.Put('c'+intToStr(index),aggregateColumns[index]);
-                           end;
-                         GroupBy_Collection.Update(oldGroupBy_Instance,GroupBy_Instance);
-                       end
-                 end;
-
-               if GroupByColumns <> nil then
-                 begin
-                   GroupBy_Cursor := GroupBy_Collection.Find();
-                   resultrows := 0;
-                   while GroupBy_Cursor.HasNext do
-                     begin
-                       GroupBy_Instance :=  GroupBy_Cursor.Next;
-                       for index := 0 to GroupBy_instance.count - 1 - length(GroupByColumns) - 1  do
-                         if GroupBy_Instance.Contain('c'+intToStr(index)) then
-                           aggregateColumns[index] := GroupBy_Instance.Items['c'+intToStr(index)].AsString
-                          else break;
-                       aggregateCol := 0;
-                       selectColsInstructions := nil;
-                       flagAggregate := false;
-                       for index1 := low(aggregateColsInstructions) to high(aggregateColsInstructions) do
-                         begin
-                           setlength(selectColsInstructions,length(selectColsInstructions)+1);
-                           selectColsInstructions[high(selectColsInstructions)] := nil;
-                           for index2 := low(aggregateColsInstructions[index1]) to high(aggregateColsInstructions[index1]) do
-                             case aggregateColsInstructions[index1,index2].mnemonic of
-                               112..116:
-                                 begin
-                                    flagAggregate := true;
-                                 end;
-                               129:
-                                 begin
-                                   st := GroupBy_Instance.Items[aggregateColsInstructions[index1,index2].stValue].AsString;
-                                   for index3 := 0 to tblFields.numCols - 1 do
-                                     if tblFields.columns[index3].colname = colname then
-                                       begin
-
-                                         setLength(selectColsInstructions[index1], length(selectColsInstructions[index1])+1);
-                                         colType := tblFields.columns[index3].coltype;
-                                         if colType = stringType then
-                                           begin
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].mnemonic := 89;
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].value := 0;
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].stvalue := st;
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].printInstruction := 'PUSH LITERAL ' + st;
-                                           end else     //// check for bool and datetime
-                                           begin
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].mnemonic := 88;
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].value := strtoFloatDef(st,0);
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].stvalue := '';
-                                             selectColsInstructions[index1,high(selectColsInstructions[index1])].printInstruction := 'PUSH  ' + st;
-                                           end;
-
-                                       end;
-                                 end;
-                               180 .. 182:
-                                 begin
-                                   setLength(selectColsInstructions[index1], length(selectColsInstructions[index1])+1);
-                                   with selectColsInstructions[index1,high(selectColsInstructions[index1])] do
-                                     begin
-                                       mnemonic := 88;
-                                       stvalue := '';
-                                       value := strToFloat(aggregateColumns[aggregateCol]);
-                                       printInstruction := 'PUSH ' + aggregateColumns[aggregateCol];
-                                     end;
-                                   aggregateCol := AggregateCol + 1;
-                                   flagAggregate := false;
-                                 end;
-                               else
-                                 begin
-                                   if not flagAggregate then
-                                     begin
-                                       setLength(selectColsInstructions[index1], length(selectColsInstructions[index1])+1);
-                                       selectColsInstructions[index1,high(selectColsInstructions[index1])] := aggregateColsInstructions[index1,index2];
-                                     end;
-
-                                 end
-                             end;
-                         end;
-                       if rowcondition(havingconditionInstructions,resultTable) then
-                         begin
-                           resultRows := ResultRows + 1;
-                           extractselect(dbUserId, selectColsInstructions, resultTable, distinctCollection, flagDistinctClause, AggregateCollection, flagAggregate, resultRows);
-                         end;
-                     end;
-                 end else
-                 begin
-                   aggregateCol := 0;
-                   selectColsInstructions := nil;
-                   flagAggregate := false;
-                   for index1 := low(aggregateColsInstructions) to high(aggregateColsInstructions) do
-                     begin
-                       setlength(selectColsInstructions,length(selectColsInstructions)+1);
-                       selectColsInstructions[high(selectColsInstructions)] := nil;
-                       for index2 := low(aggregateColsInstructions[index1]) to high(aggregateColsInstructions[index1]) do
-                         case aggregateColsInstructions[index1,index2].mnemonic of
-                           112..116:
-                              begin
-                                flagAggregate := true;
-                             end;
-                           180 .. 182:
-                             begin
-                               setLength(selectColsInstructions[index1], length(selectColsInstructions[index1])+1);
-                               with selectColsInstructions[index1,high(selectColsInstructions[index1])] do
-                                 begin
-                                   mnemonic := 88;
-                                   stvalue := '';
-                                   value := strToFloat(aggregateColumns[aggregateCol]);
-                                   printInstruction := 'PUSH ' + aggregateColumns[aggregateCol];
-                                 end;
-                               aggregateCol := AggregateCol + 1;
-                               flagAggregate := false;
-                             end;
-                           else
-                             begin
-                               if not flagAggregate then
-                                 begin
-                                   setLength(selectColsInstructions[index1], length(selectColsInstructions[index1])+1);
-                                   selectColsInstructions[index1,high(selectColsInstructions[index1])] := aggregateColsInstructions[index1,index2];
-                                 end;
-
-                             end
-                         end;
-                     end;
-                   resultrows := 1;
-                   extractselect(dbUserId, selectColsInstructions, resultTable, distinctCollection, flagDistinctClause, AggregateCollection, flagAggregate, resultRows);
-                 end;
-             end;
-
-          if useSelect then
-            begin
-              ACursor := GCollection.Find();
-              while ACursor.HasNext do
-                begin
-                  IBSONInstance := ACursor.Next;
-                  Cursors[high(Cursors)].Collection.Insert(IBSoNInstance);
-                end;
-            end else
-            begin
-              resParams := nil;
-              for index := 0 to resultTable.resultIBSONInstance.Count - 1 do
-                begin
-                  setLength(resParams,length(resParams)+1);
-                  resParams[High(resParams)] := resultTable.resultIBSONInstance.Item[index].AsString
-                end;
-            end;
-            {$ENDIF}
           yyacceptmessage('SELECT STATEMENT: ' + intToStr(ResultRows));
         end;
       end;
@@ -11028,7 +7274,6 @@ end;
 procedure createTables;
 begin
 
-  {$IFDEF tablesdb}
   DDusers := TTableClass.Create(Path + 'DD_USERS_DD', False,
     ['user_id', 'password', 'created_by'],
     ['STRING[lendbOjects]', 'STRING[lendbOjects]', 'STRING[lendbOjects]']);
@@ -11126,15 +7371,11 @@ begin
     ['STRING[lendbOjects]', 'STRING[lendbOjects]', 'STRING[lendbOjects]', 'STRING[lendbOjects]']);
 
   //createDefaultSchema('sys_suid','sample');
-  {$ENDIF}
-
 
 end;
 
 procedure openTables;
 begin
-
-  {$IFDEF tablesdb}
   //loadSchema('sys_suid','sample');
 
   DDusers := TTableClass.Create(Path + 'DD_USERS_DD', True,
@@ -11232,15 +7473,11 @@ begin
   DDkeysjointables := TTableClass.Create(Path + 'DD_KEYSJOINTABLES_DD', True,
     ['index_name', 'from_table', 'to_table', 'key_name'],
     ['STRING[lendbOjects]', 'STRING[lendbOjects]', 'STRING[lendbOjects]', 'STRING[lendbOjects]']);
-  {$ENDIF}
-
 end;
 
 
 procedure closeTables;
 begin
-
-  {$IFDEF tablesdb}
   DDusers.Free;
   DDroles.Free;
   DDuser_roleprivilege_object.Free;
@@ -11260,8 +7497,6 @@ begin
   DDkeysindexes.Free;
   DDjoinindexes.Free;
   DDkeysjointables.Free;
-  {$ENDIF}
-
 end;
 
 

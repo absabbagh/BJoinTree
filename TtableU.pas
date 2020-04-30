@@ -493,6 +493,7 @@ begin
   if fdelete then exit;
   result := true;
   index := Sizeof(Boolean);
+////  setlength(row,Length(FtblData.tblColumns));
   for i := 0 to Length(FtblData.tblColumns) - 1 do
     begin
       if FtblData.tblColumns[I].allowcolNull then

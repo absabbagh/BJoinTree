@@ -506,6 +506,8 @@ type YYSType = record
 %type <Pointer> option_columns
 %type <Pointer> selected_tables
 %type <Pointer> rptjoin_tables
+%type <Pointer> rpttable_list
+%type <Pointer> option_indexed_column_list
 %type <Pointer> option_where_condition
 %type <Pointer> rptdisplayed_column
 %type <Pointer> displayed_column
@@ -1260,15 +1262,28 @@ option_sort : /* empty */
                 { $$ := opr(123,'DESC'); }
             ;
 
-create_join_index : tknCREATE tknJOIN tknINDEX index_name tknFROM table_name rptjoin_tables option_order_by
-                { $$ := opr(152,'CREATE JOIN INDEX',[$4,opr(153,'BASE TABLE',[$6]),$7,$8]); }
-                   ;
+create_join_index : tknCREATE tknJOIN tknINDEX index_name tknON rpttable_list tknWHERE condition option_order_by
+                { $$ := opr(152,'CREATE JOIN INDEX',[$4,$6,opr(154,'JOIN TABLES CONDITION',[$8]),$9]); }
+                  ;
+
+rpttable_list : table_name option_indexed_column_list
+            { $$ :=  opr(153,'BASE TABLE',[$1,$2]); }
+              | rpttable_list ',' table_name option_indexed_column_list
+            { $$ :=  opr(153,'BASE TABLE',[$1,$3,$4]); }
+              ;
+
+option_indexed_column_list :  /* empty */
+                         { $$ := nil; }
+                           | '(' indexed_column_list ')'
+                         { $$ := $2; }
+                           ;
 
 option_order_by :  /* empty */
                 { $$ := nil; }
                 | tknORDER tknBY rptsorted_def
                 { $$ := opr(70,'ORDER BY',[$3]); }
                 ;
+
 comment_command : tknCOMMENT tknON tknTABLE ID tknIS comment
                  { $$ := opr(125,'TABLE COMMENT',[opr(4,'TABLE NAME',[DBName($4)]),$6]); }
                 |  tknCOMMENT tknON tknTABLE ID '.' ID tknIS comment

@@ -10,11 +10,6 @@ uses
   Graphics, Controls, Forms,
   Dialogs, StdCtrls, Grids, Menus, ExtCtrls,
   sql, lexlib,  yacclib,
-  {$IFDEF UNIX}
-  BSONTypes,
-  Mongo, MongoDB, MongoCollection,
-  MongoDBCursorIntf,
-  {$ENDIF}
   regexpr;
 
 type
@@ -26,7 +21,6 @@ type
     Button2: TButton;
     Button5: TButton;
     Button6: TButton;
-    Button7: TButton;
     Button8: TButton;
     Edit1: TEdit;
     Edit2: TEdit;
@@ -52,24 +46,13 @@ type
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
-    {$IFDEF UNIX}
-    procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
-    procedure Button7Click(Sender: TObject);
-    {$ENDIF}
     procedure Button8Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-    {$IFDEF UNIX}
-    procedure Timer1Timer(Sender: TObject);
-    {$ENDIF}
   private
     { Private declarations }
 
-    {$IFDEF UNIX}
-    counterCollection: TMongoCollection;
-    {$ENDIF}
     counter: Integer;
-    startCounter: Integer;
 
     function ExecuteReturnHeaderFromQuery(dbuserId: string; dbName: string; stQuery: string): string;
     procedure ExecuteQuery(dbuserId: string; dbName: string; stQuery: string);
@@ -84,13 +67,12 @@ implementation
 
 {$R *.lfm}
 
+{$Define joinindex}
+
 uses
   execProgramUnit,
   SDFUnit,
-  {$IFDEF UNIX}
-  MongoJoinTreeU,
-  {$ENDIF}
-  BPlusTreeU; // momentarely
+  {$IFDEF joinindex} BJoinTreeU; {$ELSE} BPlusTreeU; {$ENDIF}
 
 
 (********************************************
@@ -202,8 +184,6 @@ var
   st: string;
   I, J: Integer;
   SDFInstance: SDFClass;
-  colnameFlag: boolean;
-  colcount, rowcount: Integer;
 begin
   {$DEFINE Debug}
   dbname := lowercase(dbName);
@@ -261,10 +241,7 @@ begin
   end;
   {$ENDIF}
 
-  colnameFlag := true;
-  colcount := 1;
-  rowcount := 1;
-  SDFInstance := SDFClass.Create();
+  SDFInstance := SDFClass.Create;
   if length(sqlResults) <> 0 then
   begin
     SDFInstance.GetLexemes(sqlResults[0]);
@@ -327,7 +304,7 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  I, J :integer;
+  I :integer;
   InputSt: string;
   userId: string;
   dbName: string;
@@ -385,60 +362,50 @@ begin
 
 end;
 
-{$IFDEF UNIX}
- const Path: string = '/opt/';
-{$ELSE}
 const Path: string = '';
-{$ENDIF}
+
 
 type
-    DataPointerType =  Integer;//string[24];
+    DataPointerType =  Integer; //string[24];
 
-//{$IFDEF UNIX}
 procedure TForm1.Button5Click(Sender: TObject);
 var
+  {$IFDEF joinindex}
+  jdx: BJoinTreeClass;
+  {$ELSE}
   idx: BtrPlusClass;
   Thekeys: array of string;
   TheInheritedKeys: array of string;
+  {$ENDIF}
+  i: Integer;
   keys: array of variant;
-  inheritedkeys: array of variant;
-  dataref: array  of datapointertype;
-  i, j: Integer;
+  dataref: array of datapointertype;
   st: string;
-  //jdx: MongoBJoinTreeClass;
-  jdata,ref: array of Integer;
-  rowt: array of variant;
-  rows: array of variant;
 
-  tablelist: string;
-  Thebasetables: array of string;
-  cptablelist: string;
-  tmptablelist: string;
-  dbtblName: string;
-  index: integer;
-  dbName: string;
-  found: boolean;
-
-  Targettablelist: string;
-  TargetdbtblName: string;
-  a: array [0..5] of integer = (3,5,7,9,11,13);
-  len : integer;
-  l,R,m: Integer;
-
-  T: integer;
 
   StartTime: TDate;
   Diff: TTime;
   Hour, Min, Sec, MSec: word;
-  count: Integer;
+
+  (*
+  a: array [0..5] of integer = (3,5,7,9,11,13);
+  len : integer;
+  l,R,m: Integer;
+  T: integer;
+  Targettablelist: string;
+  tablelist: string;
+  tmptablelist: string;
+  cptablelist: string;
+  TargetdbtblName: string;
+  dbtblName: string;
+  *)
 begin
-  (*memo4.lines.add(inttostr(GetProcessID));
+  (*
+  memo4.lines.add(inttostr(GetProcessID));
   exit;
 
   len := 6;
-
   T:= 15;
-
   L := 0;
   R := len - 1;
   while (L < R) do
@@ -448,15 +415,11 @@ begin
       if a[m] > T then R := m-1;
     end;
   m := (L + R) div 2;
-  m := m;
   exit;
-*)
-  {
+
   TargetTableList := 'd.v,d.s';
   tablelist := 'd.n,d2.v,d.e,d.s,d.o,d.v,d.r';
-
   tmptablelist := tablelist;
-
   while Targettablelist <> '' do
     begin
       if pos(',',Targettablelist) = 0 then
@@ -489,9 +452,93 @@ begin
     tablelist := tmptablelist;
 
   exit;
-  }
+  *)
 
   StartTime := Now;
+
+  {$IFDEF joinindex}
+  if fileExists('p0.Idx') then DeleteFile('p0.Idx');
+  if fileExists('p1.Idx') then DeleteFile('p1.Idx');
+  if fileExists('p2.Idx') then DeleteFile('p2.Idx');
+  if fileExists('p3.Idx') then DeleteFile('p3.Idx');
+  if fileExists('p4.Idx') then DeleteFile('p4.Idx');
+  if fileExists('p5.Idx') then DeleteFile('p5.Idx');
+  if fileExists('p6.Idx') then DeleteFile('p6.Idx');
+  jdx := BJoinTreeClass.Create('p',['t','s','u','v']);
+  jdx.AddTableToDictionary('t');
+  jdx.AddColumnToDictionary('a1','INTEGER','t');
+  jdx.AddColumnToDictionary('a2','INTEGER','t');
+  jdx.AddTableToDictionary('s');
+  jdx.AddColumnToDictionary('a1','INTEGER','s');
+  jdx.AddColumnToDictionary('a3','INTEGER','s');
+  jdx.AddTableToDictionary('u');
+  jdx.AddColumnToDictionary('a1','INTEGER','u');
+  jdx.AddColumnToDictionary('a4','INTEGER','u');
+  jdx.AddTableToDictionary('v');
+  jdx.AddColumnToDictionary('a3','INTEGER','v');
+  jdx.AddColumnToDictionary('a4','INTEGER','v');
+  jdx.AddJoin('t','s','a1');
+  jdx.AddJoin('s','t','a1');
+  jdx.AddJoin('s','u','a1');
+  jdx.AddJoin('u','s','a1');
+  jdx.AddJoin('v','s','a3');
+  jdx.AddJoin('s','v','a3');
+  jdx.AddJoin('v','u','a4');
+  jdx.AddJoin('u','v','a4');
+  jdx.createBTrees(['t','s','u','v'],false,['t.a1','s.a3']);
+  jdx.Free;
+
+  jdx := BJoinTreeClass.Create('p',['t','s','u','v']);
+  jdx.AddTableToDictionary('t');
+  jdx.AddColumnToDictionary('a1','INTEGER','t');
+  jdx.AddColumnToDictionary('a2','INTEGER','t');
+  jdx.AddTableToDictionary('s');
+  jdx.AddColumnToDictionary('a1','INTEGER','s');
+  jdx.AddColumnToDictionary('a3','INTEGER','s');
+  jdx.AddTableToDictionary('u');
+  jdx.AddColumnToDictionary('a1','INTEGER','u');
+  jdx.AddColumnToDictionary('a4','INTEGER','u');
+  jdx.AddTableToDictionary('v');
+  jdx.AddColumnToDictionary('a3','INTEGER','v');
+  jdx.AddColumnToDictionary('a4','INTEGER','v');
+  jdx.AddJoin('t','s','a1');
+  jdx.AddJoin('s','t','a1');
+  jdx.AddJoin('s','u','a1');
+  jdx.AddJoin('u','s','a1');
+  jdx.AddJoin('v','s','a3');
+  jdx.AddJoin('s','v','a3');
+  jdx.AddJoin('v','u','a4');
+  jdx.AddJoin('u','v','a4');
+  jdx.createBTrees(['t','s','u','v'],true,['t.a1','s.a3']);
+
+  jdx.AddKey('t',[10,11],1);
+  jdx.AddKey('s',[10,25],1);
+  jdx.AddKey('u',[10,16],1);
+  jdx.AddKey('v',[25,16],1);
+
+  setlength(Keys,2);
+  setlength(DataRef,4);
+  jdx.ClearKey;
+  repeat
+    jdx.NextKey(Keys,DataRef);
+    if dataref[0] <> -1 then
+      begin
+        st := 'K0: ' + inttostr(keys[0]);
+        st := st + '  K1: ' + inttostr(keys[1]);
+        memo4.Lines.Add(st);
+        st := 'DR0: ' + intToStr(dataref[0]);
+        st := st +  '  DR1: ' + intToStr(dataref[1]);
+        st := st +  '  DR2: ' + intToStr(dataref[2]);
+        st := st +  '  DR3: ' + intToStr(dataref[3]);
+        memo4.Lines.Add(st);
+        memo4.Lines.Add('');
+      end
+
+  until DataRef[0] = -1;
+
+  jdx.Free;
+
+  {$ELSE}
   setlength(thekeys,3);
   TheKeys[0] :=  'k0: integer';
   TheKeys[1] :=  'k1: string[7]';
@@ -535,7 +582,7 @@ begin
       InheritedKeys[1] := intToStr(j + 60);
       InheritedKeys[2] :=  j + 90;
 
-      dataref[0] :=  j*2;//random(1000000);//j*2;
+      dataref[0] :=  j*2;
       dataref[1] :=  j;
       dataref[2] :=  j*3;
 
@@ -576,23 +623,11 @@ begin
          st := st +  '  DR2: ' + intToStr(dataref[2]);
          memo4.Lines.Add(st);
          memo4.Lines.Add('');
-
-
        end
    until dataref[0] = -1;
+   idx.Free;
+  {$ENDIF}
 
-(*
-   setlength(keys,3);
-   keys[0] := 4;
-   idx.findkey(keys,InheritedKeys,dataref);
-
-   st := 'IK0: ' + Inheritedkeys[0];
-   memo4.Lines.Add(st);
-   st := 'DR0: ' + intToStr(dataref[0]);
-   st := st +  '  DR1: ' + intToStr(dataref[1]);
-   st := st +  '  DR2: ' + intToStr(dataref[2]);
-   memo4.Lines.Add(st);
-*)
    Diff := Now - StartTime;
    DecodeTime(Diff, Hour, Min, Sec, MSec);
    st := 'Elapsed Time = ';
@@ -606,116 +641,8 @@ begin
    stElapsedTime := st;
    memo4.Lines.add(stelapsedtime);
 
-   idx.Free;
-
-  exit;
-
-  (*
-  GMongo := TMongo.Create;
-  GMongo.Connect();
-
-  GDB := GMongo.getDB('bjoin');
-
-  setlength(thekeys,3);
-  TheKeys[0] :=  'a0: int';
-  TheKeys[1] :=  'a1: string[12]';
-  TheKeys[2] :=  'a2: int';
-  setLength(TheInheritedKeys,3);
-  TheinheritedKeys[0] :=  'a0: int';
-  TheinheritedKeys[1] :=  'a1: string[12]';
-  TheinheritedKeys[2] :=  'a2: int';
-
-
-  jdx := BJoinTreeClass.Create('ix',['t','s']);
-  jdx.AddTableToDictionary('t');
-  jdx.AddColumnToDictionary('a1','INTEGER','t');
-  jdx.AddColumnToDictionary('a2','INTEGER','t');
-  jdx.AddTableToDictionary('s');
-  jdx.AddColumnToDictionary('a2','INTEGER','s');
-  jdx.AddColumnToDictionary('a3','INTEGER','s');
-  jdx.AddJoin('t','s','a2');
-  jdx.AddJoin('s','t','a2');
-  jdx.createBTrees(['t','s'],false,['t.a1']);
-  jdx.Free;
-*)
-
-(*
-  jdx := MongoBJoinTreeClass.Create('ix',GDB,['t','s']);
-  jdx.AddTableToDictionary('t');
-  jdx.AddColumnToDictionary('t0','INTEGER','t');
-  jdx.AddColumnToDictionary('t1','INTEGER','t');
-  jdx.AddColumnToDictionary('t2','INTEGER','t');
-
-  jdx.AddTableToDictionary('s');
-  jdx.AddColumnToDictionary('s0','INTEGER','s');
-  jdx.AddColumnToDictionary('s1','INTEGER','s');
-  jdx.AddColumnToDictionary('s2','INTEGER','s');
-  jdx.AddColumnToDictionary('s3','INTEGER','s');
-{
-  jdx.AddTableToDictionary('v');
-  jdx.AddColumnToDictionary('v0','INTEGER','v');
-  jdx.AddColumnToDictionary('v1','INTEGER','v');
-  jdx.AddColumnToDictionary('v2','INTEGER','v');
-  jdx.AddColumnToDictionary('v3','INTEGER','v');
-}
-  jdx.AddJoin('t','s','t1');
-  jdx.AddJoin('t','s','t2');
- // jdx.AddJoin('s','v','s3');
-
-  jdx.AddJoin('s','t','s1');
-  jdx.AddJoin('s','t','s2');
- // jdx.AddJoin('v','s','v3');
-
-  jdx.createBTrees(['t','s'],true,['t.t0']);
-*)
-
-(*
-  setlength(rowt,3);
-  setlength(rows,4);
-  for i := 1 to 0 do
-    begin
-      rowt[0] :=  i;
-      rowt[1] :=  i+1;
-      rowt[2] :=  i+2;
-      rows[0] := i+3;
-      rows[1] := rowt[1];
-      rows[1] := rowt[1];
-
-      rows[2] :=  i+4;
-      rows[3] :=  i+4;
-      jdx.AddKey('s',rows,inttostr(i));
-      jdx.AddKey('t',rowt,inttostr(i));
-      //memo4.Lines.Add(inttostr(i));
-    end;
-
-  jdx.AddKey('t',[0,1,2],'50');
-  jdx.AddKey('s',[0,1,2,3],'3');
-  jdx.AddKey('v',[0,1,2,3],'13');
-  exit;
-  setlength(keys,1);
-  setlength(jDataref,2);
-{
-  jdx.ClearKey;
-  jdx.NextKey(keys,jDataRef) ;
-  jdx.NextKey(keys,jDataRef) ;
-  jdx.NextKey(keys,jDataRef) ;
-  jdx.NextKey(keys,jDataRef) ;
-}
-  keys := keys;
-  jdx.Free;
-*)
-
-  (*
-  idx := BtrPlusClass.Create('p',False,Thekeys,[true,true,true],TheinheritedKeys,1);
-  idx.free;
-  exit;
-  *)
-
-
-
 end;
 
-{$IFDEF UNIX}
 procedure TForm1.Button6Click(Sender: TObject);
 var
   userId: string;
@@ -726,11 +653,7 @@ var
   SQLTextFile: Text;
   Line: string;
   I: Integer;
-  stQuery: string;
-  flagCreate: boolean;
-  IBSONInstance: IBSONObject;
   flagcomment: boolean;
-  QueryCollection: TMongoCollection;
 begin
   userId := edit4.Text;
   dbName := edit2.text;
@@ -760,20 +683,18 @@ begin
   while not EOF(SQLTextFile) do
     begin
       readLn(SQLTextFile, Line);
-
       if pos('//',Line) <> 0 then
        Line := copy(Line,1,pos('//',Line)-1);
       if pos('/*',Line) <> 0 then
         begin
           if pos('*/',Line) <> 0 then
             begin
-             Line := copy(Line,1,pos('/*',Line)-1) + copy(Line,pos('*/',Line)+2,length(Line));
+              Line := copy(Line,1,pos('/*',Line)-1) + copy(Line,pos('*/',Line)+2,length(Line));
               flagComment := false;
-
             end else
             begin
-          flagComment := true;
-          Line := copy(Line,1,pos('/*',Line)-1);
+              flagComment := true;
+              Line := copy(Line,1,pos('/*',Line)-1);
            end;
         end;
       if flagcomment then
@@ -782,7 +703,7 @@ begin
             Line := copy(Line,pos('*/',Line)+2,length(Line));
             flagComment := false;
           end else Line := '';
-
+      if trim(line) = '' then continue;
       if pos(';', Line) = 0 then
         SQLInstructions[High(SQLInstructions)] :=  SQLInstructions[High(SQLInstructions)] + ' ' + Line
        else
@@ -794,12 +715,9 @@ begin
     end;
   setlength(SQLInstructions,length(SQLInstructions)-1);
 
-
-(*
-  QueryCollection := GDB.GetCollection('query');
   for I := low(SQLInstructions) to high(SQLInstructions) do
   begin
-
+    {
     IBSONInstance :=  TBSONObject.Create;
 
     IBSONInstance.Put('queryname','sys_' + SQLFileName + '_q'+ IntToStr(I+1));
@@ -817,14 +735,13 @@ begin
     IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
 
     QueryCollection.Insert(IBSONInstance);
-
+    }
     ParseSQLStatement(SQLInstructions[I],sqlMemProg);
 
     selectColsInstructions := nil;
 
     executeProgram(sqlMemProg, userId, dbName);
   end;
-*)
 
   memo4.clear;
 
@@ -838,51 +755,6 @@ begin
 
 end;
 
-procedure TForm1.Button7Click(Sender: TObject);
-var
-  RequestsCollection: TMongoCollection;
-  RequestsIBSONInstance: IBSonObject;
-  Inputst: string;
-  userId: string;
-  dbName: string;
-  I: integer;
-  counterCursor:  IMongoDBCursor;
-  counterIBSONInstance: IBSonObject;
-  flag: boolean;
-begin
-  userId := edit4.Text;
-  dbName := edit2.text;
-
-  yyInputText := '';
-  for I := 0 to memo1.Lines.Count - 1 do
-    yyinputText := yyinputText + ' ' + memo1.Lines[i];
-  InputSt := yyinputText;
-
-  flag := false;
-  counterCursor := counterCollection.find();
-  if counterCursor.HasNext then
-    begin
-      flag := true;
-      counterIBSONInstance := countercursor.next;
-      Counter := counterIBSONInstance.Items['counter'].AsInteger;
-    end;
-(*
-  RequestsCollection := GDB.GetCollection('requests');
-  RequestsIBSONInstance := TBSONObject.create;
-  RequestsIBSONInstance.Put( 'sys_user', userId );
-  RequestsIBSONInstance.Put( 'sys_dbname', dbName );
-  RequestsIBSONInstance.Put( 'sys_query', Inputst );
-  RequestsIBSONInstance.Put( 'sys_flag', true );
-  RequestsIBSONInstance.Put( 'sys_counter', counter );
-  RequestsIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-  RequestsCollection.Insert(RequestsIBSONInstance);
-*)
-  Counter := Counter + 1;
-  counterIBSONInstance.Put('counter',Counter);
-  counterCollection.Update(counterIBSONInstance,counterIBSONInstance);
-
-end;
-{$ENDIF}
 
 function authenticate(userId, password: string): boolean;
 begin
@@ -898,7 +770,7 @@ begin
     begin
       userId := edit4.Text;
       stpassword := edit7.Text;
-      connectToDB('TS1','data'); // Database in Mongo seen as a tablespace
+      connectToDB('TS1','data'); // Database seen as a tablespace
       if authenticate(userId, stpassword) then
         begin
           edit4.Enabled := false;
@@ -924,10 +796,6 @@ begin
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);
-{var
-  counterCursor:  IMongoDBCursor;
-  counterIBSONInstance: IBSonObject;
-}
 begin
   // if the database is dropped, the program should restarted
   {
@@ -951,174 +819,6 @@ begin
   Timer1.Enabled := true; }
 end;
 
-
-{$IFDEF UNIX}
-procedure TForm1.Timer1Timer(Sender: TObject);
-var
-  I, J: Integer;
-  ResponseCollection: TMongoCollection;
-  ResponseIBSONInstance: IBSonObject;
-  hInputst: string;
-  RequestsCollection: TMongoCollection;
-  RequestsCursor:  IMongoDBCursor;
-  RequestsIBSONInstance: IBSonObject;
-  sys_queryId: string;
-  userId: string;
-  dbName: string;
-  Inputst: string;
-  StartTime: TDate;
-  Diff: TTime;
-  Hour, Min, Sec, MSec: word;
-  st: string;
-begin
-  (*
-  timer1.Interval := 1500;
-  RequestsCollection := GDB.GetCollection('requests');
-  RequestsIBSONInstance := TBSONObject.create;
-
-  if RequestsCollection.Count <> 0 then
-    begin
-      RequestsCursor := RequestsCollection.Find();
-      while RequestsCursor.HasNext do
-        begin
-          RequestsIBSONInstance := RequestsCursor.Next;
-          Counter := RequestsIBSONInstance.Items['sys_counter'].AsInteger;
-          if Counter > startCounter then
-            begin
-
-              StartTime := Now;
-
-              if RequestsIBSONInstance.HasOid then
-                sys_queryId := RequestsIBSONInstance.GetOid.GetOID else
-                sys_queryId := RequestsIBSONInstance.Items['_id'].AsString;
-              lqueryId := sys_queryId;
-              userId := RequestsIBSONInstance.Items['sys_user'].AsString;
-              dbname := RequestsIBSONInstance.Items['sys_dbname'].AsString;
-              InputSt := RequestsIBSONInstance.Items['sys_query'].AsString;
-
-              yyerrmsgs := nil;
-              yymiscmsgs := nil;
-              ResponseCollection := GDB.GetCollection('response');
-              ResponseIBSONInstance := TBSONObject.create;
-              // Process the query
-              rescolname := '';
-              startCounter := Counter;
-
-              memo1.Clear;
-              memo1.Lines.Add(InputSt);
-              if pos('PROCESS SYNTAX',trim(Uppercase(Inputst))) <> 0 then
-                begin
-                  Inputst := trim(Inputst);
-                  Inputst := copy(Inputst,16,length(Inputst));
-                  ParseSQLStatement(InputSt,sqlMemProg);
-                  sqlresults := nil;
-
-                  memo4.clear;
-                  if yyerrmsgs <> nil then
-                    for I := 0 to length(yyerrmsgs) - 1 do
-                      begin
-                        ResponseIBSONInstance.put('sys_queryId',sys_queryId);
-                        ResponseIBSONInstance.put('sys_user',userId);
-                        ResponseIBSONInstance.put('sys_dbname',dbname);
-                        ResponseIBSONInstance.put('headertext',rescolname);
-                        ResponseIBSONInstance.put('messagetext',yyerrmsgs[i]);
-                        ResponseIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-                        ResponseCollection.Insert(ResponseIBSONInstance);
-                        memo4.Lines.Add(yyerrmsgs[i]);
-                      end;
-                  if yymiscmsgs <> nil then
-                    for I := 0 to length(yymiscmsgs) - 1 do
-                      begin
-                        ResponseIBSONInstance.put('sys_queryId',sys_queryId);
-                        ResponseIBSONInstance.put('sys_user',userId);
-                        ResponseIBSONInstance.put('sys_dbname',dbname);
-                        ResponseIBSONInstance.put('headertext',rescolname);
-                        ResponseIBSONInstance.put('messagetext',yymiscmsgs[i]);
-                        ResponseIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-                        ResponseCollection.Insert(ResponseIBSONInstance);
-
-                        if yymiscmsgs <> nil then
-                          for J := 0 to length(yymiscmsgs) - 1 do
-                            begin
-                              Memo4.Lines.Add(yymiscmsgs[J]);
-                              if pos('Switch',yymiscmsgs[J]) <> 0 then
-                                edit2.Text := copy(yymiscmsgs[J],29,length(yymiscmsgs[J]));
-                            end;
-                      end;
-                  yyerrmsgs := nil;
-                  yymiscmsgs := nil;
-
-                  timer1.Interval := 500;
-                  exit;
-                end;
-
-              edit4.Text := userId;
-              edit2.Text := dbname;
-
-              rescolname := '';
-              if pos('SELECT',trim(Uppercase(Inputst))) <> 0 then
-               begin
-                 hInputSt  := 'HEADER ' + Inputst;
-                 executeQuery(userId, dbName, hInputSt);
-                end;
-              executeQuery(userId, dbName, InputSt);
-
-              memo4.clear;
-              if yyerrmsgs <> nil then
-                for I := 0 to length(yyerrmsgs) - 1 do
-                  begin
-                    ResponseIBSONInstance.put('sys_queryId',sys_queryId);
-                    ResponseIBSONInstance.put('sys_user',userId);
-                    ResponseIBSONInstance.put('sys_dbname',dbname);
-                    ResponseIBSONInstance.put('headertext',rescolname);
-                    ResponseIBSONInstance.put('messagetext',yyerrmsgs[i]);
-                    ResponseIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-                    ResponseCollection.Insert(ResponseIBSONInstance);
-                    memo4.Lines.Add(yyerrmsgs[i]);
-                  end;
-              if yymiscmsgs <> nil then
-                begin
-                  for I := 0 to length(yymiscmsgs) - 1 do
-                    begin
-                      ResponseIBSONInstance.put('sys_queryId',sys_queryId);
-                      ResponseIBSONInstance.put('sys_user',userId);
-                      ResponseIBSONInstance.put('sys_dbname',dbname);
-                      ResponseIBSONInstance.put('headertext',rescolname);
-                      ResponseIBSONInstance.put('messagetext',yymiscmsgs[i]);
-                      ResponseIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-                      ResponseCollection.Insert(ResponseIBSONInstance);
-                   end;
-
-                  if yymiscmsgs <> nil then
-                    for J := 0 to length(yymiscmsgs) - 1 do
-                      begin
-                        Memo4.Lines.Add(yymiscmsgs[J]);
-                        if pos('Switch',yymiscmsgs[J]) <> 0 then
-                          edit2.Text := copy(yymiscmsgs[J],29,length(yymiscmsgs[J]));
-                      end;
-                end;
-
-              Diff := Now - StartTime;
-              DecodeTime(Diff, Hour, Min, Sec, MSec);
-              st := 'Elapsed Time = ';
-              if Hour <> 0 then
-                st := st + IntToStr(Hour) + ' Hours ';
-              if Min <> 0 then
-                st := st + IntToStr(Min) + ' Minutes ';
-              if sec <> 0 then
-                st := st + IntToStr(Sec) + ' Seconds ';
-              st := st + IntToStr(Msec) + ' MilliSeconds';
-              stElapsedTime := st;
-              memo4.Lines.Add(stElapsedTime);
-
-              timer1.Interval := 500;
-            end;
-        end;
-
-    end;
-    *)
-end;
-{$ENDIF}
 
 function getRandomString: string;
 var
