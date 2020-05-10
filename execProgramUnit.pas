@@ -967,17 +967,18 @@ begin
                         repeat
                           if DDkeysjointables.existRow(rowId3) then
                             begin
-                              if DDkeysjointables.getValueByColumnName(rowId3, 'index_table') <> idxname then continue;
-                              if (DDkeysjointables.getValueByColumnName(rowId3, 'from_table') = joincouples[high(joincouples)].fromTable) and
-                                 (DDkeysjointables.getValueByColumnName(rowId3, 'to_table') = joincouples[high(joincouples)].toTable) then
-                                begin
-                                  setLength(joincouples[high(joincouples)].keyNames,
-                                    length(joincouples[high(joincouples)].keyNames) + 1);
-                                  joincouples[high(joincouples)].keyNames[high(joincouples[high(joincouples)].keyNames)] :=
-                                    DDkeysjointables.getValueByColumnName(rowId3, 'key_name');
-                                end
+                              if DDkeysjointables.getValueByColumnName(rowId3, 'index_name') = idxname then
+                                for index1 := low(joincouples) to high(joincouples) do
+                                  if (DDkeysjointables.getValueByColumnName(rowId3, 'from_table') = joincouples[index1].fromTable) and
+                                     (DDkeysjointables.getValueByColumnName(rowId3, 'to_table') = joincouples[index1].toTable) then
+                                    begin
+                                      setLength(joincouples[index1].keyNames,
+                                        length(joincouples[index1].keyNames) + 1);
+                                      joincouples[index1].keyNames[high(joincouples[index1].keyNames)] :=
+                                        DDkeysjointables.getValueByColumnName(rowId3, 'key_name');
+                                    end
                             end;
-
+                          rowId3 := rowId3 + 1;
                         until rowId3 >  DDkeysjointables.lastRow;
                       end;
                   end;
@@ -990,22 +991,21 @@ begin
           repeat
             if DDkeysindexes.existRow(rowId2) then
               begin
-                if workingSchema.tables[index].idxdata[high(workingSchema.tables[index].idxdata)].idxname =
-                     DDkeysindexes.getValueByColumnName(rowId2, 'index_name') then
                   if not joinIndex then
                     begin
                       with workingSchema.tables[index].idxdata[high(workingSchema.tables[index].idxdata)] do
-                        begin
-                          setLength(idxkeys, Length(idxKeys) + 1);
-                          with idxkeys[high(idxkeys)] do
-                            begin
-                              colName :=
-                                DDkeysindexes.getValueByColumnName(rowId2, 'column_name');
-                              colOrder :=
-                                uppercase(DDkeysindexes.getValueByColumnName(
-                                rowId2, 'column_order')) = 'TRUE';
-                            end;
-                        end;
+                        if idxname = DDkeysindexes.getValueByColumnName(rowId2, 'index_name') then
+                          begin
+                            setLength(idxkeys, Length(idxKeys) + 1);
+                            with idxkeys[high(idxkeys)] do
+                              begin
+                                colName :=
+                                  DDkeysindexes.getValueByColumnName(rowId2, 'column_name');
+                                colOrder :=
+                                  uppercase(DDkeysindexes.getValueByColumnName(
+                                  rowId2, 'column_order')) = 'TRUE';
+                              end;
+                          end;
                     end
                    else // join index
                     begin
@@ -1830,6 +1830,54 @@ var
 
 // check for DOUBLE PRECISION -- EXTENDED not working properly saving the right number
 
+function isEquivalentGraph(JoinGraph, idxJoinGraph: GraphStructure): boolean;
+var
+  i, j, k, l: Integer;
+  node: string;
+  found: boolean;
+begin
+  result := false;
+  if not(length(JoinGraph) = length(idxJoinGraph)) then exit;
+  for i := 0 to length(JoinGraph) - 1 do
+    begin
+      found := false;
+      for j := 0 to length(idxJoinGraph) - 1 do
+        begin
+          if (JoinGraph[i].node = idxJoinGraph[j].node) then
+            begin
+              found := true;
+              break
+            end;
+        end;
+      if not found then exit
+    end;
+
+  for i := 0 to length(JoinGraph) - 1 do
+    begin
+      for j := 0 to length(idxJoinGraph) - 1 do
+        begin
+          if (JoinGraph[i].node = idxJoinGraph[j].node) then
+            begin
+              if not(length(JoinGraph[i].adjacents) = length(idxJoinGraph[j].adjacents)) then exit;
+              for k := 0 to length(JoinGraph[i].adjacents) - 1 do
+                begin
+                  found := false;
+                  for l := 0 to length(idxJoinGraph[j].adjacents) - 1 do
+                    begin
+                      if ((JoinGraph[i].adjacents[k].link = idxJoinGraph[j].adjacents[l].link) and
+                          (JoinGraph[i].adjacents[k].CommonKey = idxJoinGraph[j].adjacents[l].CommonKey)) then
+                        begin
+                          found := true;
+                          break
+                        end;
+                    end;
+                  if not found then exit
+                end
+            end
+        end
+    end;
+  result := true
+end;
 
 procedure ExecuteProgram(sqlMemProg: progInstrunctionsType;
                          dbUserId: string;
@@ -1858,7 +1906,6 @@ type
 const
    nullDataValue = -1;//'';
 var
-
   fromtables: array of record
     Name: string;
     aliasname: array of string;
@@ -1942,6 +1989,7 @@ var
   colDefaultValue: variant;
   resultindex: integer;
   resulttable: resultTableType;
+  resultshifting: Integer;
   fromindex: integer;
   fromlengthLimit: integer;
   dbCounter: integer = 0;
@@ -1964,6 +2012,7 @@ var
   UpdatedRows: Integer = 0;
   Maxdataref: array of dataPointerType = nil;
   dataref: array of dataPointerType = nil;
+  mapdataref: array of Integer = nil;
   index4: Integer;
   extendedFieldValue: double;
   currencyFieldValue: currency;
@@ -2058,6 +2107,8 @@ var
   rowId1, rowId2: Int64;
   colsTxt: string = '';
   idxstorage: BtrPlusClass;
+  JoinGraph: GraphStructure;
+  idxJoinGraph: GraphStructure;
 begin
   if not ((sqlMemProg[high(sqlMemProg)].mnemonic = 1) or
           (sqlMemProg[high(sqlMemProg)].mnemonic = 157) or
@@ -5122,11 +5173,8 @@ end;
           for index1 := low(ljoincouples) to high(ljoincouples) do
             begin
               row[0]:= indexName;
-
               row[1] := ljoincouples[index1].fromTable;
-
               row[2] := ljoincouples[index1].toTable;
-
               DDjoinindexes.insertRow(row);
             end;
 
@@ -5409,10 +5457,6 @@ end;
           idxASC := nil;
           expr := nil;
 
-
-
-
-
           // check if the table belongs to the schema
 
           found := false;
@@ -5436,7 +5480,8 @@ end;
               yyerror('Error in the join condition');
               exit;
             end;
- }         while expr <> nil do
+ }
+          while expr <> nil do
             begin
               if expr[high(expr)].mnemonic = 44 then
                 setlength(expr,length(expr)-1);
@@ -6287,7 +6332,10 @@ end;
 
               tblFields.idxdata[index1].idxstorage.AddKey(keys,{strToint(}rowId{)});
             end;
-
+          for index1 := 0 to length(workingSchema.joinidxdata) - 1  do
+            for index2 := 0 to high(workingSchema.joinidxdata[index1].joinBaseTables) do
+              if workingSchema.joinidxdata[index1].joinBaseTables[index2] = tblFields.tblName then
+                workingSchema.joinidxdata[index1].idxstorage.AddKey(tblFields.tblName,row,rowId);
           yyacceptmessage('Row inserted ');
         end;
 
@@ -6942,118 +6990,90 @@ end;
                     end;
                 end else
                 begin
-                  TheBaseTables := nil;
+                  // create the join graph for the query
+                  SetLength(JoinGraph,Length(fromTables));
+                  for index5 := 0 to length(fromTables) - 1 do
+                    begin
+                      JoinGraph[index5].node := fromTables[index5].Name;
+                      JoinGraph[index5].adjacents := nil;
+                    end;
+                  index6 := high(conditionInstructions);
+                  while index6 >=0 do
+                    begin
+                      if not ((conditionInstructions[index6-2].mnemonic = 151) and
+                              (conditionInstructions[index6-1].mnemonic = 151) and
+                              (conditionInstructions[index6].mnemonic = 50)) then
+                        begin
+                          index6 -= 1;
+                        end else
+                        begin
+                          fromtblName := copy(conditionInstructions[index6-2].stvalue,1,
+                                              pos('.',conditionInstructions[index6-2].stvalue)-1);
+                          for index5 := 0 to length(JoinGraph)-1 do
+                            if JoinGraph[index5].node = fromtblName then
+                              begin
+                                totblName := copy(conditionInstructions[index6-1].stvalue,1,
+                                                  pos('.',conditionInstructions[index6-1].stvalue)-1);
+                                setlength(JoinGraph[index5].adjacents,length(JoinGraph[index5].adjacents)+1);
+                                JoinGraph[index5].adjacents[high(JoinGraph[index5].adjacents)].link := totblName;
+                                JoinGraph[index5].adjacents[high(JoinGraph[index5].adjacents)].CommonKey :=
+                                   copy(conditionInstructions[index6-2].stvalue,
+                                        pos('.',conditionInstructions[index6-2].stvalue)+1,
+                                        length(conditionInstructions[index6-2].stvalue));
+                                break;
+                              end;
+                          for index5 := 0 to length(JoinGraph)-1 do
+                            if JoinGraph[index5].node = totblName then
+                              begin
+                                setlength(JoinGraph[index5].adjacents,length(JoinGraph[index5].adjacents)+1);
+                                JoinGraph[index5].adjacents[high(JoinGraph[index5].adjacents)].link := fromtblName;
+                                JoinGraph[index5].adjacents[high(JoinGraph[index5].adjacents)].CommonKey :=
+                                  copy(conditionInstructions[index6-1].stvalue,
+                                       pos('.',conditionInstructions[index6-1].stvalue)+1,
+                                       length(conditionInstructions[index6-1].stvalue));
+                              end;
+                          index6 -= 3;
+                        end;
+                    end;
+
+                  // compare the join graph from all the join index with the one for the query
                   if workingSchema.joinidxdata <> nil then
                     for index1 := 0 to length(workingSchema.joinidxdata) - 1 do
                       begin
-                        for index2 := 0 to length(workingSchema.joinidxdata[index1].joincouples) - 1 do
-                          begin
-                            found := false;
-                            for index3 := 0 to length(TheBaseTables) - 1 do
-                              begin
-                                if workingSchema.joinidxdata[index1].joincouples[index2].fromTable = TheBaseTables[index3] then
-                                  begin
-                                    found := true;
-                                    break;
-                                  end;
-                              end;
-                            if not found then
-                              begin
-                                setlength(TheBaseTables, length(TheBaseTables) + 1);
-                                TheBaseTables [High(TheBaseTables)] :=
-                                  workingSchema.joinidxdata[index1].joincouples[index2].fromTable;
-                              end;
-                            found := false;
-                            if workingSchema.joinidxdata[index1].joincouples[index2].toTable = TheBaseTables[index3] then
-                              begin
-                                found := true;
-                                break;
-                              end;
-                            if not found then
-                              begin
-                                setlength(TheBaseTables, length(TheBaseTables) + 1);
-                                TheBaseTables [High(TheBaseTables)] :=
-                                  workingSchema.joinidxdata[index1].joincouples[index2].toTable;
-                              end;
-                            // Take the common keys between them
-                          end;
-                        for index2 := 0 to length(workingSchema.joinidxdata[index1].idxkeys) - 1 do
-                          begin
-                            // here to find the key in the index to take care
-                          end;
-                        // if the base tables are the same as in where condition
-                        whTheBaseTables := nil;
-                        for index := low( conditionInstructions) to high( conditionInstructions) do
-                          begin
-                            if conditionInstructions[index].mnemonic = 151 then
-                              begin
-                                // take the column
-                                st := copy(conditionInstructions[index].stvalue,1,pos('.',conditionInstructions[index].stvalue)-1);
-                                found := false;
-                                for index4 := 0 to length(whThebaseTables) - 1 do
-                                  if whTheBaseTables[index4] = st then found := true;
-                                if not found then
-                                  begin
-                                    setlength(whTheBaseTables,length(whTheBaseTables)+1);
-                                    whTheBaseTables[high(whTheBaseTables)] := st
-                                  end;
-
-                              end;
-
-                            // length of base tables are equal
-                            // every table name exist
-
-                            // check for the common keys
-                            // if common keys are the same and the base tables are the same in the join in the where condition
-                            // it's the same jon problem
-                            {
-                               Executeplan.joinFlag := true;
-                               Executeplan.useIndex := true;
-                               Executeplan.Index.Number := 0; // momenterly the index on the joinidxdata
-                             }
-                          end;
-                        found := length(whThebaseTables) = length(ThebaseTables);
-                        for index2 := 0 to length(whThebaseTables) - 1 do
-                          begin
-                            if found then
-                              begin
-                                found := false;
-                                for index3 := 0 to length(ThebaseTables) - 1 do
-                                  begin
-                                    if TheBaseTables[index3] = whThebaseTables[index2] then
-                                      begin
-                                        found := true;
-                                      end;
-                                  end
-                              end
-                          end;
-
-                        if found then
-                          begin
-                            Executeplan.joinFlag := true;
-                            Executeplan.useIndex := true;
-                            setlength(Executeplan.Index,length(Executeplan.Index)+1);
-                            Executeplan.Index[High(Executeplan.Index)].Number := index1;
-                            Executeplan.Index[High(Executeplan.Index)].Name:= workingSchema.joinidxdata[index1].idxname;
-                          end;
+                        idxJoinGraph :=  workingSchema.joinidxdata[index1].idxstorage.JoinGraph;
+                        found := isEquivalentGraph(JoinGraph,idxJoinGraph);
+                        if found then break
                       end;
 
-                end;
+                  if found then
+                    begin
+                      Executeplan.joinFlag := true;
+                      Executeplan.useIndex := true;
+                      setlength(Executeplan.Index,length(Executeplan.Index)+1);
+                      Executeplan.Index[High(Executeplan.Index)].Number := index1;
+                      Executeplan.Index[High(Executeplan.Index)].Name:= workingSchema.joinidxdata[index1].idxname;
+
+                      setlength(keys,length(workingSchema.joinidxdata[index1].idxkeys));
+                      setlength(dataref,length(workingSchema.joinidxdata[index1].joinBaseTables));
+
+                      for index2 := 0 to length(fromTables) - 1 do
+                        for index3 := 0 to length(workingSchema.joinidxdata[index1].joinBaseTables) - 1 do
+                          if fromTables[index2].Name = workingSchema.joinidxdata[index1].joinBaseTables[index3] then
+                            begin
+                               setlength(mapdataref,length(mapdataref)+1);
+                               mapdataref[index2] := index3;
+                               break
+                            end;
+                    end;
+                end
             end;
 
-          for index := 0 to fromTableslen - 1 do
-            begin
-              //setLength(executePlan,Length(executePlan)+1);
-
-              //executePlan[high(executePlan)] := 'use table: ' + fromTables[index].name;
-            end;
 
           // ****** EXECUTE PLAN ******
 
           ResultRows := 0;
 
-          executePlan.useIndex := false;
-
+          (*
           setlength(keys,1);
           setlength(dataRef,1);
           setlength(InheritedKeys,1);
@@ -7086,13 +7106,46 @@ end;
               until dataref[0] = nullDataValue;
               idxstorage.Free;
             end;
+*)
 
+          //if not flag then //momentarily
 
-          if not flag then //momentarily
           // departments employees job_history jobs locations countries
           if executePlan.useIndex then // momenteraly
             begin
-              if not executePlan.joinFlag then
+              if executePlan.joinFlag then
+                begin
+                  workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].idxstorage.ClearKey;
+                  workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].idxstorage.NextKey(keys,dataref);
+
+                  resultshifting := 0;
+                  for index := 0 to length(fromTables) - 1 do
+                    begin
+                      fromTables[index].fromFields.storage.returnRow(
+                        dataref[mapdataref[index]], fromTables[index].fromrow);
+                      for resultindex :=
+                       0 to length(fromTables[index].fromrow) - 1 do
+                        begin
+                          resulttable.resultRow[resultindex +
+                            resultshifting] :=
+                            fromTables[index].fromrow[resultindex];
+                        end;
+                      resultshifting += length(fromTables[index].fromrow)
+                    end;
+
+                  if rowcondition(conditionInstructions,resultTable) then
+                  begin
+                    resultRows := ResultRows + 1;
+                    extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                  end;
+
+
+
+
+
+
+
+                end else
                 begin
                   if executeplan.Index[index].mnemonic = 50 then // eq
                     begin
@@ -7150,12 +7203,6 @@ end;
                     end;
 
                 end
-              else
-                begin
-                  // get all the data and put them
-                  // BTree_Collection := workingSchema.joinidxdata[Executeplan.Index[0].Number].idxstorage.Collection;
-                end
-
             end
            else
             case fromTablesLen of

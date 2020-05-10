@@ -60,8 +60,9 @@ type
       DirectJoinList: array of record
         FromTable: string;
         ToTable: string;
-        Key: string
+        Key: string { TODO : Should be more than one common key }
       end;
+      FJoinGraph: GraphStructure;
       FJoinPathList: JoinPathGraphStructure;
       FBTrees: array of BtrPlusClass;
       FNewRows: RowStructure;
@@ -69,6 +70,7 @@ type
       function GetBaseTables: virtualTableStructure;
       function GetNewRows: RowStructure;
       function GetDeletedRows: RowStructure;
+      function GetJoinGraph: GraphStructure;
       procedure generateJoinGraph(BaseTables: array of string; out JoinGraph: GraphStructure);
       function eqlVirtualTables(Table1, Table2: virtualTableStructure): Boolean;
       function getIndexFromJoinGraph(JoinGraph: GraphStructure; FromTable: string): Integer;
@@ -90,7 +92,6 @@ type
       procedure AddJoin(FromTheTable, ToTheTable: string; TheKey: string); virtual;
       procedure createBTrees(JoinBaseTables: array of string; IsOpen: Boolean;
                              TheKeys: array of string);
-
       function GetnumberOfKeys(BTreeIndex: Integer): Integer;
       function GetnumberOfInheritedKeys(BTreeIndex: Integer): Integer;
       function GetnumberOfDataRef(BTreeIndex: Integer): Integer;
@@ -128,7 +129,10 @@ type
       property BaseTables: virtualTableStructure read GetBaseTables;
       property NewRows: RowStructure read GetNewRows;
       property DeletedRows: RowStructure read GetDeletedRows;
+      property JoinGraph: GraphStructure read GetJoinGraph;
   end;
+
+procedure EraseBJoinTree(name: string; numTables: word);
 
 implementation
 
@@ -159,6 +163,11 @@ end;
 function BJoinTreeClass.GetDeletedRows: RowStructure;
 begin
   result := FDeletedRows;
+end;
+
+function BJoinTreeClass.GetJoinGraph: GraphStructure;
+begin
+  result := FJoinGraph
 end;
 
 function BJoinTreeClass.getTypeFromDataDictionary(TheColumnName: string; TheTableNameRef: string): string;
@@ -295,6 +304,11 @@ end;
 procedure BJoinTreeClass.generateJoinGraph(BaseTables: array of string; out JoinGraph: GraphStructure);
 var
   i: Integer;
+  j, k ,l: Integer;
+  position: Integer;
+  (* st: string;
+  stNode: string;
+  stAdjacents: string; *)
 begin
   SetLength(JoinGraph,Length(BaseTables));
   for i := Low(BaseTables) to High(BaseTables) do
@@ -303,14 +317,46 @@ begin
         node := BaseTables[i];
         adjacents := nil
       end;
+
   for i := Low(DirectJoinList) to High(DirectJoinList) do
     with DirectJoinList[i] do
       with JoinGraph[getIndexFromJoinGraph(JoinGraph,FromTable)] do
         begin
+          k := getIndexFromJoinGraph(JoinGraph,ToTable);
+          position := length(adjacents);
+          for j := 0 to length(adjacents) - 1 do
+            begin
+              l := getIndexFromJoinGraph(JoinGraph,adjacents[j].link);
+              if k < l then
+                begin
+                  position := j;
+                  break;
+                end;
+            end;
+
           SetLength(adjacents,Length(adjacents)+1);
-          adjacents[High(adjacents)].Link := ToTable;
-          adjacents[High(adjacents)].CommonKey := Key
-        end
+          if position <> length(adjacents) then
+            begin
+              for k := length(adjacents)- 2 downto position  do
+                adjacents[k+1] := adjacents[k];
+            end;
+          adjacents[position].link  := ToTable;
+          adjacents[position].CommonKey := Key
+        end;
+  (*
+  for i := 0 to length(BaseTables) - 1 do
+    begin
+      st := '';
+      stnode := JoinGraph[i].node;
+      st := st + stNode + ' --> ';
+      for j :=  0 to length(JoinGraph[i].adjacents) - 1 do
+        begin
+          stadjacents := JoinGraph[i].adjacents[j].link + ':' + JoinGraph[i].adjacents[j].CommonKey + ' <--> ';
+          st := st + stAdjacents
+        end;
+      st := st + '<N>'
+    end;
+  *)
 end;
 
 procedure BJoinTreeClass.getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable, ToTable:  virtualTableStructure; out BaseTable: string; out key: string);
@@ -602,17 +648,19 @@ procedure BJoinTreeClass.createBTrees(JoinBaseTables: array of string; IsOpen: B
                                       TheKeys: array of string);
 var
   FBTreeName: string;
-  JoinGraph: GraphStructure;
   i, j: Integer;
   FKeys: array of string;
   FInheritedKeys: array of string;
+  (*
+  st: string;
   stnode: string;
   stkeys: string;
   stInheritedKeys: string;
+  *)
 begin
-  generateJoinGraph(FBaseTables,JoinGraph);
-  generateJoinPathList(JoinBaseTables, JoinGraph, FJoinPathList,TheKeys);
-  {
+  generateJoinGraph(FBaseTables,FJoinGraph);
+  generateJoinPathList(JoinBaseTables, FJoinGraph, FJoinPathList,TheKeys);
+  (*
   stnode := '';
   for i := Low(FJoinPathList) to High(FJoinPathList) do
     begin
@@ -632,8 +680,9 @@ begin
       for j := Low(FJoinPathList[i].adjacent.Inheritedkeys) to high(FJoinPathList[i].adjacent.Inheritedkeys) do
         stInheritedKeys := stInheritedKeys + 'From: ' + FJoinPathList[i].adjacent.Inheritedkeys[j].FromTable   + '--Key: ' +
                   FJoinPathList[i].adjacent.Inheritedkeys[j].KeyName;
+      st := stNode + ' <N> ' + stKeys + ' <N> ' +  stInheritedKeys + ' <N><N><N> '
     end;
-  }
+  *)
 
   // if an index exists for base tables use it
 
@@ -648,14 +697,14 @@ begin
             begin
               SetLength(FKeys,Length(FKeys)+1);
               with adjacent.Keys[j] do
-                FKeys[High(FKeys)] := KeyName + ':' + getTypeFromDataDictionary(KeyName,FromTable)
+                FKeys[High(FKeys)] := FromTable + '_' + KeyName + ':' + getTypeFromDataDictionary(KeyName,FromTable)
             end;
           FInheritedKeys := nil;
           for j := Low(adjacent.InheritedKeys) to High(adjacent.InheritedKeys) do
             begin
               SetLength(FInheritedKeys,Length(FInheritedKeys)+1);
               with adjacent.InheritedKeys[j] do
-                FInheritedKeys[High(FInheritedKeys)] := KeyName + ':' + getTypeFromDataDictionary(KeyName,FromTable)
+                FInheritedKeys[High(FInheritedKeys)] := FromTable + '_' + KeyName + ':' + getTypeFromDataDictionary(KeyName,FromTable)
             end;
           FBTrees[High(FBTrees)] := BtrPlusClass.Create(FBTreeName,IsOpen,FKeys,FInheritedKeys,Length(node))
         end
@@ -1308,6 +1357,19 @@ var
 begin
   InheritedKeys := nil;
   FBTrees[High(FJoinPathList)].MaxKey(Keys,InheritedKeys,DataRef)
+end;
+
+procedure EraseBJoinTree(name: string; numTables: word);
+var
+  i: Word;
+  idxName: string;
+begin
+  for i := 0 to (2*numTables-1) - 1 do
+    begin
+      idxName := name + intToStr(i) + '.idx';
+      if fileExists(idxName) then DeleteFile(idxName);
+
+    end;
 end;
 
 end.

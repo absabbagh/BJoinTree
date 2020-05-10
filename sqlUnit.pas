@@ -49,12 +49,12 @@ type
     procedure Button6Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
   private
     { Private declarations }
 
     counter: Integer;
 
-    function ExecuteReturnHeaderFromQuery(dbuserId: string; dbName: string; stQuery: string): string;
     procedure ExecuteQuery(dbuserId: string; dbName: string; stQuery: string);
   public
     { Public declarations }
@@ -260,48 +260,6 @@ begin
   SDFInstance.Free;
 end;
 
-function TForm1.executereturnHeaderfromQuery(dbuserId: string; dbName: string; stQuery: string): string;
-var
-  InputSt: string;
-
-  StartTime: TDate;
-  Diff: TTime;
-  Hour, Min, Sec, MSec: word;
-
-  st: string;
-
-begin
-
-  StartTime := now;
-  InputSt := stQuery;
-  sqlResults := nil;
-  lQueryId := 'Temporary';
-
-  ParseSQLStatement(InputSt,sqlMemProg);
-
-  selectColsInstructions := nil;
-
-  if yyerrmsgs = nil then
-    executeProgram(sqlMemProg, dbuserId,dbName);
-
-  Diff := Now - StartTime;
-  DecodeTime(Diff, Hour, Min, Sec, MSec);
-  st := 'Elapsed Time = ';
-  if Hour <> 0 then
-    st := st + IntToStr(Hour) + ' Hours ';
-  if Min <> 0 then
-    st := st + IntToStr(Min) + ' Minutes ';
-  if sec <> 0 then
-    st := st + IntToStr(Sec) + ' Seconds ';
-  st := st + IntToStr(Msec) + ' MilliSeconds';
-  //stElapsedTime := st;
-  // Writeln('Elapsed Time: ' + st);
-
-  result := rescolname;
-
-end;
-
-
 procedure TForm1.Button2Click(Sender: TObject);
 var
   I :integer;
@@ -376,8 +334,10 @@ var
   idx: BtrPlusClass;
   Thekeys: array of string;
   TheInheritedKeys: array of string;
+  InheritedKeys: array of variant;
+  i, j: Integer;
+  count: Integer;
   {$ENDIF}
-  i: Integer;
   keys: array of variant;
   dataref: array of datapointertype;
   st: string;
@@ -399,6 +359,9 @@ var
   TargetdbtblName: string;
   dbtblName: string;
   *)
+  arr: array of integer = nil;
+  i,j,k,m: integer;
+  position: Integer;
 begin
   (*
   memo4.lines.add(inttostr(GetProcessID));
@@ -457,14 +420,9 @@ begin
   StartTime := Now;
 
   {$IFDEF joinindex}
-  if fileExists('p0.Idx') then DeleteFile('p0.Idx');
-  if fileExists('p1.Idx') then DeleteFile('p1.Idx');
-  if fileExists('p2.Idx') then DeleteFile('p2.Idx');
-  if fileExists('p3.Idx') then DeleteFile('p3.Idx');
-  if fileExists('p4.Idx') then DeleteFile('p4.Idx');
-  if fileExists('p5.Idx') then DeleteFile('p5.Idx');
-  if fileExists('p6.Idx') then DeleteFile('p6.Idx');
-  jdx := BJoinTreeClass.Create('p',['t','s','u','v']);
+  EraseBJoinTree('TS1\jdx6_test',4);
+//  jdx := BJoinTreeClass.Create('TS1\jdx6_test',['v','u','s','t']);
+  jdx := BJoinTreeClass.Create('TS1\jdx6_test',['t','s','u','v']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
   jdx.AddColumnToDictionary('a2','INTEGER','t');
@@ -477,6 +435,16 @@ begin
   jdx.AddTableToDictionary('v');
   jdx.AddColumnToDictionary('a3','INTEGER','v');
   jdx.AddColumnToDictionary('a4','INTEGER','v');
+
+  jdx.AddJoin('v','u','a4');
+  jdx.AddJoin('u','v','a4');
+  jdx.AddJoin('v','s','a3');
+  jdx.AddJoin('s','v','a3');
+  jdx.AddJoin('s','u','a1');
+  jdx.AddJoin('u','s','a1');
+  jdx.AddJoin('t','s','a1');
+  jdx.AddJoin('s','t','a1');
+  (*
   jdx.AddJoin('t','s','a1');
   jdx.AddJoin('s','t','a1');
   jdx.AddJoin('s','u','a1');
@@ -485,10 +453,12 @@ begin
   jdx.AddJoin('s','v','a3');
   jdx.AddJoin('v','u','a4');
   jdx.AddJoin('u','v','a4');
-  jdx.createBTrees(['t','s','u','v'],false,['t.a1','s.a3']);
+  *)
+  //jdx.createBTrees(['v','u','s','t'],false,['s.a1','t.a1','v.a3','u.a4']);
+  jdx.createBTrees(['t','s','u','v'],false,['t.a2','s.a3']);
   jdx.Free;
 
-  jdx := BJoinTreeClass.Create('p',['t','s','u','v']);
+  jdx := BJoinTreeClass.Create('TS1\jdx6_test',['t','s','u','v']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
   jdx.AddColumnToDictionary('a2','INTEGER','t');
@@ -501,6 +471,18 @@ begin
   jdx.AddTableToDictionary('v');
   jdx.AddColumnToDictionary('a3','INTEGER','v');
   jdx.AddColumnToDictionary('a4','INTEGER','v');
+  (*
+  jdx.AddJoin('v','u','a4');
+  jdx.AddJoin('u','v','a4');
+  jdx.AddJoin('v','s','a3');
+  jdx.AddJoin('s','v','a3');
+  jdx.AddJoin('s','u','a1');
+  jdx.AddJoin('u','s','a1');
+  jdx.AddJoin('t','s','a1');
+  jdx.AddJoin('s','t','a1');
+  *)
+
+
   jdx.AddJoin('t','s','a1');
   jdx.AddJoin('s','t','a1');
   jdx.AddJoin('s','u','a1');
@@ -509,12 +491,14 @@ begin
   jdx.AddJoin('s','v','a3');
   jdx.AddJoin('v','u','a4');
   jdx.AddJoin('u','v','a4');
-  jdx.createBTrees(['t','s','u','v'],true,['t.a1','s.a3']);
 
-  jdx.AddKey('t',[10,11],1);
-  jdx.AddKey('s',[10,25],1);
+
+  jdx.createBTrees(['t','s','u','v'],true,['t.a2','s.a3']);
+
   jdx.AddKey('u',[10,16],1);
-  jdx.AddKey('v',[25,16],1);
+  jdx.AddKey('t',[10,11],1);
+  jdx.AddKey('s',[10,15],1);
+  jdx.AddKey('v',[15,16],1);
 
   setlength(Keys,2);
   setlength(DataRef,4);
@@ -525,7 +509,9 @@ begin
       begin
         st := 'K0: ' + inttostr(keys[0]);
         st := st + '  K1: ' + inttostr(keys[1]);
-        memo4.Lines.Add(st);
+{        st := st + '  K2: ' + inttostr(keys[2]);
+        st := st + '  K3: ' + inttostr(keys[3]);
+}        memo4.Lines.Add(st);
         st := 'DR0: ' + intToStr(dataref[0]);
         st := st +  '  DR1: ' + intToStr(dataref[1]);
         st := st +  '  DR2: ' + intToStr(dataref[2]);
@@ -655,6 +641,8 @@ var
   I: Integer;
   flagcomment: boolean;
 begin
+  if Button8.Caption = 'CONNECT' then
+    Button8Click(self);
   userId := edit4.Text;
   dbName := edit2.text;
   SQLFileName := edit3.Text;
@@ -683,6 +671,8 @@ begin
   while not EOF(SQLTextFile) do
     begin
       readLn(SQLTextFile, Line);
+
+
       if pos('//',Line) <> 0 then
        Line := copy(Line,1,pos('//',Line)-1);
       if pos('/*',Line) <> 0 then
@@ -713,34 +703,19 @@ begin
           SQLInstructions[High(SQLInstructions)] := SQLInstructions[High(SQLInstructions)] + copy(Line,pos(';',Line)+1,length(Line));
         end;
     end;
+
   setlength(SQLInstructions,length(SQLInstructions)-1);
 
   for I := low(SQLInstructions) to high(SQLInstructions) do
   begin
-    {
-    IBSONInstance :=  TBSONObject.Create;
-
-    IBSONInstance.Put('queryname','sys_' + SQLFileName + '_q'+ IntToStr(I+1));
-
-    IBSONInstance.Put('querytext',SQLInstructions[I]);
-
-    IBSONInstance.Put('querydbname',dbName);
-
-    IBSONInstance.Put('userid',userID);
-
-    IBSONInstance.Put('username','undefined');
-
-    IBSONInstance.Put('submitted',123456789);
-
-    IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-
-    QueryCollection.Insert(IBSONInstance);
-    }
     ParseSQLStatement(SQLInstructions[I],sqlMemProg);
-
     selectColsInstructions := nil;
-
     executeProgram(sqlMemProg, userId, dbName);
+    if pos('ACCEPT: Switch to Database:',yymiscmsgs[high(yymiscmsgs)]) <> 0 then
+      dbName := copy(yymiscmsgs[high(yymiscmsgs)],
+                     pos('Database:',yymiscmsgs[high(yymiscmsgs)])+10,
+                     length(yymiscmsgs[high(yymiscmsgs)]));
+    Edit2.Text := dbName;
   end;
 
   memo4.clear;
@@ -798,25 +773,12 @@ end;
 procedure TForm1.FormActivate(Sender: TObject);
 begin
   // if the database is dropped, the program should restarted
-  {
-  counter := 0;
-  counterCollection := GDB.GetCollection('counter');
-  counterCursor := counterCollection.find();
-  if counterCursor.HasNext then
-    begin
-      counterIBSONInstance := countercursor.next;
-      startCounter := counterIBSONInstance.Items['counter'].AsInteger - 1
-    end else
-    begin
-      counterIBSONInstance := TBSONObject.Create;
-      counterIBSONInstance.Put('counter',Counter);
-      counterIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-      counterCollection.Insert(counterIBSONInstance);
-      startCounter := -1;
-    end;
+end;
 
-
-  Timer1.Enabled := true; }
+procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if Button8.Caption = 'DISCONNECT' then Button8Click(self);
+  closeAction := caFree;
 end;
 
 
