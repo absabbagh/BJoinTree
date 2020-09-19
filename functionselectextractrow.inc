@@ -1,3 +1,171 @@
+function runStack(conditionInstruction: singleInstructiontype;
+                  var runstk: runstacktype;
+                  var executePlan: executePlanType): boolean; overload; forward;
+
+function runStack(conditionInstruction: singleInstructiontype;
+                  var runstk: runstacktype): boolean; overload; forward;
+
+function reduceExpression(var runstk: runstacktype; var executePlan: executePlanType): Boolean;
+var
+  i, j, k: Integer;
+  flag: boolean = false;
+  found: boolean = false;
+  leftexpr: runstacktype = nil;
+  rightexpr: runstacktype = nil;
+  tmpstk: runstacktype = nil;
+  lconditionInstruction: singleInstructionType;
+  tblFields: tblStructure;
+begin
+  result := true; // no error found
+  i := 0;
+  while i < length(runstk) do
+    begin
+      if not flag then
+        begin
+          setlength(leftexpr, length(leftexpr) + 1);
+          leftexpr[high(leftexpr)] := runstk[i]
+        end else
+        begin
+          setlength(rightexpr, length(rightexpr) + 1);
+          rightexpr[high(rightexpr)] := runstk[i]
+        end;
+      if runstk[i].int64Value = 0 then flag := true;
+      i += 1;
+    end;
+  i := 0;
+  while i < length(leftexpr) do
+    begin
+      found := false;
+      if leftexpr[i].caseValue = 10 then
+        for j := 0 to i - 1 do
+          if leftexpr[j].caseValue = 10 then
+            if leftexpr[i].strValue = leftexpr[j].strValue then
+              begin
+                leftexpr[i].extValue += 1;
+                for K := j + 1 to length(leftexpr) - 1 do
+                  leftexpr[k-1] := leftexpr[k];
+                setLength(leftexpr,Length(leftexpr)-1);
+                found := true;
+                break;
+              end;
+      if not found then i += 1;
+    end;
+  i := 0;
+  while i < length(rightexpr) do
+    begin
+      found := false;
+      if rightexpr[i].caseValue = 10 then
+        for j := 0 to i - 1 do
+          if rightexpr[j].caseValue = 10 then
+            if rightexpr[i].strValue = rightexpr[j].strValue then
+              begin
+                rightexpr[i].extValue += 1;
+                for K := j + 1 to length(rightexpr) - 1 do
+                  rightexpr[k-1] := rightexpr[k];
+                setLength(rightexpr,Length(rightexpr)-1);
+                found := true;
+                break;
+              end;
+      if not found then i += 1;
+    end;
+
+  for i := 0 to length(leftexpr) - 1 do
+    if leftexpr[i].caseValue = 10 then
+      for j := 0 to length(rightexpr) -1 do
+        if rightexpr[j].caseValue = 10 then
+          if leftexpr[i].strValue = rightexpr[j].strValue then
+            begin
+              leftexpr[i].extValue -= rightexpr[j].extValue;
+              for k := j to length(rightexpr) - 1 - 1 do
+                rightexpr[k] := rightexpr[k+1];
+              setlength(rightexpr,length(rightexpr)-1);
+              break
+            end;
+
+  found := false;
+  if rightexpr[high(rightexpr)].caseValue <> 10 then
+    begin
+      found := true;
+      setlength(tmpstk,length(tmpstk)+1);
+      tmpstk[high(tmpstk)] := rightexpr[high(rightexpr)]
+    end;
+if not found then
+  begin
+    lconditionInstruction.mnemonic := 79;
+    lconditionInstruction.Value := 0;
+    lconditionInstruction.stvalue := '';
+    lconditionInstruction.printInstruction := 'UMINUS';
+  end else
+  begin
+    lconditionInstruction.mnemonic := 84;
+    lconditionInstruction.Value := 0;
+    lconditionInstruction.stvalue := '';
+    lconditionInstruction.printInstruction := 'SUB';
+  end;
+  flag := found;
+  found := false;
+  if leftexpr[high(leftexpr)].caseValue <> 10 then
+    begin
+      found := true;
+      setlength(tmpstk,length(tmpstk)+1);
+      tmpstk[high(tmpstk)] := leftexpr[high(leftexpr)];
+    end;
+
+  if found then
+    begin
+      runstack(lconditionInstruction,tmpstk);
+      setlength(leftexpr,length(leftexpr)-1);
+      if flag then
+        rightexpr[high(rightexpr)] := tmpstk[0] else
+        begin
+          setlength(rightexpr,length(rightexpr)+1);
+        rightexpr[high(rightexpr)] := tmpstk[0]
+        end;
+    end;
+
+  executePlan.useIndex := false;
+  executePlan.joinFlag := false;
+  if leftexpr <> nil then
+    if length(leftexpr) = 1 then
+      begin
+        if leftexpr[low(leftexpr)].caseValue = 10 then
+          begin
+            if leftexpr[low(leftexpr)].extValue < 0 then
+              begin
+                if leftexpr[low(leftexpr)].boolValue then // if use index
+                  begin
+                    executePlan.useIndex := true;
+                    setlength(executePlan.Index, length(executePlan.Index) + 1);
+                    executePlan.Index[high(executePlan.Index)].Number := leftexpr[0].intValue;
+                    executePlan.Index[high(executePlan.Index)].tblName := copy(leftexpr[0].strvalue,1,pos('.',leftexpr[0].strvalue)-1);
+                    tblFields := loadTableFields(executePlan.Index[high(executePlan.Index)].tblName);
+                    executePlan.Index[high(executePlan.Index)].Name := tblFields.idxdata[executePlan.Index[high(executePlan.Index)].Number].idxname;
+                    executePlan.Index[high(executePlan.Index)].colName := copy(leftexpr[0].strvalue,pos('.',leftexpr[0].strvalue)+1,length(leftexpr[0].strvalue));
+                    executePlan.Index[high(executePlan.Index)].mnemonic := 50; // EQ
+                    executePlan.Index[0].Value := -leftexpr[0].extValue;
+                  end;
+                { expr := leftexpr;
+                  leftexpr := rightexpr;
+                  leftexpr[0].extValue := - leftexpr[0].extValue;
+                  rightexpr := expr;
+                  rightexpr[0].extValue := - rightexpr[0].extValue; }
+              end else
+              if leftexpr[low(leftexpr)].boolValue then // if use index
+                begin
+                  executePlan.useIndex := true;
+                  executePlan.Index[0].Number := leftexpr[0].intValue;
+                  executePlan.Index[0].tblName := leftexpr[0].strValue;
+                  executePlan.Index[0].mnemonic := 50; // EQ
+                  // executePlan.Index[0].Name ;
+                  executePlan.Index[0].Value := leftexpr[0].extValue;
+                end;
+          end
+      end;
+
+  i := i;
+
+end;
+
 function compareBooleans(comparaison_op: Integer;
                          var runstk: runstacktype): boolean;
 begin
@@ -33,6 +201,8 @@ function runStack(conditionInstruction: singleInstructiontype;
                   var runstk: runstacktype): boolean;
 var
   stDate: string;
+  strValue: string;
+  executePlan: executePlanType;
 begin
   result := true;
   case conditionInstruction.mnemonic of
@@ -93,6 +263,11 @@ begin
                       runstk[High(runstk)-1].caseValue := 8;
                       setLength(runstk,Length(runstk)-1);
                     end;
+                 10:
+                    begin
+                      // Nothing to do
+                      runstk[High(runstk)-1].int64Value := 1; // to indicate next
+                    end;
                 end;
              6:
                 case runstk[High(runstk)-1].caseValue of
@@ -140,8 +315,13 @@ begin
                                                                  runstk[High(runstk)].strValue;
                       end;
                       setLength(runstk,Length(runstk)-1)
-
                     end;
+                  10:
+                     begin
+                       // To scan all index
+                       runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                       runstk[High(runstk)-1].int64Value := 1; // to indicate next
+                     end;
                 end;
              7:
                 begin
@@ -176,7 +356,6 @@ begin
                                                                  DateTimeToStr(runstk[High(runstk)].extValue);
                       end;
                       setLength(runstk,Length(runstk)-1)
-
                     end;
                   7:
                     begin
@@ -190,6 +369,63 @@ begin
                       setLength(runstk,Length(runstk)-1);
                       result := false;
                     end;
+                  10:
+                     begin
+                       // If the index column is numeric then nothing to do else full scan on index
+                       runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                       runstk[High(runstk)-1].int64Value := 1; // to indicate next
+                     end;
+                end;
+            10: begin
+                  case runstk[High(runstk)-1].caseValue of
+                    0:
+                      begin
+                        yyerror('Type error in select clause ');
+                        runstk[High(runstk)-1].caseValue := 7;
+                        setLength(runstk,Length(runstk)-1);
+                        result := false;
+                      end;
+                    4:
+                      begin
+                        runstk[High(runstk)-1].caseValue := 10;
+                        runstk[High(runstk)-1].strValue  := runstk[High(runstk)].strValue;
+                        runstk[High(runstk)].caseValue := 4;
+                        runstk[High(runstk)].extValue := runstk[High(runstk)-1].extValue;
+                        runstk[High(runstk)].strValue  := '';
+                        runstk[High(runstk)-1].extValue  := 1;
+                        runstk[High(runstk)-1].int64Value := 1;
+                      end;
+                    6:
+                      begin
+                        runstk[High(runstk)].caseValue := 6;
+                        strValue := runstk[High(runstk)].strValue;
+                        runstk[High(runstk)].strValue := runstk[High(runstk)-1].strValue;
+                        runstk[High(runstk)-1].caseValue := 10;
+                        runstk[High(runstk)-1].strValue  := strValue;
+                        // To scan all index
+                        runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                        runstk[High(runstk)-1].int64Value := 1; // to indicate next
+                      end;
+                    7:
+                      begin
+                        runstk[High(runstk)-1].caseValue := 7;
+                        setLength(runstk,Length(runstk)-1);
+                      end;
+                    8:
+                      begin
+                        runstk[High(runstk)].caseValue := 4;
+                        runstk[High(runstk)].extValue := runstk[High(runstk)-1].extValue;
+                        runstk[High(runstk)-1].caseValue := 10;
+                        runstk[High(runstk)-1].strValue  := runstk[High(runstk)].strValue;
+                        // To scan all index
+                        runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                        runstk[High(runstk)-1].int64Value := 1; // to indicate next
+                      end;
+                    10:
+                       begin
+                         runstk[High(runstk)-1].int64Value := 1; // to indicate next
+                       end;
+                  end;
                 end;
          end;
        end;
@@ -256,6 +492,10 @@ begin
                                    runstk[High(runstk)].extValue;
                       runstk[High(runstk)-1].caseValue := 8;
                       setLength(runstk,Length(runstk)-1);
+                    end;
+                 10:
+                    begin
+                      runstk[High(runstk)].extValue := - runstk[High(runstk)].extValue;
                     end;
                 end;
              6:
@@ -324,6 +564,12 @@ begin
                       end;
                       setLength(runstk,Length(runstk)-1)
                     end;
+                  10:
+                     begin
+                       // To scan all index
+                       runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                       runstk[High(runstk)].strValue := '- ' + runstk[High(runstk)].strValue;
+                     end;
                 end;
              7:
                 begin
@@ -375,7 +621,59 @@ begin
                       setLength(runstk,Length(runstk)-1);
                       result := false;
                     end;
+                 10:
+                    begin
+                      // If the index column is numeric then nothing to do else full scan on index
+                      runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                      runstk[High(runstk)].extValue := - runstk[High(runstk)].extValue;
+                     end;
                 end;
+            10: begin
+                  case runstk[High(runstk)-1].caseValue of
+                    0:
+                      begin
+                        yyerror('Type error in select clause ');
+                        runstk[High(runstk)-1].caseValue := 7;
+                        setLength(runstk,Length(runstk)-1);
+                        result := false;
+                      end;
+                    4:
+                      begin
+                        runstk[High(runstk)].caseValue := 4;
+                        runstk[High(runstk)].extValue := runstk[High(runstk)-1].extValue;
+                        runstk[High(runstk)-1].caseValue := 10;
+                        runstk[High(runstk)-1].strValue  := '- ' + runstk[High(runstk)].strValue;
+                      end;
+                    6:
+                      begin
+                        runstk[High(runstk)].caseValue := 6;
+                        strValue := runstk[High(runstk)].strValue;
+                        runstk[High(runstk)].strValue := runstk[High(runstk)-1].strValue;
+                        runstk[High(runstk)-1].caseValue := 10;
+                        runstk[High(runstk)-1].strValue  := '- ' + strValue;
+                        // To scan all index
+                        runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                      end;
+                    7:
+                      begin
+                        runstk[High(runstk)-1].caseValue := 7;
+                        setLength(runstk,Length(runstk)-1);
+                      end;
+                    8:
+                      begin
+                        runstk[High(runstk)].caseValue := 4;
+                        runstk[High(runstk)].extValue := runstk[High(runstk)-1].extValue;
+                        runstk[High(runstk)-1].caseValue := 10;
+                        runstk[High(runstk)-1].strValue  := '- ' + runstk[High(runstk)].strValue;
+                        // To scan all index
+                        runstk[High(runstk)-1].intValue := 0; // use full scan on index
+                      end;
+                    10:
+                       begin
+                         // Nothing to do
+                       end;
+                   end;
+                 end;
          end;
        end;
 
@@ -726,26 +1024,39 @@ begin
 
     88: // PUSH: value Extended Value
       begin
-      setLength(runstk,Length(runstk)+1);
-      runstk[High(runstk)].caseValue := 4;
-      runstk[High(runstk)].extValue := conditionInstruction.value
-    end;
+        setLength(runstk,Length(runstk)+1);
+        runstk[High(runstk)].caseValue := 4;
+        runstk[High(runstk)].extValue := conditionInstruction.value;
+        runstk[High(runstk)].boolValue := false;
+        runstk[High(runstk)].intValue := 0;
+        runstk[High(runstk)].int64Value := 0;
+      end;
 
     89: // PUSH: literal
       begin
-      setLength(runstk,Length(runstk)+1);
-      runstk[High(runstk)].caseValue := 6;
-      runstk[High(runstk)].strvalue := conditionInstruction.stvalue;
-    end;
+        setLength(runstk,Length(runstk)+1);
+        runstk[High(runstk)].caseValue := 6;
+        runstk[High(runstk)].strvalue := conditionInstruction.stvalue;
+        runstk[High(runstk)].boolValue := false;
+        runstk[High(runstk)].intValue := 0;
+        runstk[High(runstk)].int64Value := 0;
+      end;
 
    221: // PUSH: boolean
       begin
         setLength(runstk,Length(runstk)+1);
         runstk[High(runstk)].caseValue := 0;
         runstk[High(runstk)].boolvalue := conditionInstruction.boolvalue;
+        runstk[High(runstk)].boolValue := false;
+        runstk[High(runstk)].intValue := 0;
+        runstk[High(runstk)].int64Value := 0;
       end;
 
-    50, 51, 52, 53, 54, 55: // EQ, LT, GT, NE, LE, GE
+   // if in the expression there is caseValue = 10
+   // check to put all in the right side while moving values to the left side
+   // scan runstk till find next = false --> sub-expressions separation
+   // left expression with highest value of runstk not a column name is moved to the end of the right expression
+   50, 51, 52, 53, 54, 55: // EQ, LT, GT, NE, LE, GE
       begin
         case runstk[high(runstk)].caseValue of
           0: begin
@@ -1488,6 +1799,23 @@ begin
 
 end;
 
+function runStack(conditionInstruction: singleInstructiontype;
+                  var runstk: runstacktype;
+                  var executePlan: executePlanType): boolean;
+var
+  stDate: string;
+  strValue: string;
+begin
+  result := true;
+  case conditionInstruction.mnemonic of
+    50 :
+       begin
+         reduceExpression(runstk,executePlan);
+       end;
+  end;
+  runStack(conditionInstruction, runstk);
+end;
+
 function extractselect(dbUserId: string;
                        selectColsInstructions: selectColsInstructionstype;
                        var outText: TextFile;
@@ -1652,6 +1980,7 @@ begin
                            end;
                          if flagTime then
                            begin
+                             if not flagDate then ObjVal := '';
                              DecodeTime(selectstk[0].extValue,hour,minute,second,millisecond);
                              if hour < 10 then ObjVal := ObjVal + '0';
                              ObjVal := ObjVal + IntToStr(hour) + ':';

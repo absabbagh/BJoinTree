@@ -179,6 +179,10 @@ begin
         FrecordLen := FrecordLen + Sizeof(currency);
       if (stType = 'TDATETIME') then
         FrecordLen := FrecordLen + Sizeof(tdatetime);
+      if (stType = 'TDATE') then
+        FrecordLen := FrecordLen + Sizeof(tdatetime);
+      if (stType = 'TTIME') then
+        FrecordLen := FrecordLen + Sizeof(tdatetime);
       if (stType = 'INTEGER') then
         FrecordLen := FrecordLen + Sizeof(Integer);
       if (stType = 'SMALLINT') then
@@ -384,14 +388,16 @@ begin
       colNull := false;
       if FtblData.tblColumns[I].allowcolNull then
         begin
-          colNull := row[i] = null;
+          colNull := row[i] = Null;
           Move(colNull, buffer[Index], Sizeof(Boolean));
           Inc(Index, Sizeof(Boolean));
         end;
       stType := FtblData.tblColumns[i].colType;
       if (pos('STRING',stType) <> 0) then
         begin
-          TmpString := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then TmpString := ' ' else TmpString := row[i]
+           else TmpString := row[i];
           stSize := FtblData.tblColumns[I].charSize;
           if stSize = 0 then stSize := 255;
           if Length(TmpString) > stSize then
@@ -403,55 +409,89 @@ begin
         end;
       if (stType = 'BOOLEAN') then
         begin
-          boolvalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then boolValue := false else boolvalue := row[i]
+           else boolvalue := row[i];
           Move(boolvalue, buffer[Index], Sizeof(Boolean));
           index := index + Sizeof(Boolean);
         end;
       if (stType = 'SINGLE') then
         begin
-          singlevalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then singleValue := 0 else singlevalue := row[i]
+           else singlevalue := row[i];
           Move(singlevalue, buffer[Index], Sizeof(single));
           index := index + Sizeof(single);
         end;
       if (stType = 'DOUBLE') then
         begin
-          doublevalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then doubleValue := 0 else doublevalue := row[i]
+           else doublevalue := row[i];
           Move(doublevalue, buffer[Index], Sizeof(double));
           index := index + Sizeof(double);
         end;
       if (stType = 'EXTENDED') then
         begin
-          extendedvalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then extendedValue := 0 else extendedvalue := row[i]
+           else extendedvalue := row[i];
           Move(extendedvalue, buffer[Index], Sizeof(Extended));
           index := index + Sizeof(Extended);
         end;
       if (stType = 'CURRENCY') then
         begin
-          currencyvalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then currencyValue := 0 else currencyvalue := row[i]
+           else currencyvalue := row[i];
           Move(currencyvalue, buffer[Index], Sizeof(currency));
           index := index + Sizeof(currency);
         end;
       if (stType = 'TDATETIME') then
         begin
-          tdatetimevalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then tdatetimevalue := now else tdatetimevalue := row[i]
+           else tdatetimevalue := row[i];
+          Move(tdatetimevalue, buffer[Index], Sizeof(tdatetime));
+          index := index + Sizeof(tdatetime);
+        end;
+      if (stType = 'TDATE') then
+        begin
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then tdatetimevalue := now else tdatetimevalue := row[i]
+           else tdatetimevalue := row[i];
+          Move(tdatetimevalue, buffer[Index], Sizeof(tdatetime));
+          index := index + Sizeof(tdatetime);
+        end;
+      if (stType = 'TTIME') then
+        begin
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then tdatetimevalue := now else tdatetimevalue := row[i]
+           else tdatetimevalue := row[i];
           Move(tdatetimevalue, buffer[Index], Sizeof(tdatetime));
           index := index + Sizeof(tdatetime);
         end;
       if (stType = 'SMALLINT') then
         begin
-          smallintvalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then smallintvalue := 0 else smallintvalue := row[i]
+           else smallintvalue := row[i];
           Move(smallintvalue,buffer[index],sizeof(smallInt));
           index := index + Sizeof(smallInt);
         end;
       if (stType = 'INTEGER') then
         begin
-          intvalue := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then intvalue := 0 else intvalue := row[i]
+           else intvalue := row[i];
           Move(intvalue,buffer[index],sizeof(Integer));
           index := index + Sizeof(Integer);
         end;
       if (stType = 'INT64') then
         begin
-          int64value := row[i];
+          if FtblData.tblColumns[I].allowcolNull then
+            if colNull then int64value := 0 else int64value := row[i]
+           else int64value := row[i];
           Move(int64value,buffer[index],sizeof(Int64));
           index := index + Sizeof(Int64);
         end;
@@ -547,6 +587,18 @@ begin
           index := index + Sizeof(tdatetime);
           row[I] := tdatetimeresult;
         end;
+      if (stType = 'TDATE') then
+        begin
+          Move(buffer[index],tdatetimeresult,sizeof(tdatetime));
+          index := index + Sizeof(tdatetime);
+          row[I] := tdatetimeresult;
+        end;
+      if (stType = 'TTIME') then
+        begin
+          Move(buffer[index],tdatetimeresult,sizeof(tdatetime));
+          index := index + Sizeof(tdatetime);
+          row[I] := tdatetimeresult;
+        end;
       if (stType = 'SMALLINT') then
         begin
           Move(buffer[index],smallintresult,sizeof(smallint));
@@ -620,7 +672,7 @@ begin
           end;
         if (stType = 'SINGLE') or (stType = 'DOUBLE') or
            (stType = 'EXTENDED') or (stType = 'CURRENCY') or
-           (stType = 'TDATETIME') then
+           (stType = 'TDATETIME') or (stType = 'TDATE') or (stType = 'TTIME') then
           begin
             Move(buffer[index],extendedresult,sizeof(extended));
             result := extendedresult;

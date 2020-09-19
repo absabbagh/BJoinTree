@@ -1,6 +1,8 @@
 
 unit sql;
 
+{$MODE Delphi}
+
 interface
 
 uses

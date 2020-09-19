@@ -67,7 +67,7 @@ implementation
 
 {$R *.lfm}
 
-{$Define joinindex}
+{$Define rjoinindex}
 
 uses
   execProgramUnit,
@@ -262,7 +262,7 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  I :integer;
+  I, j :integer;
   InputSt: string;
   userId: string;
   dbName: string;
@@ -277,7 +277,6 @@ begin
   StringGrid1.RowCount := 5;
   yyerrmsgs := nil;
 
-  // timer1.enabled := false;
   userId := edit4.Text;
   dbName := edit2.text;
   dbName := lowercase(dbName);
@@ -287,9 +286,10 @@ begin
   for I := 0 to memo1.Lines.Count - 1 do
     begin
       st := memo1.Lines[i];
-   {   for j := 1 to length(st) do
-        if st[j] = #9 then
-         st[j] := ' ';       }
+      for j := 1 to length(st) do
+        if (st[j] = #9) or (st[j] = #10) then
+          st[j] := ' ';
+      st := trim(st);
       yyinputText := yyinputText + ' ' + st;
     end;
   InputSt := yyinputText;
@@ -316,7 +316,6 @@ begin
   memo4.lines.Add(stElapsedTime);
   yyerrmsgs := nil;
   yymiscmsgs := nil;
-  // timer1.enabled := true;
 
 end;
 
@@ -359,9 +358,6 @@ var
   TargetdbtblName: string;
   dbtblName: string;
   *)
-  arr: array of integer = nil;
-  i,j,k,m: integer;
-  position: Integer;
 begin
   (*
   memo4.lines.add(inttostr(GetProcessID));
@@ -525,7 +521,9 @@ begin
   jdx.Free;
 
   {$ELSE}
-  setlength(thekeys,3);
+  thekeys := nil;
+  theInheritedkeys := nil;
+{  setlength(thekeys,3);
   TheKeys[0] :=  'k0: integer';
   TheKeys[1] :=  'k1: string[7]';
   TheKeys[2] :=  'k2: string[5]';
@@ -533,7 +531,7 @@ begin
   TheinheritedKeys[0] :=  'IK0:string[7]';
   TheinheritedKeys[1] :=  'IK1: string[5]';
   TheinheritedKeys[2] :=  'IK2: integer';
-
+}
   if fileExists('p.Idx') then
     begin
       DeleteFile('p.Idx');
@@ -544,9 +542,12 @@ begin
 
   idx := BtrPlusClass.Create('p',True,Thekeys,TheInheritedKeys,3);
 
+  keys := nil;
+  InheritedKeys := nil;
+  {
   setlength(keys,3);
   setLength(InheritedKeys,3);
-  setlength(dataref,3);
+  }setlength(dataref,3);
 
 
 
@@ -560,14 +561,14 @@ begin
       edit6.Repaint;
 
       j := i;
-      keys[0] :=  random(100000);
+   {   keys[0] :=  random(100000);
       keys[1] :=  intToStr(j+3);
       keys[2] :=  intToStr(j+4);
 
       InheritedKeys[0] := intToStr(j + 40);
       InheritedKeys[1] := intToStr(j + 60);
       InheritedKeys[2] :=  j + 90;
-
+    }
       dataref[0] :=  j*2;
       dataref[1] :=  j;
       dataref[2] :=  j*3;
@@ -596,7 +597,7 @@ begin
      if dataref[0] <> -1 then
        begin
          j := j +1;
-         st := st + 'K0: ' + inttostr(keys[0]);
+     {    st := st + 'K0: ' + inttostr(keys[0]);
          st := st + '  K1: ' + keys[1];
          st := st + '  K2: ' + keys[2];
          memo4.Lines.Add(st);
@@ -604,7 +605,7 @@ begin
          st := st +  '  IK1: ' + Inheritedkeys[1];
          st := st +  '  IK2: ' + intToStr(Inheritedkeys[2]);
          memo4.Lines.Add(st);
-         st := 'DR0: ' + intToStr(dataref[0]);
+      }   st := 'DR0: ' + intToStr(dataref[0]);
          st := st +  '  DR1: ' + intToStr(dataref[1]);
          st := st +  '  DR2: ' + intToStr(dataref[2]);
          memo4.Lines.Add(st);
@@ -706,19 +707,24 @@ begin
 
   setlength(SQLInstructions,length(SQLInstructions)-1);
 
+  memo4.clear;
+
   for I := low(SQLInstructions) to high(SQLInstructions) do
   begin
     ParseSQLStatement(SQLInstructions[I],sqlMemProg);
     selectColsInstructions := nil;
     executeProgram(sqlMemProg, userId, dbName);
+    if yyerrmsgs <> nil then
+      begin
+        memo4.Lines.add('Instruction #: ' + intToStr(I));
+        break;
+      end;
     if pos('ACCEPT: Switch to Database:',yymiscmsgs[high(yymiscmsgs)]) <> 0 then
       dbName := copy(yymiscmsgs[high(yymiscmsgs)],
                      pos('Database:',yymiscmsgs[high(yymiscmsgs)])+10,
                      length(yymiscmsgs[high(yymiscmsgs)]));
     Edit2.Text := dbName;
   end;
-
-  memo4.clear;
 
   if yyerrmsgs <> nil then
     for I := 0 to length(yyerrmsgs) -1 do

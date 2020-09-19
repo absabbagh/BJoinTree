@@ -4,7 +4,7 @@ unit BPlusTreeU;
 
 {$DEFINE LRU}
 
-{$DEFINE Duplicates}
+{$DEFINE RDuplicates}
 
 
 interface
@@ -1248,26 +1248,24 @@ begin
       tmpNode := nullValue;
       if nodePage.Max <> 0 then
         begin
-          if compare(Keys,nodePage.Keys[nodePage.Max]) = 0 then
-            tmpNode := nodePage.NextPointer else
+          if nodePage.NextPointer <> nullvalue then
+            if compare(Keys,nodePage.Keys[nodePage.Max]) = 0 then
+              tmpNode := nodePage.NextPointer;
+          KeyPosition := nodePage.Max + 1;
+          for i := 1 to nodePage.Max do
+            if compare(Keys,nodePage.Keys[i]) = -1  then
+              begin
+                keyposition := i;
+                Break;
+              end;
+          for i := nodePage.Max  downto keyPosition do
             begin
-              KeyPosition := nodePage.Max + 1;
-              for i := 1 to nodePage.Max do
-                if compare(Keys,nodePage.Keys[i]) = -1  then
-                  begin
-                    keyposition := i;
-                    Break;
-                  end;
-              for i := nodePage.Max  downto keyPosition do
-                begin
-                  for j := Low(nodePage.Keys[i]) to High(nodePage.Keys[i]) do
-                    nodePage.Keys[i+1,j] := nodePage.Keys[i,j];
-                  for j := Low(nodePage.DataPointers[i]) to High(nodePage.DataPointers[i]) do
-                    nodePage.DataPointers[i+1,j] := nodePage.DataPointers[i,j];
-                  for j := Low(nodePage.InheritedKeys[i]) to High(nodePage.InheritedKeys[i]) do
-                    nodePage.InheritedKeys[i+1,j] := nodePage.InheritedKeys[i,j];
-                end;
-
+              for j := Low(nodePage.Keys[i]) to High(nodePage.Keys[i]) do
+                nodePage.Keys[i+1,j] := nodePage.Keys[i,j];
+              for j := Low(nodePage.DataPointers[i]) to High(nodePage.DataPointers[i]) do
+                nodePage.DataPointers[i+1,j] := nodePage.DataPointers[i,j];
+              for j := Low(nodePage.InheritedKeys[i]) to High(nodePage.InheritedKeys[i]) do
+                nodePage.InheritedKeys[i+1,j] := nodePage.InheritedKeys[i,j];
             end
         end else
         begin

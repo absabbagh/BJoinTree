@@ -263,7 +263,7 @@ begin
       setlength(row,3);
       row[0] := 'root';
       row[1] := 'password';
-      row[2] := 'null';
+      row[2] := 'Null';
       DDusers.insertRow(row);
       closeTables;
     end;
@@ -663,28 +663,28 @@ begin
                 colHasDefault := (defaultType <> -1) and (defaultType <> 8);
                 case defaultType of
                   0: if DDtablecolumns.getValueByColumnName(rowId1, 'nulldefault') then
-                       colDefaultValue := null else
+                       colDefaultValue := Null else
                        colDefaultValue :=
                          DDtablecolumns.getValueByColumnName(rowId1, 'intdefault');
-                  1: colDefaultValue := null;
+                  1: colDefaultValue := Null;
                   2: if DDtablecolumns.getValueByColumnName(rowId1, 'nulldefault') then
-                       colDefaultValue := null else
+                       colDefaultValue := Null else
                        colDefaultValue :=
                          DDtablecolumns.getValueByColumnName(rowId1, 'int64default');
                   3, 5: if DDtablecolumns.getValueByColumnName(rowId1, 'nulldefault') then
-                          colDefaultValue := null else
+                          colDefaultValue := Null else
                           colDefaultValue :=
                             DDtablecolumns.getValueByColumnName(rowId1, 'extdefault');
                   4: if DDtablecolumns.getValueByColumnName(rowId1, 'nulldefault') then
-                       colDefaultValue := null else
+                       colDefaultValue := Null else
                        colDefaultValue :=
                          DDtablecolumns.getValueByColumnName(rowId1, 'currencydefault');
                   6: if DDtablecolumns.getValueByColumnName(rowId1, 'nulldefault') then
-                       colDefaultValue := null else
+                       colDefaultValue := Null else
                        colDefaultValue :=
                          DDtablecolumns.getValueByColumnName(rowId1, 'booleandefault');
                   7: if DDtablecolumns.getValueByColumnName(rowId1, 'nulldefault') then
-                       colDefaultValue := null else
+                       colDefaultValue := Null else
                        colDefaultValue :=
                          DDtablecolumns.getValueByColumnName(rowId1, 'stdefault');
                 end;
@@ -1218,17 +1218,39 @@ type
 
 
    runstacksingletype = record // extvalue for all numbers
-     caseValue: integer;       // 7 for Null Value - 8 for dates - 9 for options
-     boolValue: boolean;
-     intValue: integer;
-     int64Value: integer;
-     dblValue: double;
-     extValue: extended;
-     curValue: currency;
-     strValue: string;
+     caseValue: integer;       // 7 for Null Value
+                               // 8 for dates
+                               // 9 for options
+                               // 10 for column name
+                               //   boolValue: false no index
+                               //              true use index -->
+                               //                   intvalue: 1 use index on condition
+                               //                             0 use full scan on index
+                               //   int64Value: 1 next exist to seperate left expression from right expression
+     boolValue: boolean;       // 0
+     intValue: integer;        // 4
+     int64Value: integer;      // 4
+     dblValue: double;         // 4
+     extValue: extended;       // 4
+     curValue: currency;       // 4
+     strValue: string;         // 6
    end;
 
    runstacktype = array of runstacksingletype;
+
+ type
+   executePlanType = record
+     useIndex: boolean;
+     joinFlag: boolean;
+     Index: array of record
+       Number: Integer;
+       Name: string;
+       tblName: string;
+       colName : string;
+       Value: variant;
+       mnemonic: integer;
+     end
+   end;
 
 
 {$INCLUDE functionselectextractrow.inc}
@@ -1306,7 +1328,7 @@ begin
           begin
             if (varVar > high(smallint)) or (varVar < low(smallint)) then
               begin
-                result := null;
+                result := Null;
                 yyerror('Value is not in the range of SMALLINT');
                 exit
               end;
@@ -1345,7 +1367,7 @@ begin
           begin
             if (varVar > high(smallint)) or (varVar < low(smallint)) then
               begin
-                result := null;
+                result := Null;
                 yyerror('Value is not in the range of SMALLINT');
                 exit
               end;
@@ -1354,7 +1376,7 @@ begin
           begin
             if (varVar > high(integer)) or (varVar < low(integer)) then
               begin
-                result := null;
+                result := Null;
                 yyerror('Value is not in the range of INTEGER');
                 exit
               end;
@@ -1394,7 +1416,7 @@ begin
           begin
             if (intvalue > High(smallint)) or (intvalue < Low(smallint)) then
               begin
-                result := null;
+                result := Null;
                 yyerror('Value is not in the range of SMALLINT');
                 exit
               end;
@@ -1404,7 +1426,7 @@ begin
           begin
             if (intvalue > High(integer)) or (intvalue < Low(integer)) then
               begin
-                result := null;
+                result := Null;
                 yyerror('Value is not in the range of INTEGER');
                 exit
               end;
@@ -1414,7 +1436,7 @@ begin
           begin
             if (intvalue > High(int64)) or (intvalue < Low(int64)) then
               begin
-                result := null;
+                result := Null;
                 yyerror('Value is not in the range of INT64');
                 exit
               end;
@@ -1429,7 +1451,7 @@ begin
                 stVar := floatToStr(intValue);
                 if length(stVar) > dim1 - dim2 then
                   begin
-                    result := null;
+                    result := Null;
                     yyerror('Value to big for dimension: ' + intToStr(dim1));
                     exit
                   end;
@@ -1474,7 +1496,7 @@ begin
     varArray, varByRef, varStrArg, varAny, varTypeMask: exit;
     varError:
       begin
-        result := null;
+        result := Null;
         yyerror(' Type Error ');
         exit;
       end;
@@ -1493,7 +1515,7 @@ begin
            (sqltype_name = 'TIME') or
            (sqltype_name = 'TIMESTAMP') then
           begin
-            result := null;
+            result := Null;
             yyerror(' Type Error ');
             exit;
           end;
@@ -1521,13 +1543,13 @@ begin
                  result := Round(extendedFieldValue)
                else
                 begin
-                  result := null;
+                  result := Null;
                   yyerror('Value is not in the range of SMALLINT');
                   Exit;
                 end
              else
               begin
-                result := null;
+                result := Null;
                 yyerror('Type Error ');
                 Exit;
               end;
@@ -1540,13 +1562,13 @@ begin
                  result := Round(extendedFieldValue)
                else
                 begin
-                  result := null;
+                  result := Null;
                   yyerror('Value is not in the range of INTEGER');
                   Exit;
                 end
              else
               begin
-                result := null;
+                result := Null;
                 yyerror('Type Error ');
                 Exit;
               end;
@@ -1559,13 +1581,13 @@ begin
                  result := Round(extendedFieldValue)
                else
                 begin
-                  result := null;
+                  result := Null;
                   yyerror('Value is not in the range of INT64');
                   Exit;
                 end
              else
               begin
-                result := null;
+                result := Null;
                 yyerror('Type Error ');
                 Exit;
               end;
@@ -1580,7 +1602,7 @@ begin
               result := extendedFieldValue
              else
               begin
-                result := null;
+                result := Null;
                 yyerror('Type Error ');
                 Exit;
               end;
@@ -1731,9 +1753,9 @@ begin
                 month := strToIntDef(copy(stVar,1,pos('/',stVar)-1),1);
                 stVar := copy(stVar,pos('/',stVar)+1, length(stVar));
                 day := strToIntDef(stVar,1);
+                extendedFieldValue := EncodeDate(year, month, day);
+                result := extendedFieldValue
               end;
-            extendedFieldValue := EncodeDate(year, month, day);
-            result := extendedFieldValue
           end;
 
         if (sqltype_name = 'TIME') then
@@ -1833,7 +1855,6 @@ var
 function isEquivalentGraph(JoinGraph, idxJoinGraph: GraphStructure): boolean;
 var
   i, j, k, l: Integer;
-  node: string;
   found: boolean;
 begin
   result := false;
@@ -1915,7 +1936,7 @@ var
 
   ldbName: string = '';
   lUserId: string = '';
-  stk: runstacktype;
+  stk: runstacktype = nil;
   i: integer;
   tblName: string = '';
   aliasName: string = '';
@@ -1932,6 +1953,7 @@ var
   j: integer;
   found: boolean;
   database_Name: string = '';
+  file_name: string = '';
   row: array of variant;
   dimSize: integer;
   index: integer;
@@ -1939,12 +1961,7 @@ var
   hasAutoincrement: boolean = false;
   colsType: array of string = nil;
   tblFields: tblStructure;
-  intFieldValue: integer;
-  int64FieldValue: int64;
-  booleanFieldValue: boolean;
-  nnullFieldValue: boolean;
   indexName: string = '';
-  index_type: string = '';
   ordAsc: boolean = True;
   idxAsc: array of boolean = nil;
   Thekeys: array of string;
@@ -1955,17 +1972,7 @@ var
   conditionInstructions: conditionInstructionstype = nil;
   allowcolsNull: array of boolean = nil;
   tbltimestamp: double;
-  executePlan: record
-    joinFlag: boolean;
-    useIndex: boolean;
-    Index: array of record
-      Number: Integer;
-      Name: string;
-      colName: string;
-      Value:variant;
-      mnemonic: integer;
-    end
-  end;
+  executePlan: executePlanType;
 
   ljoinBaseTables: array of string = nil;
   ljoincouples: array of record
@@ -1985,7 +1992,6 @@ var
   index1, index2: integer;
   type_name: string;
   runstk: runstackType;
-  st: string;
   colDefaultValue: variant;
   resultindex: integer;
   resulttable: resultTableType;
@@ -1995,7 +2001,6 @@ var
   dbCounter: integer = 0;
   table_name: string = '';
   Keys: array of variant;
-  InheritedKeys: array of variant;
   index3: integer;
   index_name: string;
   defaultType: integer;
@@ -2013,38 +2018,22 @@ var
   Maxdataref: array of dataPointerType = nil;
   dataref: array of dataPointerType = nil;
   mapdataref: array of Integer = nil;
-  index4: Integer;
-  extendedFieldValue: double;
-  currencyFieldValue: currency;
   stringFieldValue: string;
-  colNames: array of string = nil;
-  colTypes: array of typeset = nil;
-  rowIndex: array[0..254] of Integer;
-  currentTableIndex: Integer;
-  flagdone: boolean;
   Row2: array of variant;
-  whTheBaseTables: array of string;
-  file_name: string = '';
   lcount: Integer;
   exprList: array of array of singleInstructionType = nil;
   index5, index6: integer;
-  varFieldValue: variant;
-  stcondition: string;
-  RowsInserted: integer;
-  counter: LongInt;
-  SR: TRawByteSearchRec;
   ladd_column: boolean = false;
   ldrop_column: boolean = false;
   lrename_table: boolean = false;
   lrename_column: boolean = false;
-  nextfound: boolean;
-  stID: string;
 
   JSONString: record
     kind: (kndObj, kndArr);
     objJSON: array of array of JSONPairType;
     arrJSON: array of array of JSONValueType;
   end;
+
   JPairs: array of JSonPairType = nil;
   JMembers: array of array of JSONPairType = nil;
   membersCounter: Integer = 0;
@@ -2106,10 +2095,10 @@ var
   rowid: DataPointerType;
   rowId1, rowId2: Int64;
   colsTxt: string = '';
-  idxstorage: BtrPlusClass;
   JoinGraph: GraphStructure;
   idxJoinGraph: GraphStructure;
 begin
+  if sqlMemProg = nil then exit;
   if not ((sqlMemProg[high(sqlMemProg)].mnemonic = 1) or
           (sqlMemProg[high(sqlMemProg)].mnemonic = 157) or
           (sqlMemProg[high(sqlMemProg)].mnemonic = 159) or
@@ -2122,12 +2111,12 @@ begin
   optionCreateViewCommand := sqlMemProg[high(sqlMemProg)].mnemonic = 226;
 
 
- // fromTables := nil;
+  // fromTables := nil;
   dbName := lowercase(trim(dbName));
   charsize := 0;
   numsize[0] := 0;
   numsize[1] := 0;
-  dfltValue := null;
+  dfltValue := Null;
 
   //  workingSchema.dbName := 'sample';
 
@@ -2512,7 +2501,7 @@ begin
           expr[high(expr)] := sqlMemProg[i];
           setLength(stk, Length(stk) + 1);
           stk[High(stk)].caseValue := 7;
-          stk[High(stk)].strValue  := 'null';
+          stk[High(stk)].strValue  := 'Null';
         end;
 
         234: // PUSH: option
@@ -3435,7 +3424,7 @@ end;
                           row[7] := 0;  // 0 for integer
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
                           if not row[8] then row[9] := vardef
                         end;
                       if convertType(columnTypeName) = 'INT64' then
@@ -3443,7 +3432,7 @@ end;
                           row[7] := 2;  // 2 for int64
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
                           if not row[8] then row[11] := vardef
                         end;
                       if (convertType(columnTypeName) = 'SINGLE') or
@@ -3453,7 +3442,7 @@ end;
                           row[7] := 3;  // 3 for extended
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
                           if not row[8] then row[12] := vardef
                         end;
                       if convertType(columnTypeName) = 'CURRENCY' then
@@ -3461,7 +3450,7 @@ end;
                           row[7] := 4;  // 4 for currency
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
                           if not row[8] then row[13] := vardef
                         end;
                       if convertType(columnTypeName) = 'TDATETIME' then
@@ -3469,7 +3458,27 @@ end;
                           row[7] := 5;  // 5 for tdatetime
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
+                          if not row[8] then
+                            row[12] := vardef else
+                            row[12] := now;
+                        end;
+                      if convertType(columnTypeName) = 'TDATE' then
+                        begin
+                          row[7] := 5;  // 5 for tdatetime
+                          with columnlist[index1] do
+                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
+                          row[8] := vardef = Null;
+                          if not row[8] then
+                            row[12] := vardef else
+                            row[12] := now;
+                        end;
+                      if convertType(columnTypeName) = 'TTIME' then
+                        begin
+                          row[7] := 5;  // 5 for tdatetime
+                          with columnlist[index1] do
+                            vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
+                          row[8] := vardef = Null;
                           if not row[8] then
                             row[12] := vardef else
                             row[12] := now;
@@ -3479,7 +3488,7 @@ end;
                           row[7] := 6;  // 6 for boolean
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
                           if not row[8] then row[14] := vardef
                         end;
                       if convertType(columnTypeName) = 'STRING' then
@@ -3487,7 +3496,7 @@ end;
                           row[7] := 7; // 7 for string
                           with columnlist[index1] do
                             vardef := IsCompatibleType(columnDefaultValue,columnTypeName,numTypeSize[0],numTypeSize[1]);
-                          row[8] := vardef = null;
+                          row[8] := vardef = Null;
                           if not row[8] then row[10] := vardef
                         end;
                     end
@@ -3896,7 +3905,7 @@ end;
         // Check if the same column exist
 
         for index1 := low(columnList) to high(columnList) do
-          if colsName[high(colsName)] =
+          if colsName[low(colsName)] =
             columnlist[index1].columnName then
           begin
             yyerror('Duplicate declaration of Column Name in the same table ' +
@@ -4278,7 +4287,8 @@ end;
               case tblFields.columns[resultindex].coltype of
                 inttype, smallinttype: colsType[resultindex] := 'INTEGER';
                 int64type: colsType[resultindex] := 'INT64';
-                extendedtype, tdatetimetype: colsType[resultindex] := 'EXTENDED';
+                extendedtype, tdatetimetype, tdatetype, ttimetype:
+                  colsType[resultindex] := 'EXTENDED';
                 currencytype: colsType[resultindex] := 'CURRENCY';
                 booleantype: colsType[resultindex] := 'BOOLEAN';
                 stringtype: colsType[resultindex] :=
@@ -4334,7 +4344,7 @@ end;
                                             end
                                        end;
                                     end;
-                                  if setstk[index1].caseValue = 7 then row[j] := null;
+                                  if setstk[index1].caseValue = 7 then row[j] := Null;
                                   if setstk[index1].caseValue = 0 then row[j] := setstk[index1].boolValue;
                                   if setstk[index1].caseValue = 4 then row[j] := setstk[index1].extValue;
                                   if setstk[index1].caseValue = 6 then row[j] := setstk[index1].strValue;
@@ -4516,7 +4526,8 @@ end;
                 case tblFields.columns[resultindex].coltype of
                   inttype, smallinttype: colsType[resultindex] := 'INTEGER';
                   int64type: colsType[resultindex] := 'INT64';
-                  extendedtype, tdatetimetype: colsType[resultindex] := 'EXTENDED';
+                  extendedtype, tdatetimetype, tdatetype, ttimetype:
+                    colsType[resultindex] := 'EXTENDED';
                   currencytype: colsType[resultindex] := 'CURRENCY';
                   booleantype: colsType[resultindex] := 'BOOLEAN';
                   stringtype: colsType[resultindex] :=
@@ -4584,7 +4595,7 @@ end;
           hasDefault := True;
           case stk[high(stk)].caseValue of
             7: // if colname allow null then
-              dfltValue := null;
+              dfltValue := Null;
             0: dfltValue := stk[High(stk)].boolValue;
             4, 8: dfltValue := stk[High(stk)].extValue;
             6: dfltValue := stk[High(stk)].strValue;
@@ -5088,9 +5099,9 @@ end;
                                       columns[index3].colname) then
                                       break;
                                   setlength(keys, length(keys) + 1);
-                                  if (row[index3] = null) then
+                                  if (row[index3] = Null) then
                                     begin
-                                      keys[high(Keys)] := 'NULL';
+                                      keys[high(Keys)] := 'Null';
                                     end
                                    else
                                     keys[high(Keys)] := Row[index3];
@@ -5374,7 +5385,7 @@ end;
                    for index1 := 0 to tblFields.numCols - 1 do
                      begin
                        setLength( Row2, length(Row2) + 1);
-                       if row[index1] = null then
+                       if row[index1] = Null then
                          begin
                            stringFieldValue := 'Null';
                            Row2[high(Row2)] := stringFieldvalue;
@@ -5661,6 +5672,16 @@ end;
                                 row[12] := columnlist[index1].columnDefaultValue;
                               end;
                             if convertType(columnTypeName) = 'TDATETIME' then
+                              begin
+                                row[7] := 5;  // 5 for tdatetime
+                                row[11] := @columnlist[index1].columnDefaultValue;
+                              end;
+                            if convertType(columnTypeName) = 'TDATE' then
+                              begin
+                                row[7] := 5;  // 5 for tdatetime
+                                row[11] := @columnlist[index1].columnDefaultValue;
+                              end;
+                            if convertType(columnTypeName) = 'TTIME' then
                               begin
                                 row[7] := 5;  // 5 for tdatetime
                                 row[11] := @columnlist[index1].columnDefaultValue;
@@ -5952,7 +5973,7 @@ end;
                           inscols[index1].value :=
                             isCompatibleType(columnDefaultValue,columnTypeName,
                               dim1,dim2) else
-                        inscols[index1].value := null
+                        inscols[index1].value := Null
                 end;
 
 
@@ -6114,7 +6135,7 @@ end;
               0: valuesList[j] := stk[j].boolValue;
               4,8: valuesList[j] := stk[j].extValue;
               6: valuesList[j] := stk[j].strValue;
-              7: valuesList[j] := null;
+              7: valuesList[j] := Null;
             end;
         end;
 
@@ -6230,13 +6251,12 @@ end;
                             inscols[index1].value := double(now);
                           end else
                           begin
-                            nnullFieldValue := False;
                             (* check for constraints come later
                                If you specify no default value for a column, the default is NULL
                                  unless you place a NOT NULL constraint on the column. In this case,
                                  no default exists.
                             *)
-                              inscols[index1].value := null
+                              inscols[index1].value := Null
                           end;
                end;
 
@@ -6252,7 +6272,7 @@ end;
                   case tblFields.constraints[index2].cnstrtype of
                     1: // Not Null constraint
                       begin
-                        if (inscols[tblFields.constraints[index2].nnullcol].value = null) then
+                        if (inscols[tblFields.constraints[index2].nnullcol].value = Null) then
                           begin
                             yyerror('Column ' + tblFields.columns[tblFields.constraints[index2].nnullcol].colname + ' not allow null values');
                             Exit;
@@ -6267,7 +6287,7 @@ end;
                         // check by the index if the value exists
                         for index1 := 0 to tblFields.numCols - 1 do
                           if isbitset(tblFields.constraints[index2].pkCols[0], index1) then
-                            if inscols[index1].value = null then
+                            if inscols[index1].value = Null then
                               begin
                                 yyerror('Column ' + tblFields.columns[index1].colname + ' not allow null values');
                                 Exit;
@@ -6321,9 +6341,9 @@ end;
                     tblFields.columns[index3].colname) then
                     break;
                 setlength(keys, length(keys) + 1);
-                if (row[index3] = null) then
+                if (row[index3] = Null) then
                 begin
-                  keys[high(Keys)] := 'NULL';
+                  keys[high(Keys)] := 'Null';
                 end
                 else
                 keys[high(Keys)] := Row[index3];
@@ -6332,10 +6352,14 @@ end;
 
               tblFields.idxdata[index1].idxstorage.AddKey(keys,{strToint(}rowId{)});
             end;
+
           for index1 := 0 to length(workingSchema.joinidxdata) - 1  do
             for index2 := 0 to high(workingSchema.joinidxdata[index1].joinBaseTables) do
               if workingSchema.joinidxdata[index1].joinBaseTables[index2] = tblFields.tblName then
-                workingSchema.joinidxdata[index1].idxstorage.AddKey(tblFields.tblName,row,rowId);
+                begin
+                  rowId := tblFields.storage.lastRow;
+                  workingSchema.joinidxdata[index1].idxstorage.AddKey(tblFields.tblName,row,rowId);
+                end;
           yyacceptmessage('Row inserted ');
         end;
 
@@ -6909,86 +6933,23 @@ end;
 
           // look for index on the columns
           executeplan.useIndex := false;
-          executeplan.Index := nil;
           executeplan.joinFlag := false;
+          executeplan.Index := nil;
 
           if conditionInstructions = nil then
             begin
               // read sequentially the data
-              executeplan.useIndex := false;
+              // executeplan.useIndex := false;
               if flagOrderClause then
                 begin
                   // read sequentially by ordering
                 end
             end else
             begin
-              // check the column names that are used
-              // get the list of expressions, every expression hold an equality ... between column name and a value ...
-              // check for an existing index on the column
-              exprList := nil;
-              setLength(exprList,length(exprList) + 1);
-              exprList[high(exprList)] := nil;
-              for index := low(conditionInstructions) to high(conditionInstructions) do
-                begin
-                  // save all instructions till find 50..55 and in the future between, like and In
-                  // for 50..55 there is check for index and not on 42..44 later should be done
-                  if not (conditionInstructions[index].mnemonic in [42..44]) then // 'NOT', 'OR', 'AND'
-                    begin
-                      setlength(exprList[high(exprList)],length(exprList[high(exprList)])+1);
-                      exprList[high(exprList),high(exprList[high(exprList)])] := conditionInstructions[index];
-                    end;
-                  if conditionInstructions[index].mnemonic in [50..55] then // 'EQ', 'LT', 'GT', 'NE', 'LE', 'GE'
-                    setLength(exprList,length(exprList) + 1);
-                  // check the exprList for join
-                end;
-              setLength(exprList,length(exprList) - 1);
+              analyzeQuery(conditionInstructions,executePlan);
+
               executePlan.joinFlag := fromTableslen <> 1;
-              if not executePlan.joinFlag then
-                begin
-                  // go through exprlist and get one by one to see the index
-                  // Order By translated into find().sort
-
-                  for index5 := 0 to length(exprList) - 1 do
-                    begin
-                      for index6 := 0 to length(exprList[index5])  - 1 do
-                        begin
-                          if exprList[index5,index6].mnemonic = 151 then
-                            begin
-
-                              // check the indexes to see if there is one on the column
-                              with fromtables[0].fromFields do
-                                for index2 := low(idxData) to high(idxData) do
-                                  begin
-                                    with idxData[index2] do
-                                      for index3 := low(idxkeys) to high(idxkeys) do
-                                        if tblFields.tblName + '.' + idxkeys[index3].colName = exprList[index5,index6].stvalue then
-                                          begin
-                                            executePlan.useIndex := true;
-                                            setlength(executeplan.Index,length(executeplan.Index)+1);
-                                            executeplan.Index[high(executePlan.Index)].Name := idxData[index2].idxname;
-                                            executeplan.Index[high(executePlan.Index)].Number := index2;
-                                            executeplan.Index[high(executePlan.Index)].colName := idxkeys[index3].colName;
-                                          end;
-                                  end;
-                              break;
-                            end;
-                        end;
-                      //executeplan.useIndex := false;
-                      if executeplan.useIndex then
-                        begin
-                          runstk := nil;
-                          for index6 := low(exprList[index5]) + 1 to high(exprList[index5]) - 1 do
-                            runStack(exprList[index5,index6],runstk);
-                          case runstk[high(runstk)].caseValue of
-                            0: executeplan.Index[high(executePlan.Index)].Value := runstk[high(runstk)].boolValue;
-                            4: executeplan.Index[high(executePlan.Index)].Value := runstk[high(runstk)].extValue;
-                            6: executeplan.Index[high(executePlan.Index)].Value := runstk[high(runstk)].strValue;
-                          end;
-                          executeplan.Index[high(executePlan.Index)].mnemonic := exprList[index5,high(exprList[index5])].mnemonic;
-                        end;
-                     { TODO : check if the type of the column math the value in runstk }
-                    end;
-                end else
+              if executePlan.joinFlag then
                 begin
                   // create the join graph for the query
                   SetLength(JoinGraph,Length(fromTables));
@@ -7073,42 +7034,6 @@ end;
 
           ResultRows := 0;
 
-          (*
-          setlength(keys,1);
-          setlength(dataRef,1);
-          setlength(InheritedKeys,1);
-          flag := false; //momentarily
-          if analyzeQuery(conditionInstructions, idxstorage) then
-            begin
-              flag := true;
-              idxStorage.ClearKey;
-              repeat
-                idxStorage.NextKey(Keys,InheritedKeys,DataRef);
-                if DataRef[0] <> nullDataValue then
-                  begin
-                    rowId1 := DataRef[0];
-                    if not fromTables[0].fromFields.storage.existRow(rowId1) then
-                      continue;
-
-                    fromTables[0].fromFields.storage.returnRow(
-                      rowId1, fromTables[0].fromrow);
-                    for resultindex := 0 to length(fromTables[0].fromrow) - 1 do
-                      begin
-                        resulttable.resultRow[resultindex] :=
-                          fromTables[0].fromrow[resultindex];
-                      end;
-                    if rowcondition(conditionInstructions,resultTable) then
-                      begin
-                        resultRows := resultRows + 1;
-                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
-                      end
-                  end;
-              until dataref[0] = nullDataValue;
-              idxstorage.Free;
-            end;
-*)
-
-          //if not flag then //momentarily
 
           // departments employees job_history jobs locations countries
           if executePlan.useIndex then // momenteraly
@@ -7139,69 +7064,9 @@ end;
                     extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
                   end;
 
-
-
-
-
-
-
                 end else
                 begin
-                  if executeplan.Index[index].mnemonic = 50 then // eq
-                    begin
-                      if (fromTables[0].fromFields.idxdata[0].idxname =  executeplan.Index[index].Name) and
-                         (fromTables[0].fromFields.idxdata[0].idxkeys[0].colName = executeplan.Index[index].colName) then
-                        begin
-                          // Momentarely
-                          setlength(keys,1);
-                          setlength(dataRef,1);
-                          Keys[0] := conditionInstructions[1].stvalue;
-                          // Momentarely
-
-                          // A better way for the delete to not have to use nextkey
-                          fromTables[0].fromFields.idxdata[0].idxstorage.FindKey(Keys,DataRef[0]);
-                          if DataRef[0] <> nullDataValue then
-                             begin
-                               flag := true;
-                               repeat
-
-                                 rowId1 := {StrToInt(}DataRef[0]{)};
-                                 while not(fromTables[0].fromFields.storage.existRow(rowId1)) do
-                                   begin
-                                     fromTables[0].fromFields.idxdata[0].idxstorage.nextKey(Keys,DataRef[0]);
-                                     rowId1 := {StrToInt(}DataRef[0]{)};
-                                     if keys[0] <> conditionInstructions[1].stvalue then
-                                       begin
-                                         flag := false;
-                                         break;
-                                       end;
-                                   end;
-
-                                 rowId1 := {StrToInt(}DataRef[0]{)};
-                                 if (fromTables[0].fromFields.storage.existRow(rowId1)) and flag then
-                                   begin
-                                     fromTables[0].fromFields.storage.returnRow(
-                                       rowId1, fromTables[0].fromrow);
-                                     for resultindex := 0 to length(fromTables[0].fromrow) - 1 do
-                                       begin
-                                         resulttable.resultRow[resultindex] :=
-                                           fromTables[0].fromrow[resultindex];
-                                       end;
-                                     if rowcondition(conditionInstructions,resultTable) then
-                                       begin
-                                         resultRows := resultRows + 1;
-                                         extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
-                                       end
-                                   end;
-
-
-                                 fromTables[0].fromFields.idxdata[0].idxstorage.nextKey(Keys,DataRef[0]);
-
-                               until keys[0] <> conditionInstructions[1].stvalue;
-                             end;
-                        end;
-                    end;
-
+                  // use executeplan to get the rows
                 end
             end
            else

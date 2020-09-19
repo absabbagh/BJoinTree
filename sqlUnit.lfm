@@ -183,6 +183,7 @@ object Form1: TForm1
     Top = 545
     Width = 59
     TabOrder = 13
+    Text = 'SQL\'
   end
   object Edit6: TEdit
     Left = 363
