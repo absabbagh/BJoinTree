@@ -1967,6 +1967,8 @@ var
   Thekeys: array of string;
   expr: progInstrunctionsType = nil;
   fromTableslen: byte = 0;
+  container: array of int64 = nil;
+  shiftresultindex: Integer = 0;
   aliasindex: integer;
   tblcolName: string = '';
   conditionInstructions: conditionInstructionstype = nil;
@@ -7070,6 +7072,55 @@ end;
                 end
             end
            else
+
+            begin
+              setlength(container,fromTablesLen);
+              for index := 0 to fromTablesLen - 1 do
+                container[index] := 1;
+              repeat
+                shiftresultindex := 0;
+                for index := 0 to fromTablesLen - 1 do
+                  begin
+                    if fromTables[index].fromFields.storage.existRow(container[index]) then
+                      begin
+                        fromTables[index].fromFields.storage.returnRow(
+                          container[index], fromTables[index].fromrow);
+                        if index > 0 then shiftresultindex := shiftresultindex + length(fromTables[index -1].fromrow);
+                        for resultindex := 0 to length(fromTables[index].fromrow) - 1 do
+                          begin
+                            resulttable.resultRow[resultindex + shiftresultindex] :=
+                              fromTables[index].fromrow[resultindex];
+                          end;
+                      end
+                  end;
+                if rowcondition(conditionInstructions,resultTable) then
+                  begin
+                    resultRows := ResultRows + 1;
+                    extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                  end;
+                index2 := fromTablesLen - 1;
+                flag := false;
+                repeat
+                  container[index2] += 1;
+                  if flag then container[index2] -= 1;
+                  found := false;
+                  flag := false;
+                  if container[index2] = fromTables[index2].fromFields.storage.lastRow + 1 then
+                    begin
+                      if index2 <> 0 then
+                        begin
+                          container[index2] := 1;
+                          container[index2-1] += 1;
+                          index2 -= 1;
+                          flag := true
+                        end
+                    end else found := true;
+                    if index2 = 0 then found := true
+                until found;
+              until container[0] = fromTables[0].fromFields.storage.lastRow + 1;
+            end;
+
+            (*
             case fromTablesLen of
               1:
               begin
@@ -7176,7 +7227,7 @@ end;
                       end;
               end;
             end;
-
+            *)
           yyacceptmessage('SELECT STATEMENT: ' + intToStr(ResultRows));
         end;
       end;
