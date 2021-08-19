@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units Count="31">
+      <Unit0>
+        <Filename Value="ndyacc.dpr"/>
+        <IsPartOfProject Value="True"/>
+        <TopLine Value="2604"/>
+        <CursorPos X="23" Y="2608"/>
+        <UsageCount Value="25"/>
+        <Bookmarks Count="1">
+          <Item0 X="3" Y="2599" ID="1"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="tlexerparser.pas"/>
+        <UnitName Value="TLexerParser"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="21"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="yaccmsgs.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="144"/>
+        <CursorPos X="40" Y="165"/>
+        <UsageCount Value="11"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="11"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="yaccsem.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="88"/>
+        <CursorPos Y="88"/>
+        <UsageCount Value="11"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="yacctabl.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="100"/>
+        <CursorPos Y="106"/>
+        <UsageCount Value="10"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="yaccpars.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="23"/>
+        <CursorPos Y="33"/>
+        <UsageCount Value="11"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\lexlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos Y="56"/>
+        <UsageCount Value="10"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="yaccbase.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="88"/>
+        <CursorPos X="36" Y="106"/>
+        <UsageCount Value="11"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="sql.y"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="89"/>
+        <CursorPos Y="89"/>
+        <UsageCount Value="10"/>
+        <Bookmarks Count="2">
+          <Item0 X="13" Y="1169" ID="9"/>
+          <Item1 X="53" Y="1402" ID="3"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="sql.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="15541"/>
+        <CursorPos X="6" Y="15557"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="yaccclos.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="50" Y="6"/>
+        <UsageCount Value="11"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="yacclook.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="23"/>
+        <CursorPos Y="33"/>
+        <UsageCount Value="11"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="yacclr0.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="23"/>
+        <CursorPos Y="29"/>
+        <UsageCount Value="11"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="..\..\..\..\..\BJoinTree-master\BJoinTree-master\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="57"/>
+        <CursorPos Y="64"/>
+        <UsageCount Value="10"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="..\..\..\..\..\BJoinTree-master\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="141"/>
+        <CursorPos Y="156"/>
+        <UsageCount Value="10"/>
+        <Bookmarks Count="1">
+          <Item0 X="19" Y="487" ID="1"/>
+        </Bookmarks>
+      </Unit15>
+      <Unit16>
+        <Filename Value="..\..\..\..\..\BJoinTree-master\dlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="9"/>
+        <UsageCount Value="10"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="yyparse.cod"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="sql.lst"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1627"/>
+        <CursorPos Y="1596"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="sql1.pas"/>
+        <UnitName Value="sql"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="429"/>
+        <CursorPos X="24" Y="447"/>
+        <UsageCount Value="10"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="ndyacc.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="788"/>
+        <CursorPos X="13" Y="809"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="..\..\test\yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="88"/>
+        <CursorPos X="4" Y="109"/>
+        <UsageCount Value="10"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="..\..\test\generated\expr.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="12"/>
+        <CursorPos Y="12"/>
+        <UsageCount Value="10"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="..\..\..\..\..\BJoinTree-master\sql2.pas"/>
+        <UnitName Value="sql"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="516"/>
+        <CursorPos Y="530"/>
+        <UsageCount Value="10"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="..\..\..\..\..\BJoinTree-master\sql1.pas"/>
+        <UnitName Value="sql"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="505"/>
+        <CursorPos X="31" Y="526"/>
+        <UsageCount Value="10"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="..\..\..\..\..\BJoinTree-master\sql.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="155"/>
+        <CursorPos Y="155"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="yyparse - Copy.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="91"/>
+        <CursorPos Y="112"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="..\lex\sqlLEX.cod"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="124" Y="20"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="..\lex\sqlLEX.l"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="5" Y="3"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="10"/>
+        <CursorPos X="14" Y="14"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="sql.cod"/>
+        <EditorIndex Value="2"/>
+        <CursorPos Y="11"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit30>
+    </Units>
+    <JumpHistory Count="29" HistoryIndex="28">
+      <Position1>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="143" Column="62" TopLine="137"/>
+      </Position1>
+      <Position2>
+        <Filename Value="ndyacc.dpr"/>
+      </Position2>
+      <Position3>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="72" Column="23" TopLine="54"/>
+      </Position3>
+      <Position4>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="180" Column="23" TopLine="162"/>
+      </Position4>
+      <Position5>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="585" Column="23" TopLine="569"/>
+      </Position5>
+      <Position6>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2069" Column="23" TopLine="2052"/>
+      </Position6>
+      <Position7>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2597" Column="53" TopLine="2583"/>
+      </Position7>
+      <Position8>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2594" Column="3" TopLine="2584"/>
+      </Position8>
+      <Position9>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="98" Column="6" TopLine="89"/>
+      </Position9>
+      <Position10>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="119" TopLine="118"/>
+      </Position10>
+      <Position11>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2606" Column="10" TopLine="2588"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2600" Column="21" TopLine="2583"/>
+      </Position12>
+      <Position13>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2604" Column="41" TopLine="2592"/>
+      </Position13>
+      <Position14>
+        <Filename Value="ndyacc.dpr"/>
+        <Caret Line="2607" TopLine="2598"/>
+      </Position14>
+      <Position15>
+        <Filename Value="sql.y"/>
+        <Caret Line="242" TopLine="221"/>
+      </Position15>
+      <Position16>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="50" TopLine="29"/>
+      </Position16>
+      <Position17>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="10" Column="105"/>
+      </Position17>
+      <Position18>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="82" Column="42" TopLine="64"/>
+      </Position18>
+      <Position19>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="87" Column="42" TopLine="69"/>
+      </Position19>
+      <Position20>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="92" Column="42" TopLine="74"/>
+      </Position20>
+      <Position21>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="93" Column="42" TopLine="75"/>
+      </Position21>
+      <Position22>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="259" Column="42" TopLine="241"/>
+      </Position22>
+      <Position23>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="274" Column="5" TopLine="256"/>
+      </Position23>
+      <Position24>
+        <Filename Value="..\lex\sqlLEX.pas"/>
+        <Caret Line="82" Column="42" TopLine="71"/>
+      </Position24>
+      <Position25>
+        <Filename Value="sql.y"/>
+        <Caret Line="567" TopLine="546"/>
+      </Position25>
+      <Position26>
+        <Filename Value="sql.y"/>
+        <Caret Line="2"/>
+      </Position26>
+      <Position27>
+        <Filename Value="sql.y"/>
+        <Caret Line="266" Column="3" TopLine="248"/>
+      </Position27>
+      <Position28>
+        <Filename Value="sql.pas"/>
+        <Caret Line="47" Column="21" TopLine="42"/>
+      </Position28>
+      <Position29>
+        <Filename Value="sql.pas"/>
+        <Caret Line="10" Column="9"/>
+      </Position29>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode="default"/>
+    </RunParams>
+    <HistoryLists Count="2">
+      <List0 Name="LaunchingApplication" Type="File" Count="2">
+        <Item1 Value="\usr\bin\xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+        <Item2 Value="C:\WINDOWS\system32\cmd.exe /C ${TargetCmdLine}"/>
+      </List0>
+      <List1 Name="CommandLineParameters" Count="1">
+        <Item1 Value="sql.y sql.pas"/>
+      </List1>
+    </HistoryLists>
+  </ProjectSession>
+</CONFIG>
