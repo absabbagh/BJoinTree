@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpc.exe" Date="1390977449"/>
-  <Params Value=" -MDelphi -Scghi -CX -O1 -l -vewnhibq &quot;-FuC:\Users\Alan Sabbagh\Documents\Parsers\Lazly\src\lex\&quot; &quot;-oC:\Users\Alan Sabbagh\Documents\Parsers\Lazly\src\lex\ndlex.exe&quot; ndlex.dpr"/>
-</CONFIG>
