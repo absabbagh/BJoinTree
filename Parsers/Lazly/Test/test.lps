@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="test.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+      </Unit>
+      <Unit>
+        <Filename Value="frmTest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="frmtest"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uStreamLexer.pas"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="21" Y="7"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="generated\expr.pas"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="6"/>
+        <CursorPos X="19" Y="17"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="generated\expr.y"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="9"/>
+        <CursorPos Y="9"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit>
+      <Unit>
+        <Filename Value="lexlib.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="159"/>
+        <CursorPos X="15" Y="169"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="yacclib.pas"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="30"/>
+        <CursorPos X="3" Y="50"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\yacc\expr.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="45"/>
+        <CursorPos Y="59"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\yacc\ndyacc.y"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit>
+      <Unit>
+        <Filename Value="generated\exprlex.cod"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="9"/>
+        <CursorPos X="12" Y="20"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit>
+      <Unit>
+        <Filename Value="generated\exprparse.cod"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="23" Y="8"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\yacc\yyparse - Copy.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="125"/>
+        <CursorPos X="46" Y="146"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\yacc\yyparse.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="16"/>
+        <CursorPos Y="35"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit>
+      <Unit>
+        <Filename Value="generated\exprlex.pas"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="236"/>
+        <CursorPos X="12" Y="247"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="generated\expr.pas"/>
+        <Caret Line="17" Column="19" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.pas"/>
+        <Caret Line="247" Column="11" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.pas"/>
+        <Caret Line="246" Column="12" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\expr.pas"/>
+        <Caret Line="17" Column="19" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.pas"/>
+        <Caret Line="247" Column="13" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.pas"/>
+        <Caret Line="251" Column="6" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.pas"/>
+        <Caret Line="298" Column="33" TopLine="280"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.cod"/>
+        <Caret Line="76" TopLine="55"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.cod"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.cod"/>
+        <Caret Line="20" Column="13" TopLine="2"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.cod"/>
+        <Caret Line="24" Column="7" TopLine="6"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprlex.cod"/>
+        <Caret Line="71" Column="33" TopLine="53"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="5"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="8" Column="23"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="17" Column="27"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="36" Column="9" TopLine="18"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="113" Column="13" TopLine="95"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="115" Column="15" TopLine="97"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="124" Column="7" TopLine="106"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="131" Column="49" TopLine="113"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="141" Column="28" TopLine="123"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="146" Column="21" TopLine="128"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="151" Column="37" TopLine="133"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="162" Column="39" TopLine="144"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="184" Column="42" TopLine="166"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="186" Column="18" TopLine="168"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="202" Column="14" TopLine="184"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="222" Column="14" TopLine="204"/>
+      </Position>
+      <Position>
+        <Filename Value="generated\exprparse.cod"/>
+        <Caret Line="234" Column="13" TopLine="213"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
