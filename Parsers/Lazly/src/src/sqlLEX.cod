@@ -1,0 +1,130 @@
+%%
+
+function TLexer.get_char : AnsiChar;
+var
+  i: integer;
+begin
+  if (bufptr = 0) and (yycolno <= length(yyInputText)) then
+  begin
+    yyline := yyinputText;
+    Inc(yylineno);
+    yycolno := 1;
+    buf[1]  := nl;
+    for i := 1 to length(yyline) do
+      buf[i + 1] := yyline[length(yyline) - i + 1];
+    Inc(bufptr, length(yyline) + 1);
+  end;
+  if bufptr > 0 then
+  begin
+    Result := buf[bufptr];
+    Dec(bufptr);
+    Inc(yycolno);
+  end
+  else
+  begin
+    yycolno := 1;
+    Result := #0;
+  end
+end;
+
+procedure TLexer.unget_char(c: AnsiChar);
+begin
+  (*if bufptr = max_chars then
+    fatal('input buffer overflow');*)
+  Inc(bufptr);
+  Dec(yycolno);
+  buf[bufptr] := c;
+end;
+
+procedure TLexer.put_char(c: AnsiChar);
+begin
+
+end(*put_char*);
+
+procedure TLexer.yyclear;
+begin
+  inherited;
+  yycolno := 1;
+  bufptr := 0;
+end;
+
+function TLexer.yywrap: boolean;
+begin
+  Result := True;
+end;
+
+
+function TLexer.parse() : integer;
+
+procedure yyaction ( yyruleno : Integer );
+  (* local definitions: *)
+%%
+begin
+  (* actions: *)
+  case yyruleno of
+%%
+  end;
+end(*yyaction*);
+
+(* DFA table: *)
+%%
+
+var yyn : Integer;
+
+label start1, scan, action;
+
+begin
+
+start1:
+
+  (* initialize: *)
+
+  yynew;
+
+scan:
+
+  (* mark positions and matches: *)
+
+  for yyn := yykl[yystate] to     yykh[yystate] do yymark(yyk[yyn]);
+  for yyn := yymh[yystate] downto yyml[yystate] do yymatch(yym[yyn]);
+
+  if yytl[yystate]>yyth[yystate] then goto action; (* dead state *)
+
+  (* get next character: *)
+
+  yyscan;
+
+  (* determine action: *)
+
+  yyn := yytl[yystate];
+  while (yyn<=yyth[yystate]) and not (yyactchar in yyt[yyn].cc) do inc(yyn);
+  if yyn>yyth[yystate] then goto action;
+    (* no transition on yyactchar in this state *)
+
+  (* switch to new state: *)
+
+  yystate := yyt[yyn].s;
+
+  goto scan;
+
+action:
+
+  (* execute action: *)
+
+  if yyfind(yyrule) then
+    begin
+      yyaction(yyrule);
+      if yyreject then goto action;
+    end
+  else if not yydefault and yywrap then
+    begin
+      yyclear;
+      return(0);
+    end;
+
+  if not yydone then goto start1;
+
+  Result := yyretval;
+
+end(*yylex*);
+
