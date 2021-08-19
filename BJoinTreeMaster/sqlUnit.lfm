@@ -1,0 +1,220 @@
+object Form1: TForm1
+  Left = 472
+  Height = 578
+  Top = 91
+  Width = 737
+  Caption = 'Form1'
+  ClientHeight = 578
+  ClientWidth = 737
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  OnActivate = FormActivate
+  OnClose = FormClose
+  LCLVersion = '2.2.0.1'
+  object Label1: TLabel
+    Left = 48
+    Height = 13
+    Top = 197
+    Width = 72
+    Caption = 'SQL Statement'
+  end
+  object Label2: TLabel
+    Left = 447
+    Height = 13
+    Top = 197
+    Width = 81
+    Caption = 'Memory Program'
+  end
+  object Button2: TButton
+    Left = 309
+    Height = 25
+    Top = 273
+    Width = 129
+    Caption = 'Parse SQL statement'
+    OnClick = Button2Click
+    TabOrder = 0
+  end
+  object Memo1: TMemo
+    Left = 48
+    Height = 145
+    Top = 216
+    Width = 241
+    Enabled = False
+    TabOrder = 1
+  end
+  object Memo2: TMemo
+    Left = 447
+    Height = 145
+    Top = 216
+    Width = 241
+    TabOrder = 2
+  end
+  object Memo3: TMemo
+    Left = 48
+    Height = 145
+    Top = 390
+    Width = 241
+    TabOrder = 3
+  end
+  object StringGrid1: TStringGrid
+    Left = 48
+    Height = 157
+    Top = 24
+    Width = 641
+    ColCount = 4
+    DefaultColWidth = 150
+    TabOrder = 4
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+  end
+  object Label3: TLabel
+    Left = 48
+    Height = 13
+    Top = 8
+    Width = 35
+    Caption = 'Results'
+  end
+  object Label4: TLabel
+    Left = 48
+    Height = 13
+    Top = 370
+    Width = 90
+    Caption = 'SELECT Processing'
+  end
+  object Memo4: TMemo
+    Left = 447
+    Height = 145
+    Top = 390
+    Width = 241
+    TabOrder = 5
+  end
+  object Label5: TLabel
+    Left = 447
+    Height = 13
+    Top = 370
+    Width = 52
+    Caption = 'MESSAGES'
+  end
+  object Button1: TButton
+    Left = 48
+    Height = 25
+    Top = 543
+    Width = 75
+    Caption = 'LoadCSV'
+    OnClick = Button1Click
+    TabOrder = 6
+  end
+  object Edit1: TEdit
+    Left = 129
+    Height = 21
+    Top = 543
+    Width = 160
+    TabOrder = 7
+    Text = 'DEPARTMENTS.csv'
+  end
+  object Button5: TButton
+    Left = 328
+    Height = 25
+    Top = 508
+    Width = 75
+    Caption = 'Test index'
+    OnClick = Button5Click
+    TabOrder = 8
+  end
+  object Label6: TLabel
+    Left = 368
+    Height = 13
+    Top = 6
+    Width = 61
+    Caption = 'PASSWORD:'
+  end
+  object Edit7: TEdit
+    Left = 433
+    Height = 21
+    Top = 2
+    Width = 123
+    TabOrder = 9
+    Text = 'password'
+  end
+  object Button6: TButton
+    Left = 448
+    Height = 25
+    Top = 544
+    Width = 75
+    Caption = 'LoadSQL'
+    OnClick = Button6Click
+    TabOrder = 10
+  end
+  object Edit3: TEdit
+    Left = 528
+    Height = 21
+    Top = 543
+    Width = 160
+    TabOrder = 11
+    Text = 'test.sql'
+  end
+  object Label7: TLabel
+    Left = 149
+    Height = 13
+    Top = 6
+    Width = 44
+    Caption = 'USER ID:'
+  end
+  object Edit4: TEdit
+    Left = 197
+    Height = 21
+    Top = 2
+    Width = 123
+    TabOrder = 12
+    Text = 'superuser'
+  end
+  object Edit5: TEdit
+    Left = 297
+    Height = 21
+    Top = 545
+    Width = 59
+    TabOrder = 13
+    Text = 'SQL\'
+  end
+  object Edit6: TEdit
+    Left = 363
+    Height = 21
+    Top = 545
+    Width = 80
+    TabOrder = 14
+    Text = '0'
+  end
+  object Button8: TButton
+    Left = 328
+    Height = 25
+    Top = 222
+    Width = 75
+    Caption = 'CONNECT'
+    OnClick = Button8Click
+    TabOrder = 15
+  end
+  object Label9: TLabel
+    Left = 218
+    Height = 13
+    Top = 192
+    Width = 87
+    Caption = 'DATABASE NAME:'
+  end
+  object Edit2: TEdit
+    Left = 310
+    Height = 21
+    Top = 187
+    Width = 123
+    Enabled = False
+    TabOrder = 16
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 500
+    Left = 232
+    Top = 360
+  end
+end
