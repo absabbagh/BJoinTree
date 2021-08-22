@@ -1,0 +1,4 @@
+a=2 <enter>
+b=6 <enter>
+c=4 <enter>
+a*b+c <enter>
