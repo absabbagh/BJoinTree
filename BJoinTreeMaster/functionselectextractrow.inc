@@ -109,7 +109,11 @@ begin
   *)
 
 
-
+  if rightexpr = nil then
+    begin
+      setlength(rightexpr,length(leftexpr));
+      rightexpr[0] := leftexpr[0]
+    end;
   found := false;
   if rightexpr[high(rightexpr)].caseValue <> 10 then
     begin
@@ -185,7 +189,13 @@ if not found then
                   //executePlan.Index[0].tblName := leftexpr[0].strValue;
                   //executePlan.Index[0].mnemonic := 50; // EQ
                   // executePlan.Index[0].Name ;
-                  executePlan.Index[high(executePlan.Index)].Value := rightexpr[0].extValue;
+                  case rightexpr[0].caseValue of
+                    0: executePlan.Index[high(executePlan.Index)].Value := rightexpr[0].boolValue;
+                    4: executePlan.Index[high(executePlan.Index)].Value := rightexpr[0].extValue;
+                    6: executePlan.Index[high(executePlan.Index)].Value := rightexpr[0].strValue;
+                    7: executePlan.Index[high(executePlan.Index)].Value := null;
+                 end;
+
                   leftexpr := nil;
                   rightexpr := nil;
                 end;
@@ -193,7 +203,7 @@ if not found then
       end;
 
   //startFrom := length(runstk);
-  i := i;
+  //i := i;
 
 end;
 
@@ -1089,6 +1099,15 @@ begin
         runstk[High(runstk)].int64Value := 0;
       end;
 
+   241: // PUSH: NULL
+      begin
+        setLength(runstk,Length(runstk)+1);
+        runstk[High(runstk)].caseValue := 7;
+        runstk[High(runstk)].boolValue := false;
+        runstk[High(runstk)].intValue := 0;
+        runstk[High(runstk)].int64Value := 0;
+      end;
+
    // if in the expression there is caseValue = 10
    // check to put all in the right side while moving values to the left side
    // scan runstk till find next = false --> sub-expressions separation
@@ -1245,6 +1264,19 @@ begin
                       runstk[High(runstk)-1].caseValue := 7;
                       setLength(runstk,Length(runstk)-1);
                       result := false;
+                    end;
+               end;
+             end;
+          7:
+             begin
+               case runstk[high(runstk)-1].caseValue of
+                 7: begin
+                      if conditionInstruction.mnemonic = 50 then
+                        begin
+                          runstk[High(runstk)-1].boolValue := true;
+                          runstk[High(runstk)-1].caseValue := 0;
+                          setLength(runstk,Length(runstk)-1)
+                        end
                     end;
                end;
              end;
@@ -1911,7 +1943,7 @@ begin
         exprname := 'Expr' + intToStr(index2+1);
         for index3 := low(selectColsInstructions[index2]) to high(selectColsInstructions[index2]) do
         begin
-          if (selectColsInstructions[index2,index3].mnemonic in [42..44,50..55,79,83..86,88,89,221]) then
+          if (selectColsInstructions[index2,index3].mnemonic in [42..44,50..55,79,83..86,88,89,221,241]) then
             begin
               runstack(selectColsInstructions[index2,index3],selectstk)
             end;

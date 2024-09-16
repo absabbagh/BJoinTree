@@ -139,13 +139,14 @@ implementation
 uses SysUtils;
 
 { TODO : a.b = c.d
-a.b = c.b and a.e = and c.e
+a.b = c.b and a.e = c.e and
 t.a = s.b opr expr
 save as(t.a) (s.b xopr expr) where xopr is the oposite of opr
 t1.k1 = t2.k2 call addkey with t.k1, t2.k2 for values in idx(t2.k2)
 that equals to values in idx(t1.k1)
 t.k1 = t2.k2 + 1 call addkey and find values in idx(t2.k2) that
-satisfy idx(t1.k1) = idx(t2.k2) + 1 and call addkey with t.k1, t2.k2 - 1}
+satisfy idx(t1.k1) = idx(t2.k2) + 1 and call addkey with t.k1, t2.k2 - 1
+}
 
 const
   nullDataValue = -1;//'';
@@ -825,12 +826,9 @@ begin
 
       for i := 0 to length(DataRef) - 1 do
         concatenateDataRef[i+length(AdjacentDataRef)] := DataRef[i];
-
 }
 
 {
-
-
       BTreeConcatenateIndex := getIndexFromJoinPathList(FJoinPathList,ConcatenateTable);
 
 
@@ -878,18 +876,10 @@ begin
                   AdjacentInheritedKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].KeyIndex]
             end;
 
-
-
-
-
         end;
 
       concatenatekeys := nil;
       concatenateInheritedKeys := nil;
-
-
-
-
 }
 
 

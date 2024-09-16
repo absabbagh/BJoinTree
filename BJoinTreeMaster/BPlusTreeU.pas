@@ -11,7 +11,7 @@ uses SysUtils, Classes;
 
 (* In BPlusTree, normally the table itself is inserted in the leaf node.
    This is why there is LeafPageSize and NonLeafPageSize.
-   Even if thet are both set to PageSize, they are treatted differently,
+   Even if that are both set to PageSize, they are treatted differently,
    because there is always the case of leaf and not leaf.
    This BPlusTree serve for BJoinTree, this is why DataPointers are considered.
 *)
@@ -2487,7 +2487,6 @@ begin
   internalfindkey(keys,DataRef);
   if DataRef[0] = NullDataValue then exit else
    ReplaceKey(Keys,DataRef);
-
 end;
 }
 
@@ -2616,11 +2615,6 @@ begin
       GetLRUIndex(TmpPoint,InternalPage);
       while not(InternalPage.Leaf) do
         begin
-{
-          for i := 1 to InternalPage.Max do
-            st1 := InternalPage.Keys[i,0];
-
-}
           index := InternalPage.Max + 1;
 
           for i := 1 to InternalPage.Max do

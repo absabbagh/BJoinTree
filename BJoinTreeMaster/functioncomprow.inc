@@ -14,7 +14,7 @@ var
   RPattern: string;
   RegexObj: TRegExpr;
 begin
-  { TODO :  use executeplan or indexes directly to be sure about it }
+  { #todo:  use executeplan or indexes directly to be sure about it }
   setlength(lconditionInstructions, length(conditionInstructions));
   for index1 := low(conditionInstructions) to high(conditionInstructions) do
     lconditionInstructions[index1] := conditionInstructions[index1];
@@ -40,7 +40,7 @@ begin
   // Check the Where Condition
   for index2 := low(lconditionInstructions) to high(lconditionInstructions) do
     begin
-      if lconditionInstructions[index2].mnemonic in [42..44,50..55,79,83..86,88,89,221] then
+      if lconditionInstructions[index2].mnemonic in [42..44,50..55,79,83..86,88,89,221,241] then
         runStack(lconditionInstructions[index2],runstk);
 
       case lconditionInstructions[index2].mnemonic of
@@ -62,7 +62,7 @@ begin
                   end;
               end;
 
-            { TODO : check for column_name don't exists in where clause. group by clause and having }
+            { #todo : check for column_name don't exists in where clause. group by clause and having }
 
             setlength(runstk,length(runstk) + 1);
             runstk[High(runstk)].boolValue := false;

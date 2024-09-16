@@ -4,14 +4,14 @@ unit execProgramUnit;
 
 interface
 
-{ TODO : Nested SQL
-         More than one common key
-         add to Join the on clause key1 = key2
-         Having }
+{ #todo : Nested SQL
+          More than one common key
+          add to Join the on clause key1 = key2
+          Having }
 
-{ DONE : Aggregate functions
-         Group by
-         Ordered by
+{ #done : Aggregate functions
+          Group by
+          Ordered by
 }
 
 uses
@@ -50,7 +50,7 @@ type
   tblStructure = record
     tblName: string;
     // TimeStamp: TDateTime;
-    storageIndex: Integer; // index of storageTableRecord
+    storageTableIndex: Integer; // index of storageTableRecord
     numCols: integer;
     columns: array of record
       colname: string;
@@ -208,11 +208,14 @@ uses
   msgslib,
   binU,
   SDFUnit,
-  regexpr;
+  regexpr{,
+  lockmanager};
 
   var
     Lexer: TLexer;
     parser: TParser;
+
+    //locks: LockClass; ////
 
 const
   tableColumnSeperator: char = '_';
@@ -243,8 +246,8 @@ var
   outText: TextFile;
   logfile: TextFile;
 
-  { TODO : check all the fields in BSON, if someone is messing put it as default or yyerror }
-  { DONE : To put boolean values as a new kind in sqlLex and sql.y }
+  { #todo : check all the fields in BSON, if someone is messing put it as default or yyerror }
+  { #done : To put boolean values as a new kind in sqlLex and sql.y }
 
 procedure closeSchemaTables;
 var
@@ -284,6 +287,7 @@ begin
   Path := DBName + '/';
   if createDir(Path) then
     begin
+      // This is the only Transaction for Data Dictionary
       createTables;
       setlength(row,3);
       row[0] := 'superuser';
@@ -423,6 +427,7 @@ begin
   dbName := lowercase(dbName);
   Result := False;
 
+  //locks.LockShared(-1, 'datadictionary', 'DDdatabases'); ////
   rowId := DDdatabases.firstRow;
   repeat
     if DDdatabases.existRow(rowId) then
@@ -438,6 +443,7 @@ begin
       end;
     rowId := rowId + 1;
   until rowId > DDdatabases.lastRow;
+  //locks.UnLockShared(-1, 'datadictionary', 'DDdatabases'); ////
 end;
 
 function ConstraintNameExists(cnstrName: string): boolean;
@@ -693,7 +699,7 @@ begin
         with workingSchema.tables[high(workingSchema.tables)] do
         begin
           tblName := table_Name;
-          storageIndex := -1; //** load the table
+          storageTableIndex := -1; //** load the table
           numCols := 0;
           // load the number of columns (Available as third column in DDtables)
           columns := nil; // to load the columns
@@ -935,6 +941,7 @@ begin
                         checkCondition[high(checkCondition)].stvalue := DDcheckinstructions.getValueByColumnName(rowId3,'stvalue');
                         checkCondition[high(checkCondition)].printInstruction := DDcheckinstructions.getValueByColumnName(rowId1,'printInstruction')
                      end;
+                  rowId3 := rowId3 + 1;
                 until rowId3 > DDcheckinstructions.lastRow
               end;
 
@@ -1001,7 +1008,7 @@ begin
                     end;
                   end;
             end;
-        end;  { TODO : check for null and call load with null also for indexes }
+        end;  { #todo : check for null and call load with null also for indexes }
       if (existstorageTableRecord(workingSchema.dbName,workingSchema.tables[index].tblName) = -1) then
         begin
           setlength(storageTables,length(storageTables)+1);
@@ -1012,13 +1019,13 @@ begin
               tblstorage :=
                 TTableClass.Create(Path + workingSchema.tables[index].tblName + '_' + workingSchema.dbName, True, colsname, colstype, allowcolsNull);
             end;
-          workingSchema.tables[index].storageIndex := high(storageTables);
+          workingSchema.tables[index].storageTableIndex := high(storageTables);
         end else
-        workingSchema.tables[index].storageIndex := existstorageTableRecord(workingSchema.dbName,workingSchema.tables[index].tblName)
+        workingSchema.tables[index].storageTableIndex := existstorageTableRecord(workingSchema.dbName,workingSchema.tables[index].tblName)
     end;
 
 
-  { TODO : check for null and call load with null also for indexes }
+  { #todo : check for null and call load with null also for indexes }
 
 
   rowId1 := DDindexes.firstRow;
@@ -1411,7 +1418,7 @@ begin
   until RowId1 > DDusers.lastRow;;
 end;
 
-{ TODO : Make sure the dimensions are right for extended and strings.. Use truncate }
+{ #todo : Make sure the dimensions are right for extended and strings.. Use truncate }
 function IscompatibleType(var varVar: variant; sqltype_name: string; dim1, dim2: integer): variant;
 var
   basicType: longInt;
@@ -2111,7 +2118,7 @@ var
   cnstrName: string;
   cnstrType: string;
   dfltValue: variant;
-  valuesList: array of variant;
+  valuesList: array of array of variant = nil;
   j: integer;
   found: boolean;
   tmpFound: boolean;
@@ -2154,6 +2161,7 @@ var
   flag: boolean;
   colName: string= '';
   foundTable: boolean;
+  counterFound: integer;
   index1, index2: integer;
   type_name: string;
   colDefaultValue: variant;
@@ -2164,9 +2172,11 @@ var
   fromlengthLimit: integer;
   dbCounter: integer = 0;
   table_name: string = '';
+  view_name: string = '';
   indexcondition: boolean;
   Keys: array of variant;
   index3: integer;
+  index4: integer;
   index_name: string;
   idx_Name: string;
   column_order: string;
@@ -2185,6 +2195,7 @@ var
   grpkind: aggregateset = nullkind;
   SDFInstance: SDFClass;
   ResultRows: Integer = 0;
+  InsertedRows: Integer = 0;
   DeletedRows: Integer = 0;
   UpdatedRows: Integer = 0;
   Maxdataref: array of dataPointerType = nil;
@@ -2699,7 +2710,7 @@ begin
         end;
 
         // distinct should be inserted after from
-        // should lookfor union before
+        // should look for union before
 
         222: // UNION
          begin
@@ -2898,6 +2909,45 @@ begin
             rowId1 := rowId1 + 1;
           until rowId1 > DDtables.lastRow;
 
+
+          rowId1 := DDViews.firstRow;
+          repeat
+            if DDViews.existRow(rowId1) then
+              begin
+                database_Name :=
+                  DDViews.getValueByColumnName(rowId1, 'database_name');
+                if ldbName = database_Name then
+                  begin
+                    if not found then
+                      begin
+                        sqlResults := nil;
+                        setLength(sqlResults, length(sqlResults) + 1);
+                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'ROW ID',True);
+                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'VIEW NAME',True);
+                      end;
+                    view_Name :=
+                      DDViews.getValueByColumnName(rowId1, 'view_name');
+                    if CanUserUseTable(dbuserId,ldbName,view_Name) then
+                      begin
+                        resultRows := dbCounter + 1;
+                        setLength(sqlResults, length(sqlResults) + 1);
+                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],IntToStr(resultRows),True);
+                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],view_Name,True);
+
+                        colsTxt := ''; //'sys_queryId: ' + lqueryId + ' ' + 'sys_user: ' + dbUserId + ' ';
+                        colsTxt := colsTxt + 'rowId: ' + intToStr(resultRows) + ' ' + 'VIEW NAME: ' + view_name;
+                        // writeln(outText,colsIdTxt);
+                        // writeln(outText,colsValTxt);
+                        writeln(outText,colsTxt);
+
+                        dbCounter := dbCounter + 1;
+                        found := True;
+                      end;
+                  end;
+              end;
+            rowId1 := rowId1 + 1;
+          until rowId1 > DDtables.lastRow;
+
           SDFInstance.Free;
 
           if dbCounter <> 0 then
@@ -2908,6 +2958,12 @@ begin
 
         161: // SHOW ALL COLUMNS
         begin
+          found := TableExists(tblName);
+          if not found then
+            begin
+              Parser.yyerror('Table ' + tblName + ' not exist ');
+              Exit;
+            end;
 
           found := False;
           SDFInstance := SDFClass.Create;
@@ -3283,6 +3339,7 @@ begin
                     begin
                       DeleteFile(Path + table_Name);
                       DDtables.deleteRow(rowId1);
+                      Break;
                     end;
                 end;
             end;
@@ -3292,7 +3349,7 @@ begin
                 DDtablecolumns.getValueByColumnName(rowId1, 'database_name');
               if (database_name = ldbname) then
                 begin
-                  table_name := DDTables.getValueByColumnName(rowId1, 'table_name');
+                  table_name := DDTablecolumns.getValueByColumnName(rowId1, 'table_name');
                   if tblName = table_Name then
                     DDtablecolumns.deleteRow(rowId1);
                 end;
@@ -3367,6 +3424,17 @@ begin
           for index2 := index1+1 to high(workingschema.tables) do
             workingschema.tables[index2-1] := workingschema.tables[index2];
           setLength(workingSchema.tables,length(workingSchema.tables)-1) ;
+
+          for index1 := 0 to high(storageTables) do
+            if (storagetables[index1].dbName = dbname) and
+               (storagetables[index1].tblName = tblname) then
+                 begin
+                    storagetables[index1].tblstorage.free;
+                    Break;
+                 end;
+          for index2 := index1+1 to high(storagetables) do
+            storagetables[index2-1] := storagetables[index2];
+          setLength(storagetables,length(storagetables)-1) ;
 
           Parser.yyacceptmessage('Table ' + tblName + ' dropped');
         end;
@@ -3512,7 +3580,7 @@ begin
             rowId1 := rowId1 + 1;
           until rowId1 > DDdatabases.lastRow;
 
-        { TODO : working schema }
+        { #todo : working schema }
           if found then
             begin
               workingschema.dbName := '';
@@ -3985,7 +4053,7 @@ begin
                 tblstorage :=
                   TTableClass.Create(Path + workingSchema.tables[high(storageTables)].tblName + '_' + workingSchema.dbName, True, colsName, colsType, allowcolsNull);
               end;
-            workingSchema.tables[high(workingSchema.tables)].storageIndex := high(storageTables);
+            workingSchema.tables[high(workingSchema.tables)].storageTableIndex := high(storageTables);
             (***
             storage := TTableClass.Create(Path + tblName + '_' + dbName,
               False, colsName, colsType, allowcolsNull);
@@ -4108,7 +4176,7 @@ begin
             numCols := length(selectColsInstructions);
 
             idxname := ''; // sequential
-            { TODO : should be created as possible }
+            { #todo :should be created as possible }
 
             columns := nil;
 
@@ -4222,11 +4290,12 @@ begin
         expr[high(expr)].mnemonic := 151;
         expr[high(expr)].Value := 0.0;
         colname := lowercase(stk[High(stk)].strValue);
-        { TODO : query alias should have the table name }
+        { #todo : query alias should have the table name }
         for index1 := 0 to high(queryalias) do
           if queryalias[index1].aliasname = colname then colname := queryalias[index1].colname;
         if (tblcolName = '') and (fromTablesLen <> 0) then
           begin
+            counterFound := 0;
             tblName := '';
             for index1 := 0 to fromTablesLen - 1 do
               begin
@@ -4236,18 +4305,45 @@ begin
                     if colname = tblFields.columns[index2].colname then
                       begin
                         tblname := tblFields.tblName;
+                        counterFound += 1;
+                        continue;
+                      end;
+                  end;
+              end;
+            if counterFound = 0 then
+              begin
+                Parser.yyerror('Column ' + colname + ' doesn''t belongs to any table');
+                Exit;
+              end else
+              begin
+                if counterFound > 1 then
+                  begin
+                    Parser.yyerror('Column ' + colname + ' is ambiguous');
+                    Exit;
+                  end
+              end
+          end else
+          begin
+            found := false;
+            if tblcolName <> '' then
+              begin
+                tblFields := loadTableFields(tblcolName);
+                for index2 := 0 to length(tblFields.columns)- 1 do
+                  begin
+                    if colname = tblFields.columns[index2].colname then
+                      begin
+                        found := true;
                         break;
                       end;
                   end;
-                if tblName <> '' then break;
-              end;
-            if tblName = '' then
-              begin
-                Parser.yyerror('Column doesn''t belongs to any table');
-                Exit;
+                if not found then
+                  begin
+                    Parser.yyerror('Column ' +  colname + ' doesn''t belong to the table ' + tblcolName);
+                    Exit;
+                  end
               end;
           end;
-
+        {#todo : insert here the code to check if the column belongs to any from list}
         expr[high(expr)].stvalue := tblName + '.' + lowercase(stk[High(stk)].strValue);
         expr[high(expr)].printInstruction := 'PUSH COLUMN NAME';
 
@@ -4617,12 +4713,12 @@ begin
          // resultTable.resultFields.storage := nil;
 
           for rowId1 :=
-            storageTables[tblFields.storageIndex].tblstorage.firstRow to storageTables[tblFields.storageIndex].tblstorage.lastRow do
+            storageTables[tblFields.storageTableIndex].tblstorage.firstRow to storageTables[tblFields.storageTableIndex].tblstorage.lastRow do
             //**tblFields.storage.firstRow to tblFields.storage.LastRow do
             begin
-              if storageTables[tblFields.storageIndex].tblstorage.existRow(rowId1) then
+              if storageTables[tblFields.storageTableIndex].tblstorage.existRow(rowId1) then
                 begin
-                  storageTables[tblFields.storageIndex].tblstorage.returnRow(rowId1, row);
+                  storageTables[tblFields.storageTableIndex].tblstorage.returnRow(rowId1, row);
                   for resultindex := 0 to length(row) - 1 do
                     begin
                       resulttable.resultRow[resultindex] := row[resultindex];
@@ -4685,7 +4781,7 @@ begin
                                 end;
                             end;
                         end;
-                      storageTables[tblFields.storageIndex].tblstorage.putRow(rowId1,row);
+                      storageTables[tblFields.storageTableIndex].tblstorage.putRow(rowId1,row);
 
 
                       UpdatedRows := UpdatedRows + 1;
@@ -4715,7 +4811,7 @@ begin
         end;
 
         //// bring the one for dmtables
-        82: // DELETE Rows from Table name
+        82: // DELETE FROM
         begin
           // check if the tablename exist
           tblFields := loadTableFields(tblName);
@@ -4726,178 +4822,112 @@ begin
             exit;
           end;
 
-          // In case of where ommited It is better to delete the table physically
+          // In case of where ommited It is better to put where true
 
           if conditionInstructions = nil then
           begin
-            (*****
-            // Better to delete phisycally and restore from DataDictionary as loading tables
-            tblFields.storage.Free;
-            DeleteFile(Path + dbUserId + workingschema.dbName + tblName);
-
-            setLength(colsName, tblFields.numCols);
-            for index := low(tblFields.columns) to high(tblFields.columns) do
-              colsName[index] := tblFields.columns[index].colname;
-
-            setLength(colsType, tblFields.numCols);
-            for index := low(tblFields.columns) to high(tblFields.columns) do
+            { Added : "where true" }
+            setlength(conditionInstructions,1);
+            with conditionInstructions[0] do
             begin
-              case tblFields.columns[index].coltype of
-                intType:
-                  type_Name := 'INTEGER';
-                smallintType:
-                  type_Name := 'SMALLINT';
-                int64Type:
-                  type_Name := 'INT64';
-                extendedType:
-                  type_Name := 'EXTENDED';
-                TDateTimeType:
-                  type_Name := 'TDATETIME';
-                currencyType:
-                  type_Name := 'CURRENCY';
-                booleanType:
-                  type_Name := 'BOOLEAN';
-                stringType:
-                begin
-                  type_Name := 'STRING';
-                  if tblFields.columns[index].coltypescale.size <> 0 then
-                    type_Name :=
-                      type_name + '[' +
-                      IntToStr(tblFields.columns[index].coltypescale.size) + ']'
-                  else
-                    type_Name := type_name + '[255]';
-                end;
-              end;
-              colstype[index] := type_Name;
+              MNEMONIC := 221;
+              BOOLVALUE := true;
+              VALUE := 0;
+              STVALUE := '';
+              PRINTINSTRUCTION := 'PUSH BOOLEAN TRUE';
             end;
-
-            setLength(allowcolsNull, tblFields.numCols);
-            for index := low(tblFields.columns) to high(tblFields.columns) do
-            begin
-              allowcolsNull[index] := True;
-              for index2 :=
-                low(tblFields.constraints) to high(tblFields.constraints) do
-                with tblFields.constraints[index2] do
-                begin
-                  case cnstrtype of
-                    1: if nnullcol = index then
-                        allowcolsNull[index] := False;
-                    2: if isbitset(uqCols[0], index) then
-                        allowcolsNull[index] := False;
-                    3: if isbitset(pkCols[0], index) then
-                        allowcolsNull[index] := False;
-                  end;
-                end;
-
-            end;
-            tblFields.storage :=
-              TTableClass.Create(Path + dbUserId + dbName + tblName,
-              False, colsName, colsType, allowcolsNull);
-            tblFields.storage.Free;
-            tblFields.storage :=
-              TTableClass.Create(Path + dbUserId + dbName + tblName,
-              True, colsName, colsType, allowcolsNull);
-            tblFields.Collection.Drop;
-            *****)
-            Parser.yyacceptmessage('ALL ROWS DELETED ');
-            { TODO : Delete all values from indexes on table }
-          end
-          else
-          begin
-
-
-            resulttable.numCols := 0;
-            resulttable.columns := nil;
-            resulttable.ownerTable := nil;
-
-            resulttable.numCols :=
-              resulttable.numCols + tblFields.numCols;
-            setLength(resulttable.columns, length(
-              resulttable.columns) + tblFields.numCols);
-            setLength(resulttable.ownerTable, length(resulttable.ownerTable) +
-              tblFields.numCols);
-
-            for resultindex := 0 to length(tblFields.columns) - 1 do
-            begin
-              resulttable.columns[resultindex].coltype :=
-                tblFields.columns[resultindex].coltype;
-              resulttable.ownertable[resultindex].colname :=
-                tblFields.columns[resultindex].colname;
-             resulttable.ownertable[resultindex].tblname :=
-                tblFields.tblName;
-              resulttable.ownertable[resultindex].aliasname := nil;
-            end;
-
-            colsname := nil;
-            setlength(colsname, length(colsname) + tblFields.numCols);
-            for resultindex := 0 to length(tblFields.columns) - 1 do
-              colsname[resultindex] := tblFields.columns[resultindex].colname;
-
-            colsType := nil;
-            setlength(colstype, length(colsType) + tblFields.numCols);
-            for resultindex := 0 to length(tblFields.columns) - 1 do
-              begin
-                case tblFields.columns[resultindex].coltype of
-                  inttype, smallinttype: colsType[resultindex] := 'INTEGER';
-                  int64type: colsType[resultindex] := 'INT64';
-                  extendedtype, tdatetimetype, tdatetype, ttimetype:
-                    colsType[resultindex] := 'EXTENDED';
-                  currencytype: colsType[resultindex] := 'CURRENCY';
-                  booleantype: colsType[resultindex] := 'BOOLEAN';
-                  stringtype: colsType[resultindex] :=
-                      'STRING[' + IntToStr(
-                      TBLFields.columns[resultindex].coltypescale.size) + ']'
-                end;
-              end;
-
-            setLength(Row, tblFields.numCols);
-            resulttable.resultRow := nil;
-            setLength(resulttable.resultRow, length(resulttable.resultRow) +
-              tblFields.numCols);
-
-            //**resultTable.resultFields.storage := nil;
-
-            for rowId1 :=
-              storageTables[tblFields.storageIndex].tblstorage.firstRow to storageTables[tblFields.storageIndex].tblstorage.LastRow do
-              begin
-                if storageTables[tblFields.storageIndex].tblstorage.existRow(rowId1) then
-                  begin
-                    storageTables[tblFields.storageIndex].tblstorage.returnRow(rowId1, row);
-                    for resultindex := 0 to length(row) - 1 do
-                      begin
-                        resulttable.resultRow[resultindex] := row[resultindex];
-                      end;
-                    if rowcondition(conditionInstructions,resultTable) then
-                      begin
-                        for j := 0 to tblFields.numCols - 1 do
-                          begin
-                            if tblFields.columns[j].colname = colName then
-                              begin
-                                for index2 := 0 to length(tblFields.idxdata) - 1 do
-                                  begin
-                                    for index3 := 0 to length(tblFields.idxdata[index2].idxkeys) - 1 do
-                                      begin
-                                        if tblFields.idxdata[index2].idxkeys[index3].colName = colName then
-                                          begin
-                                            keys := nil;
-                                            setlength(keys, length(keys) + 1);
-                                            keys[high(Keys)] := row[j];
-                                            //rowId := intToStr(rowid1);
-                                            rowId := rowid1;
-                                            storageIndexes[tblFields.idxdata[index2].storageIndex].idxstorage.DeleteKey(keys,RowId);
-                                          end
-                                     end;
-                                  end;
-                              end;
-                          end;
-                        storageTables[tblFields.storageIndex].tblstorage.deleteRow(rowId1);
-                        DeletedRows := DeletedRows + 1;
-                      end;
-                  end;
-              end;
-
-            Parser.yyacceptmessage(inttostr(DeletedRows) + ' ROWS DELETED ');
           end;
+          resulttable.numCols := 0;
+          resulttable.columns := nil;
+          resulttable.ownerTable := nil;
+
+          resulttable.numCols :=
+            resulttable.numCols + tblFields.numCols;
+          setLength(resulttable.columns, length(
+            resulttable.columns) + tblFields.numCols);
+          setLength(resulttable.ownerTable, length(resulttable.ownerTable) +
+            tblFields.numCols);
+
+          for resultindex := 0 to length(tblFields.columns) - 1 do
+          begin
+            resulttable.columns[resultindex].coltype :=
+              tblFields.columns[resultindex].coltype;
+            resulttable.ownertable[resultindex].colname :=
+              tblFields.columns[resultindex].colname;
+           resulttable.ownertable[resultindex].tblname :=
+              tblFields.tblName;
+            resulttable.ownertable[resultindex].aliasname := nil;
+          end;
+
+          colsname := nil;
+          setlength(colsname, length(colsname) + tblFields.numCols);
+          for resultindex := 0 to length(tblFields.columns) - 1 do
+            colsname[resultindex] := tblFields.columns[resultindex].colname;
+
+          colsType := nil;
+          setlength(colstype, length(colsType) + tblFields.numCols);
+          for resultindex := 0 to length(tblFields.columns) - 1 do
+            begin
+              case tblFields.columns[resultindex].coltype of
+                inttype, smallinttype: colsType[resultindex] := 'INTEGER';
+                int64type: colsType[resultindex] := 'INT64';
+                extendedtype, tdatetimetype, tdatetype, ttimetype:
+                  colsType[resultindex] := 'EXTENDED';
+                currencytype: colsType[resultindex] := 'CURRENCY';
+                booleantype: colsType[resultindex] := 'BOOLEAN';
+                stringtype: colsType[resultindex] :=
+                    'STRING[' + IntToStr(
+                    TBLFields.columns[resultindex].coltypescale.size) + ']'
+              end;
+            end;
+
+          setLength(Row, tblFields.numCols);
+          resulttable.resultRow := nil;
+          setLength(resulttable.resultRow, length(resulttable.resultRow) +
+            tblFields.numCols);
+
+          //**resultTable.resultFields.storage := nil;
+
+          for rowId1 :=
+            storageTables[tblFields.storageTableIndex].tblstorage.firstRow to storageTables[tblFields.storageTableIndex].tblstorage.LastRow do
+            begin
+              if storageTables[tblFields.storageTableIndex].tblstorage.existRow(rowId1) then
+                begin
+                  storageTables[tblFields.storageTableIndex].tblstorage.returnRow(rowId1, row);
+                  for resultindex := 0 to length(row) - 1 do
+                    begin
+                      resulttable.resultRow[resultindex] := row[resultindex];
+                    end;
+                  if rowcondition(conditionInstructions,resultTable) then
+                    begin
+                      for j := 0 to tblFields.numCols - 1 do
+                        begin
+                          if tblFields.columns[j].colname = colName then
+                            begin
+                              for index2 := 0 to length(tblFields.idxdata) - 1 do
+                                begin
+                                  for index3 := 0 to length(tblFields.idxdata[index2].idxkeys) - 1 do
+                                    begin
+                                      if tblFields.idxdata[index2].idxkeys[index3].colName = colName then
+                                        begin
+                                          keys := nil;
+                                          setlength(keys, length(keys) + 1);
+                                          keys[high(Keys)] := row[j];
+                                          //rowId := intToStr(rowid1);
+                                          rowId := rowid1;
+                                          storageIndexes[tblFields.idxdata[index2].storageIndex].idxstorage.DeleteKey(keys,RowId);
+                                        end
+                                   end;
+                                end;
+                            end;
+                        end;
+                      storageTables[tblFields.storageTableIndex].tblstorage.deleteRow(rowId1);
+                      DeletedRows := DeletedRows + 1;
+                    end;
+                end;
+            end;
+
+          Parser.yyacceptmessage(inttostr(DeletedRows) + ' ROWS DELETED ');
         end;
 
         90: // Opr DEFAULT: POP dfltValue and insert it into a structure
@@ -5403,11 +5433,11 @@ begin
                       Row := nil;
                       setLength(Row, numCols);
                       for rowId1 :=
-                            storageTables[storageIndex].tblstorage.firstRow to storageTables[storageIndex].tblstorage.LastRow do
+                            storageTables[storageTableIndex].tblstorage.firstRow to storageTables[storageTableIndex].tblstorage.LastRow do
                         begin
-                          if storageTables[storageIndex].tblstorage.existRow(rowId1) then
+                          if storageTables[storageTableIndex].tblstorage.existRow(rowId1) then
                             begin
-                              storageTables[storageIndex].tblstorage.returnRow(rowId1, Row);
+                              storageTables[storageTableIndex].tblstorage.returnRow(rowId1, Row);
                               ///// colsnull can be detected by row[index3] = null
                               keys := nil;
                               for index1 := low(colsName) to high(colsName) do
@@ -5426,8 +5456,10 @@ begin
                                 end;
                               //rowId := intToStr(rowid1);
                               rowId := rowid1;
-                              storageIndexes[workingSchema.tables[index2].IdxData[High(
+{                              storageIndexes[workingSchema.tables[index2].IdxData[High(
                                 workingSchema.tables[index2].IdxData)].storageIndex].idxstorage.AddKey(keys, rowId);
+}                              storageIndexes[High(
+                                workingSchema.tables[index2].IdxData)].idxstorage.AddKey(keys, rowId);
                             end;
                         end;
 
@@ -5685,11 +5717,11 @@ begin
             begin
              // for every base table: load the rows and insert them in a join
              tblFields := loadTableFields(TheBaseTables[index]);
-             for rowId1 := storageTables[tblFields.storageIndex].tblstorage.firstRow to storageTables[tblFields.storageIndex].tblstorage.LastRow do
-               if storageTables[tblFields.storageIndex].tblstorage.existRow(rowId1) then
+             for rowId1 := storageTables[tblFields.storageTableIndex].tblstorage.firstRow to storageTables[tblFields.storageTableIndex].tblstorage.LastRow do
+               if storageTables[tblFields.storageTableIndex].tblstorage.existRow(rowId1) then
                  begin
                    setLength(row,tblFields.numCols);
-                   storageTables[tblFields.storageIndex].tblstorage.returnRow(rowId1, row);
+                   storageTables[tblFields.storageTableIndex].tblstorage.returnRow(rowId1, row);
                    Row2 := nil;
                    for index1 := 0 to tblFields.numCols - 1 do
                      begin
@@ -6437,20 +6469,23 @@ begin
 
         78: // VALUES
         begin
-          valuesList := nil;
-          SetLength(valuesList, Length(stk));
+          setlength(valuesList,length(valuesList)+1);
+          ValuesList[High(valuesList)] := nil;
+          SetLength(valuesList[High(valuesList)], Length(stk));
           for j := low(stk) to high(stk) do
             case stk[j].caseValue of
-              0: valuesList[j] := stk[j].boolValue;
-              4,8: valuesList[j] := stk[j].extValue;
-              6: valuesList[j] := stk[j].strValue;
-              7: valuesList[j] := Null;
+              0: valuesList[High(valuesList),j] := stk[j].boolValue;
+              4,8: valuesList[High(valuesList),j] := stk[j].extValue;
+              6: valuesList[High(valuesList),j] := stk[j].strValue;
+              7: valuesList[High(valuesList),j] := Null;
             end;
+          stk := nil;
         end;
 
-        { TODO : check constraints before insert }
+        { #done : check constraints before insert }
         77: // INSERT INTO *************** just first case with values list treated  *********************
         begin
+          InsertedRows := 0;
           if not TableExists(tblName) then
             begin
               Parser.yyerror('Table Name ' + tblName + ' not belong to database ' + dbName);
@@ -6458,13 +6493,16 @@ begin
             end;
 
           tblFields := loadTableFields(tblname);
-
+          { #todo : All inserted in valuesList or none }
+      for index4 := low(valuesList) to High(ValuesList) do
+        begin
           // colnames = nil means that the columns have been omited
           if colsName = nil then
             begin
-              if length(ValuesList) <> tblFields.numCols then
-                { TODO : unless there is autoincrement or default values }
+              if length(ValuesList[index4]) <> tblFields.numCols then
+                { #todo : unless there is autoincrement or default values }
                 begin
+                  Parser.yyacceptmessage(inttostr(InsertedRows) + ' ROWS INSERTED ');
                   Parser.yyerror('Number of Values differs from number of Columns');
                   exit;
                 end;
@@ -6474,13 +6512,14 @@ begin
                   inscols[index1].name := tblFields.columns[index1].colname;
                   with tblFields.columns[index1] do
                     inscols[index1].value :=
-                      isCompatibleType(valuesList[index1],colSQLtypename,
+                      isCompatibleType(valuesList[index4,index1],colSQLtypename,
                         colTypeScale.precision,colTypeScale.scale)
                 end
             end else
             begin
-              if length(colsName) <> length(ValuesList) then
+              if length(colsName) <> length(ValuesList[index4]) then
                 begin
+                  Parser.yyacceptmessage(inttostr(InsertedRows) + ' ROWS INSERTED ');
                   Parser.yyerror('Number listed in Values differs from number of Columns');
                   exit;
                 end;
@@ -6517,9 +6556,9 @@ begin
                     begin
                       with tblFields.columns[index1] do
                         inscols[index1].value :=
-                          isCompatibleType(valuesList[index2],colSQLtypename,
+                          isCompatibleType(valuesList[index4,index2],colSQLtypename,
                             colTypeScale.precision,colTypeScale.scale);
-                      { TODO : Check if there is autoincrement
+                              { #todo : Check if there is autoincrement
                                If the value is more than the one in sequence counter then put sequence counter equal to it
                                If not then error }
                       if tblFields.columns[index1].colhasAutoIncrement then
@@ -6624,6 +6663,7 @@ begin
                   begin
                     if (inscols[tblFields.constraints[index2].nnullcol].value = Null) then
                       begin
+                        Parser.yyacceptmessage(inttostr(InsertedRows) + ' ROWS INSERTED ');
                         Parser.yyerror('Column ' + tblFields.columns[tblFields.constraints[index2].nnullcol].colname + ' not allow null values');
                         Exit;
                       end;
@@ -6639,6 +6679,7 @@ begin
                       if isbitset(tblFields.constraints[index2].pkCols[0], index1) then
                         if inscols[index1].value = Null then
                           begin
+                            Parser.yyacceptmessage(inttostr(InsertedRows) + ' ROWS INSERTED ');
                             Parser.yyerror('Column ' + tblFields.columns[index1].colname + ' not allow null values');
                             Exit;
                           end;
@@ -6647,12 +6688,18 @@ begin
                 5: //Check constraint
                   begin
                     resultTable.ownertable := nil;
+                    resultTable.numCols := tblFields.numCols;
+                    resultTable.Columns := nil;
                     for index1 := 0 to tblFields.numCols - 1 do
                       begin
                         setlength(resultTable.ownertable,length(resultTable.ownertable)+1);
                         resultTable.ownertable[index1].tblname := tblName;
                         resultTable.ownertable[index1].colname := tblFields.columns[index1].colname;
                         resultTable.ownertable[index1].aliasname := nil;
+
+                        setlength(resultTable.columns,length(resultTable.columns)+1);
+                        resultTable.columns[index1].coltype := tblFields.columns[index1].coltype;
+
                       end;
                     //**resultTable.resultFields := tblFields;
 
@@ -6668,6 +6715,7 @@ begin
 
                     if not rowcondition(tblFields.constraints[index2].checkCondition ,resulttable) then
                       begin
+                        Parser.yyacceptmessage(inttostr(InsertedRows) + ' ROWS INSERTED ');
                         Parser.yyerror('Check condition not satisfied');
                         Exit;
                       end
@@ -6675,7 +6723,8 @@ begin
               end;
             end;
 
-          storageTables[tblFields.storageIndex].tblstorage.insertRow(row);
+          InsertedRows += 1;
+          storageTables[tblFields.storageTableIndex].tblstorage.insertRow(row);
 
 
           //// search for indexes and fill them
@@ -6697,7 +6746,7 @@ begin
                 else
                 keys[high(Keys)] := Row[index3];
               end;
-              rowId := {intToStr(}storageTables[tblFields.storageIndex].tblstorage.lastRow{)};
+              rowId := {intToStr(}storageTables[tblFields.storageTableIndex].tblstorage.lastRow{)};
 
               storageIndexes[tblFields.idxdata[index1].storageIndex].idxstorage.AddKey(keys,{strToint(}rowId{)});
             end;
@@ -6706,10 +6755,12 @@ begin
             for index2 := 0 to high(workingSchema.joinidxdata[index1].joinBaseTables) do
               if workingSchema.joinidxdata[index1].joinBaseTables[index2] = tblFields.tblName then
                 begin
-                  rowId := storageTables[tblFields.storageIndex].tblstorage.lastRow;
+                  rowId := storageTables[tblFields.storageTableIndex].tblstorage.lastRow;
                   storageJoinIndexes[workingSchema.joinidxdata[index1].storageIndex].idxstorage.AddKey(tblFields.tblName,row,rowId);
                 end;
-          Parser.yyacceptmessage('Row inserted ');
+
+        end;
+          Parser.yyacceptmessage(inttostr(InsertedRows) + ' ROWS INSERTED ');
         end;
 
         40: // FROM ALIAS NAME
@@ -6761,6 +6812,18 @@ begin
               if fromTables[index1].Name = workingSchema.tables[index2].tblName then
                 found := True;
             end;
+            if ldbName <> '' then
+            if ldbName <> dbName then
+            begin
+              Parser.yyerror('Current database should be used');
+              exit;
+            end;
+            { #todo:
+              loadschema(ldbName); // database found in From Clause
+              check the table
+              loadschema(dbName);  // current database
+              // To avoid above error
+            }
             if not found then
             begin
               Parser.yyerror('Table not found in database ');
@@ -7225,7 +7288,6 @@ begin
 
         34: // SELECT STATEMENT
         begin
-
           if optionCreateViewCommand then continue;
           for fromIndex := low(fromTables) to high(fromTables) do
             fromTables[fromIndex].fromFields :=
@@ -7356,6 +7418,7 @@ begin
                         end;
                     end;
 
+                  found := false;
                   // compare the join graph from all the join index with the one for the query
                   if workingSchema.joinidxdata <> nil then
                     for index1 := 0 to length(workingSchema.joinidxdata) - 1 do
@@ -7393,33 +7456,40 @@ begin
 
           ResultRows := 0;
 
+
+          //executeplan.useIndex := false; /////////////////////////  to take it away
           if executePlan.useIndex then // momenteraly
             begin
               if executePlan.joinFlag then
                 begin
                   storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.ClearKey;
+
                   storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
-
-                  resultshifting := 0;
-                  for index := 0 to length(fromTables) - 1 do
+                  if (workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].idxkeys = nil) then
+                  while dataref[0] <> -1 do
                     begin
-                      storageTables[fromTables[index].fromFields.storageIndex].tblstorage.returnRow(
-                        dataref[mapdataref[index]], fromTables[index].fromrow);
-                      for resultindex :=
-                       0 to length(fromTables[index].fromrow) - 1 do
-                        begin
-                          resulttable.resultRow[resultindex +
-                            resultshifting] :=
-                            fromTables[index].fromrow[resultindex];
-                        end;
-                      resultshifting += length(fromTables[index].fromrow)
-                    end;
+                      resultshifting := 0;
+                      for index := 0 to length(fromTables) - 1 do
+                      begin
+                        storageTables[fromTables[index].fromFields.storageTableIndex].tblstorage.returnRow(
+                          dataref[mapdataref[index]], fromTables[index].fromrow);
+                        for resultindex :=
+                         0 to length(fromTables[index].fromrow) - 1 do
+                          begin
+                            resulttable.resultRow[resultindex +
+                              resultshifting] :=
+                              fromTables[index].fromrow[resultindex];
+                          end;
+                        resultshifting += length(fromTables[index].fromrow)
+                      end;
 
-                  if rowcondition(conditionInstructions,resultTable) then
-                  begin
-                    resultRows := ResultRows + 1;
-                    extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
-                  end;
+                      if rowcondition(conditionInstructions,resultTable) then
+                      begin
+                        resultRows := ResultRows + 1;
+                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                      end;
+                      storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
+                    end;
 
                 end else
                 begin
@@ -7437,8 +7507,8 @@ begin
                               repeat
                                 if dataref[0] <> -1 then
                                   if keys[0] = value then
-                                    begin  storageTables[
-                                      fromTables[0].fromFields.storageIndex].tblstorage.returnRow(
+                                    begin
+                                      storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.returnRow(
                                         dataref[0], fromTables[0].fromrow);
                                       for resultindex :=
                                        0 to length(fromTables[0].fromrow) - 1 do
@@ -7468,7 +7538,7 @@ begin
               for index := 0 to fromTablesLen - 1 do
                 begin
                   container[index] := 1;
-                  if storageTables[fromTables[index].fromFields.storageIndex].tblstorage.emptyTable then
+                  if storageTables[fromTables[index].fromFields.storageTableIndex].tblstorage.emptyTable then
                     begin
                       Parser.yyacceptmessage('SELECT STATEMENT: ' + intToStr(ResultRows));
                       exit
@@ -7478,9 +7548,9 @@ begin
                 shiftresultindex := 0;
                 for index := 0 to fromTablesLen - 1 do
                   begin
-                    if storageTables[fromTables[index].fromFields.storageIndex].tblstorage.existRow(container[index]) then
+                    if storageTables[fromTables[index].fromFields.storageTableIndex].tblstorage.existRow(container[index]) then
                       begin
-                        storageTables[fromTables[index].fromFields.storageIndex].tblstorage.returnRow(
+                        storageTables[fromTables[index].fromFields.storageTableIndex].tblstorage.returnRow(
                           container[index], fromTables[index].fromrow);
                         if index > 0 then shiftresultindex := shiftresultindex + length(fromTables[index -1].fromrow);
                         for resultindex := 0 to length(fromTables[index].fromrow) - 1 do
@@ -7505,7 +7575,7 @@ begin
                   if flag then container[index2] -= 1;
                   found := false;
                   flag := false;
-                  if container[index2] = storageTables[fromTables[index2].fromFields.storageIndex].tblstorage.lastRow + 1 then
+                  if container[index2] = storageTables[fromTables[index2].fromFields.storageTableIndex].tblstorage.lastRow + 1 then
                     begin
                       if index2 <> 0 then
                         begin
@@ -7517,7 +7587,7 @@ begin
                     end else found := true;
                     if index2 = 0 then found := true
                 until found;
-              until container[0] = storageTables[fromTables[0].fromFields.storageIndex].tblstorage.lastRow + 1;
+              until container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow + 1;
             end;
 
           Parser.yyacceptmessage('SELECT STATEMENT: ' + intToStr(ResultRows));
@@ -7766,9 +7836,11 @@ parser.lexer := lexer;
 
 // userid := 'sys_suid';
 
+//locks := LockClass.Create(); ////
 
 finalization
 
+//locks.Free; ////
 lexer.free;
 parser.free;
 
