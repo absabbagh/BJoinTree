@@ -8,6 +8,7 @@
       <Unit0>
         <Filename Value="ndlex.dpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="635"/>
         <CursorPos X="23" Y="645"/>
         <UsageCount Value="20"/>
@@ -61,7 +62,6 @@
       </Unit6>
       <Unit7>
         <Filename Value="lexmsgs.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="59"/>
         <CursorPos X="28" Y="77"/>
@@ -70,9 +70,8 @@
       </Unit7>
       <Unit8>
         <Filename Value="sqlLEX.cod"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit8>
     </Units>
