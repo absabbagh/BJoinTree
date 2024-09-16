@@ -55,6 +55,22 @@ type
     end;
 
 type
+  TLexer = class(TCustomLexer)
+  private
+    bufptr: integer;
+    buf: array [1 .. max_chars] of AnsiChar;
+  protected
+    function get_char: AnsiChar; override;
+    procedure unget_char(c: AnsiChar); override;
+    procedure put_char(c: AnsiChar); override;
+    procedure yyclear; override;
+    function yywrap: boolean; override;
+  public
+    yyInputText: string;
+
+    function parse() : integer; override;
+  end;
+
   TParser = class(TCustomParser)
   public
     lexer : TLexer;
@@ -459,6 +475,7 @@ type YYSType = record
 %type <Pointer> insert_command
 %type <Pointer> value_list
 %type <Pointer> rptvalue
+%type <Pointer> rptvalues_list
 %type <Pointer> value
 %type <Pointer> query
 %type <Pointer> update_command
@@ -1809,9 +1826,20 @@ insert_command : tknINSERT tknINTO  table_name '(' column_list ')' value_list
                 { $$ := opr(77,'INSERT INTO',[$3,$5,opr(78,'VALUE',[$7])]); }
                ;
 
+value_list : tknVALUES rptvalues_list
+                { $$ := $2; }
+           ;
+
+rptvalues_list : '(' rptvalue ')'
+                { $$ := opr(78,'VALUE',[$2]); }
+               | rptvalues_list ',' '(' rptvalue ')'
+                { $$ := opr(78,'VALUE',[$1,$4]); }
+               ;
+/*
 value_list : tknVALUES '(' rptvalue ')'
                 { $$ := opr(78,'VALUE',[$3]); }
            ;
+*/
 
 rptvalue : value
                 { $$ := $1; }
@@ -2148,7 +2176,6 @@ rpt_trigger_step: trigger_step ';'
 %%
 
 {$I sqlLEX.pas}
-
 
 procedure ex(p: NodePointer);
 var
