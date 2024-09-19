@@ -1523,10 +1523,12 @@ rptdisplayed_column : displayed_column
      COUNT, MIN, MAX, or AVG function is commonly used in the subquery.
 */
 
-displayed_column : '*'
+displayed_column : ID '.' '*'
+                { $$ := opr(229,'DOT',[opr(4,'TABLE NAME',[DBName($1)]),opr(37,'ALL COLUMNS')]); }
+                 | ID '.' ID '.' '*'
+                { $$ := opr(229,'DOT',[opr(2,'DATABASE NAME',[DBName($1)]),opr(4,'TABLE NAME',[DBName($3)]),opr(37,'ALL COLUMNS')]); }
+                 | '*'
                 { $$ := opr(37,'ALL COLUMNS'); }
-                 | table_name '.' '*'
-                { $$ := opr(38,'ALL TABLE COLUMNS',[$1]); }
                  | expr
                 { $$ := opr(39,'COLUMNS WITHIN EXPRESSION',[$1]); }
                  | expr alias
