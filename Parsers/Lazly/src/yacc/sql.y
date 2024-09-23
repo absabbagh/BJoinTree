@@ -93,9 +93,9 @@ const
      'DEC', 'NUMERIC', 'NUMBER1','INTEGER', 'INT',
      'SMALLINT', 'CONSTRAINT NAME','NULL','NOT NULL', 'UNIQUE',            //29
      'PRIMARY KEY', 'REFERENCES', 'ON DELETE CASCADE', 'TABLE CONSTRAINT', 'SELECT',
-     'ALL', 'DISTINCT', 'ALL COLUMNS', 'ALL TABLE COLUMNS', 'COLUMNS WITHIN EXPRESSION',
+     'ALL', 'DISTINCT', 'ALL COLUMNS', 'NOT USED', 'COLUMNS WITHIN EXPRESSION',
      'FROM ALIAS NAME','WHERE', 'NOT', 'OR', 'AND',
-     'IN', 'LIKE', 'BETWEEN', 'IS NULL', 'IS NOT NULL',                    //49
+     'IN', 'LIKE', 'NOT USED', 'IS NULL', 'IS NOT NULL',                    //49
      'EQ', 'LT', 'GT', 'NE', 'LE',
      'GE', 'EQ ALL', 'LT ALL', 'GT ALL', 'NE ALL',
      'LE ALL', 'GE ALL', 'EQ ANY', 'LT ANY', 'GT ANY',
@@ -119,7 +119,7 @@ const
      'COLUMNS PROJECTION', 'PUSH COLUMN NAME', 'CREATE JOIN INDEX', 'BASE TABLE', 'JOIN TABLES CONDITION',
      'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE', //159
      'SHOW ALL TABLES', 'SHOW ALL COLUMNS', 'SHOW ALL JOIN INDEXES', 'SHOW ALL INDEXES', 'SHOW INDEXES',
-     'DROP DATABASE', 'ALTER TABLE', 'ADD', 'DROP', 'DROP CONSTRAINT', //169
+     'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT', //169
      'MODIFY', 'UCASE', 'LCASE', 'MID', 'NOW',
      'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS', //179
      'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'COUNT COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
@@ -153,7 +153,6 @@ type
 
 var
   selectColsInstructions: selectColsInstructionstype = nil;
-  aggregateColsInstructions: selectColsInstructionstype = nil;
 
   lQueryId: string = '';
   rescolname: string = '';
@@ -548,6 +547,11 @@ type YYSType = record
 %type <Pointer> close_cursor
 %type <Pointer> cursor_name
 %type <Pointer> cursor_deallocation
+%type <Pointer> add_column_list
+%type <Pointer> add_column
+%type <Pointer> option_tknCOLUMN
+%type <Pointer> drop_column_list
+%type <Pointer> drop_column
 
 %left tknOR
 %left tknAND
@@ -803,27 +807,44 @@ alter_command : alter_table
                { $$ := $1; }
               ;
 
-alter_table  : tknALTER tknTABLE table_name tknADD new_column option_new_constraint_list
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(167,'ADD',[$5,$6])]); }
-             | tknALTER tknTABLE table_name tknADD '(' new_column_list option_new_constraint_list ')'
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(167,'ADD',[$6,$7])]); }
+alter_table  : tknALTER tknTABLE table_name add_column_list
+              { $$ := opr(166,'ALTER TABLE',[$3,$4]); }
+             | tknALTER tknTABLE table_name drop_column_list
+              { $$ := opr(166,'ALTER TABLE',[$3,$4]); }
              | tknALTER tknTABLE table_name tknADD new_constraint_list
               { $$ := opr(166,'ALTER TABLE',[$3,opr(242,'ADD CONSTRAINT',[$5])]); }
-             | tknALTER tknTABLE table_name tknDROP tknCOLUMN column_name
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(168,'DROP',[$6])]); }
              | tknALTER tknTABLE table_name tknDROP tknCONSTRAINT constraint_name
               { $$ := opr(166,'ALTER TABLE',[$3,opr(169,'DROP CONSTRAINT',[$6])]); }
-             | tknALTER tknTABLE table_name tknDROP '(' column_list ')'
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(168,'DROP',[$6])]); }
              | tknALTER tknTABLE table_name tknMODIFY new_column option_new_constraint_list
               { $$ := opr(166,'ALTER TABLE',[$3,opr(170,'MODIFY',[$5,$6])]); }
-             | tknALTER tknTABLE table_name tknMODIFY '(' new_column_list option_new_constraint_list ')'
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(170,'MODIFY',[$6,$7])]); }
              | tknALTER tknTABLE table_name tknRENAME tknCOLUMN column_name tknTO column_name
               { $$ := opr(166,'ALTER TABLE',[$3,opr(155,'RENAME COLUMN',[$6,$8])]); }
              | tknALTER tknTABLE table_name tknRENAME tknTO table_name
               { $$ := opr(166,'ALTER TABLE',[$3,opr(239,'RENAME TABLE',[$6])]); }
              ;
+
+add_column_list :  add_column
+                 { $$ := opr(167,'ADD COLUMN',[$1]); }
+                 |   add_column_list ',' add_column
+                 { $$ := opr(0,'REPEAT',[$1,opr(167,'ADD COLUMN',[$3])]); }
+                 ;
+add_column      : tknADD option_tknCOLUMN new_column
+                 { $$ := opr(129,'VOID',[$3]); }
+                 ;
+
+option_tknCOLUMN :  /* empty */
+                 { $$ := nil; }
+                 | tknCOLUMN
+                 { $$ := nil; }
+                 ;
+drop_column_list :  drop_column
+                 { $$ := opr(168,'DROP COLUMN',[$1]); }
+                 |   drop_column_list ',' drop_column
+                 { $$ := opr(0,'REPEAT',[$1,opr(168,'DROP COLUMN',[$3])]); }
+                 ;
+drop_column      : tknDROP option_tknCOLUMN column_name
+                 { $$ := $3; }
+                 ;
 
 create_command : create_database
                 { $$ := $1; }
@@ -1653,18 +1674,9 @@ condition : condition tknEQ condition
                 { $$ := opr(42,'NOT',[opr(46,'LIKE',[$1,stcon($4),opr(243,'ESCAPE',stcon($6))])]); }
 
         | condition tknBETWEEN expr tknAND expr
-                /*
-                { $$ := opr(47,'BETWEEN',[$1,$3,$5]); }
-
-                { $$ := opr(129,'void',[opr(55,'GE',[$1,$3]),opr(54,'LE',[$1,$5]),opr(44,'AND',[])]); }
-                */
                 { $$ := opr(44,'AND',[opr(55,'GE',[$1,$3]),opr(54,'LE',[$1,$5])]); }
 
         | condition tknNOT tknBETWEEN expr tknAND expr %prec URELATIONAL
-                /*
-                { $$ := opr(42,'NOT',[opr(47,'BETWEEN',[$1,$4,$6])]); }
-                { $$ := opr(129,'void',[opr(51,'LT',[$1,$4]),opr(52,'GT',[$1,$6]),opr(43,'OR',[])]); }
-                */
                 { $$ := opr(43,'OR',[opr(51,'LT',[$1,$4]),opr(52,'GT',[$1,$6])]); }
 
         | condition tknIS tknNULL
