@@ -1929,11 +1929,6 @@ begin
   selectstk := nil;
   if selectColsInstructions <> nil then
     begin
-      {
-      if not  flagAggregate then
-        if flagDistinctClause then
-          DistinctIBSONInstance :=  TBSONObject.Create;
-      }
       // colsIdTxt := 'sys_queryId' + #8 + 'sys_user' + #8 + 'rowId' + #8;
       // colsValTxt := '"' + lqueryId + '"' + #8 + '"' + dbuserId + '"' + #8 + intToStr(resultRows) + #8;
       colsTxt := 'sys_queryId: ' + lqueryId + ' ' + 'sys_user: ' + dbUserId + ' ' + 'rowId: ' + intToStr(resultRows) + ' ';
@@ -1955,7 +1950,6 @@ begin
               begin
                 exprname := selectColsInstructions[index2,index3].stValue;
               end;
-
 
            151: // COLUMN NAME
               begin
@@ -2082,12 +2076,6 @@ begin
                          ObjVal := trim(ObjVal);
                        end;
                   end;
-                  {if not  flagAggregate then
-                    if flagDistinctClause then
-                      begin
-                        DistinctIBSONInstance.Put(ObjId, ObjVal);
-                      end;}
-                  (*IBSONInstance.Put(ObjId, ObjVal);*)
                   colsIdTxt := colsIdTxt + objId + ',';
                   colsValTxt := colsValTxt + objVal + ',';
 
@@ -2098,25 +2086,6 @@ begin
         end;
       end;
     end;
-  {
-  if flagDistinctClause and not flagAggregate then
-    begin
-      distinctCursor := distinctCollection.find(DistinctIBSONInstance);
-      if distinctCursor.Count <> 0 then
-        resultRows := resultRows - 1
-       else
-        begin
-          DistinctIBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-          distinctCollection.Insert(DistinctIBSONInstance);
-          IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-          GCollection.Insert(IBSONInstance);
-        end
-    end else
-    begin
-      IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-      if flagAggregate then AggregateCollection.Insert(IBSONInstance) else GCollection.Insert(IBSONInstance);
-    end;
-  }
 
   writeln(outText,colsTxt);
 
