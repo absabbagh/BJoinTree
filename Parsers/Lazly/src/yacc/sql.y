@@ -122,7 +122,7 @@ const
      'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT', //169
      'MODIFY', 'UCASE', 'LCASE', 'MID', 'NOW',
      'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS', //179
-     'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'COUNT COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
+     'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'AGGREGATE COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
      'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',
      'DROP TABLE', 'DROP INDEX', 'DROP JOIN INDEX', 'COLUMNS SPECIFIED', 'TABLES COLUMNS SPECIFIED',
      'UPLOAD CSV', 'EMPTY JSON OBJECT', 'MEMBERS OBJECT', 'EMPTY JSON ARRAY', 'ELEMENTS ARRAY', //199
@@ -1955,7 +1955,7 @@ expr    :  expr '+' expr
         | function option_expression
                 { $$ := opr(129,'VOID',[$1,$2]); }
         | group_function '(' option_group ')'
-                { $$ := opr(129,'VOID',[$1,$3]); }
+                { $$ := opr(129,'VOID',[$3,$1]); }
 	;
 
 option_expression : '(' expr_list ')'
