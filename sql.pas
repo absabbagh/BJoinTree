@@ -122,7 +122,7 @@ const
      'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT', //169
      'MODIFY', 'UCASE', 'LCASE', 'MID', 'NOW',
      'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS', //179
-     'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'COUNT COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
+     'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'AGGREGATE COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
      'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',
      'DROP TABLE', 'DROP INDEX', 'DROP JOIN INDEX', 'COLUMNS SPECIFIED', 'TABLES COLUMNS SPECIFIED',
      'UPLOAD CSV', 'EMPTY JSON OBJECT', 'MEMBERS OBJECT', 'EMPTY JSON ARRAY', 'ELEMENTS ARRAY', //199
@@ -2202,7 +2202,7 @@ begin
        end;
 418 : begin
          // source: sql.y line#1958
-         yyval.yyPointer := opr(129,'VOID',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer]); 
+         yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,yyv[yysp-3].yyPointer]); 
        end;
 419 : begin
          yyval := yyv[yysp-2];

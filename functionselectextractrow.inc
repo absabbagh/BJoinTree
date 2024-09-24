@@ -1968,6 +1968,7 @@ begin
                            (resulttable.ownertable[index1].colname = lcolName) then found := true;
                         if found then break;
                       end;
+                    if found then break;
                   end;
                 //**colType :=  resultTable.resultFields.columns[index1].coltype;
                 colType :=  resultTable.columns[index1].coltype;

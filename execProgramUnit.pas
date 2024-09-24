@@ -2192,7 +2192,7 @@ var
   setInstructions: array of array of singleInstructionType = nil;
   isexpr: boolean;
   exprName: string;
-  grpkind: aggregateset = nullkind;   st:string;
+  grpkind: aggregateset = nullkind;
   SDFInstance: SDFClass;
   ResultRows: Integer = 0;
   InsertedRows: Integer = 0;
@@ -4289,8 +4289,8 @@ begin
         if flagAggregate then
           begin
             { #todo : try to process the aggregate function and return result and push it }
-            Parser.yyerror('not yet implemented ');
-            exit;
+//            Parser.yyerror('not yet implemented ');
+//            exit;
             for index2 := low(expr) to high(expr) do
               if expr[index2].mnemonic in [112..116] then
                 begin
@@ -4301,7 +4301,12 @@ begin
                   break;
                 end;
             // check for all columns aggregate
+            setLength(expr, length(expr) + 1);
+            expr[high(expr)].mnemonic := 183;
+            expr[high(expr)].Value := 0.0;
             colname := lowercase(stk[High(stk)].strValue);
+            expr[high(expr)].stvalue := colname;
+            expr[high(expr)].printInstruction := 'AGGREGATE COLUMN NAME';
             // same case as 151 in extractselect but with calculate aggregate
           end else
           begin
@@ -4594,6 +4599,11 @@ begin
         end;
        180: // ALL COLUMNS AGGREGATE
         begin
+          if grpKind <> countKind then
+            begin
+              Parser.yyerror('only * allowed with count ');
+              exit;
+            end;
           setlength(expr,length(expr) + 1);
           expr[High(expr)].mnemonic := 180;
           expr[High(expr)].Value := 111 + ord(grpKind);
@@ -6849,7 +6859,7 @@ begin
           // This is to know if any table found after form table is done for the columns
         end;
 
-        { #todo : Take care of Aliases, should be used, the only place where not use is when we fetch the data }
+        { #todo : Take care of Aliases, should be used }
         37: // ALL COLUMNS
         begin
           // selectColsInstructions := nil;
@@ -7045,7 +7055,6 @@ begin
                 if expr = nil then index := -1;
                 with selectColsInstructions[high(selectColsInstructions), index + 1] do
                   begin
-
                     mnemonic := 177;
                     Value := 0;
                     stvalue := '';
@@ -7061,15 +7070,6 @@ begin
           // End of columns clause: selectColsInstructions has a stack to process the columns
           if flagAggregate then
             begin
-              grpkind := aggregateset(expr[0].Mnemonic - 111);
-              if expr[high(expr)].mnemonic = 180 then
-                if grpKind <> countKind then
-                  begin
-                    Parser.yyerror('only allowed * with count ');
-                    exit;
-                  end;
-              if length(expr) = 2 then
-                st := 'Count (*)' else st := 'Count(' + expr[High(expr)-1].stValue + ')';
               selectColsInstructions := nil;
               setlength(selectColsInstructions,1);
               setlength(selectColsInstructions[High(selectColsInstructions)],2);
@@ -7081,40 +7081,6 @@ begin
                 stvalue := '';
                 printInstruction := 'Aggregate Column';
               end;
-
-
-{
-              for index1 := 0 to fromTableslen - 1 do
-              begin
-//                expr := nil;
-                tblFields := loadTableFields(fromTables[index1].Name);
-                with workingSchema.tables[index1] do
-                  for index2 := 0 to tblFields.numCols - 1 do
-                  begin
-                    setLength(expr, length(expr) + 1);
-                    expr[high(expr)].mnemonic := 151;
-                    expr[high(expr)].Value := 0.0;
-                    expr[high(expr)].stvalue := 'count(*)';
-//                      tblFields.tblName + '.' + tblFields.columns[index2].colname;
-                    expr[high(expr)].printInstruction := 'PUSH COLUMN NAME';
-                    setlength(selectColsInstructions, length(
-                      selectColsInstructions) + 1);
-                    setlength(selectColsInstructions[high(selectColsInstructions)],
-                      length(expr) + 1);
-                    for index := low(expr) to high(expr) do
-                      selectColsInstructions[high(selectColsInstructions), index] :=
-                        expr[index];
-                    expr := nil;
-                    with selectColsInstructions[high(selectColsInstructions),
-                        index + 1] do
-                    begin
-                      mnemonic := 177;
-                      Value := 0;
-                      stvalue := '';
-                      printInstruction := 'Show Column';
-                    end;
-                  end;
-              end;}
             end;
           colsName := nil;
           expr := nil;
@@ -7278,49 +7244,49 @@ begin
           resulttable.columns := nil;
           resulttable.ownerTable := nil;
           for fromindex := 0 to fromTablesLen - 1 do
-          begin
-            resulttable.numCols :=
-              resulttable.numCols +
-              fromTables[fromIndex].fromFields.numCols;
-            setLength(resulttable.columns, length(
-              resulttable.columns) +
-              length(fromTables[fromindex].fromFields.Columns));
-            setLength(resulttable.ownerTable, length(resulttable.ownerTable) +
-              length(fromTables[fromindex].fromFields.Columns));
-          end;
+            begin
+              resulttable.numCols :=
+                resulttable.numCols +
+                fromTables[fromIndex].fromFields.numCols;
+              setLength(resulttable.columns, length(
+                resulttable.columns) +
+                length(fromTables[fromindex].fromFields.Columns));
+              setLength(resulttable.ownerTable, length(resulttable.ownerTable) +
+                length(fromTables[fromindex].fromFields.Columns));
+            end;
 
           fromlengthLimit := 0;
           for fromindex := 0 to fromTablesLen - 1 do
-          begin
-            if fromindex > 0 then
-              fromlengthLimit := fromlengthLimit +
-                length(fromTables[fromindex - 1].fromFields.columns);
-            for resultindex :=
-              0 to length(fromTables[fromIndex].fromFields.columns) - 1 do
             begin
-              resulttable.columns[resultindex + fromlengthlimit].coltype :=
-                fromTables[fromindex].fromFields.columns[resultindex].coltype;
-              resulttable.ownertable[resultindex + fromlengthlimit].colname :=
-                fromTables[fromIndex].fromFields.columns[resultindex].colname;
-              resulttable.ownertable[resultindex + fromlengthlimit].tblname :=
-                fromTables[fromIndex].Name;
+              if fromindex > 0 then
+                fromlengthLimit := fromlengthLimit +
+                  length(fromTables[fromindex - 1].fromFields.columns);
+              for resultindex :=
+                0 to length(fromTables[fromIndex].fromFields.columns) - 1 do
+                begin
+                  resulttable.columns[resultindex + fromlengthlimit].coltype :=
+                    fromTables[fromindex].fromFields.columns[resultindex].coltype;
+                  resulttable.ownertable[resultindex + fromlengthlimit].colname :=
+                    fromTables[fromIndex].fromFields.columns[resultindex].colname;
+                  resulttable.ownertable[resultindex + fromlengthlimit].tblname :=
+                    fromTables[fromIndex].Name;
 
-              setlength(resulttable.ownertable[resultindex +
-                fromlengthlimit].aliasname, length(fromTables[fromIndex].aliasname));
-              for index2 := low(fromTables[fromIndex].aliasname) to high(fromTables[fromIndex].aliasname) do
-                resulttable.ownertable[resultindex + fromlengthlimit].aliasname[index2] :=
-                  fromTables[fromIndex].aliasname[index2];
+                  setlength(resulttable.ownertable[resultindex +
+                    fromlengthlimit].aliasname, length(fromTables[fromIndex].aliasname));
+                  for index2 := low(fromTables[fromIndex].aliasname) to high(fromTables[fromIndex].aliasname) do
+                    resulttable.ownertable[resultindex + fromlengthlimit].aliasname[index2] :=
+                      fromTables[fromIndex].aliasname[index2];
+                end;
             end;
-          end;
 
           resulttable.resultRow := nil;
           for fromindex := 0 to fromTablesLen - 1 do
-          begin
-            setLength(fromTables[fromindex].fromRow,
-              fromTables[fromindex].fromFields.numCols);
-            setLength(resulttable.resultRow, length(resulttable.resultRow) +
-              fromTables[fromindex].fromFields.numCols);
-          end;
+            begin
+              setLength(fromTables[fromindex].fromRow,
+                fromTables[fromindex].fromFields.numCols);
+              setLength(resulttable.resultRow, length(resulttable.resultRow) +
+                fromTables[fromindex].fromFields.numCols);
+            end;
 
 
 
