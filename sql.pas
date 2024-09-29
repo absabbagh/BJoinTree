@@ -78,6 +78,9 @@ type
     procedure yyacceptmessage(msg: string);
     (* accept message printing routine used by the parser *)
 
+    procedure yywarningmessage(msg: string);
+    (* warning message printing routine used by the parser *)
+
     procedure yyerror(msg: string); reintroduce;
     (* error message printing routine used by the parser *)
 
@@ -164,7 +167,7 @@ var
 
   sqlMemProg: progInstrunctionsType;
 
-  sqlResults: array of string;
+  sqlResults: array of string = nil;
 
   resParams: array of string = nil;
 
@@ -443,6 +446,13 @@ begin
   yymiscmsgs[High(yymiscmsgs)] := msg;
 end(*yyacceptmsg*);
 
+procedure TParser.yywarningmessage(msg: string);
+begin
+  msg := 'WARNING: '+ msg;
+  setLength(yywarningmsgs,length(yywarningmsgs) + 1);
+  yywarningmsgs[High(yywarningmsgs)] := msg;
+end(*yywarningmsg*);
+
 function con(value: extended): NodePointer;
 begin
   new(result);
@@ -531,1967 +541,1967 @@ var
 
 procedure yyaction ( yyruleno : Integer );
   (* local definitions: *)
-// source: sql.cod line# 167
+// source: sql.cod line# 174
 begin
   (* actions: *)
   case yyruleno of
 1 : begin
        end;
 2 : begin
-         // source: sql.y line#592
+         // source: sql.y line#595
          yyaccept; 
        end;
 3 : begin
-         // source: sql.y line#594
+         // source: sql.y line#597
          ex(yyv[yysp-1].yyPointer); yyaccept; 
        end;
 4 : begin
-         // source: sql.y line#596
+         // source: sql.y line#599
          ex(yyv[yysp-2].yyPointer); yyaccept; 
        end;
 5 : begin
-         // source: sql.y line#598
+         // source: sql.y line#601
          ex(yyv[yysp-2].yyPointer); yyaccept; 
        end;
 6 : begin
-         // source: sql.y line#600
+         // source: sql.y line#603
          ex(yyv[yysp-2].yyPointer); yyaccept; 
        end;
 7 : begin
-         // source: sql.y line#602
+         // source: sql.y line#605
          ex(yyv[yysp-1].yyPointer); yyaccept; 
        end;
 8 : begin
-         // source: sql.y line#604
+         // source: sql.y line#607
          yyerrok; 
        end;
 9 : begin
-         // source: sql.y line#609
+         // source: sql.y line#612
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 10 : begin
-         // source: sql.y line#611
+         // source: sql.y line#614
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 11 : begin
-         // source: sql.y line#615
+         // source: sql.y line#618
          yyval.yyPointer := opr(196,'EMPTY JSON OBJECT',[]); 
        end;
 12 : begin
-         // source: sql.y line#617
+         // source: sql.y line#620
          yyval.yyPointer := opr(197,'MEMBERS OBJECT',[yyv[yysp-1].yyPointer]); 
        end;
 13 : begin
-         // source: sql.y line#621
+         // source: sql.y line#624
          yyval.yyPointer := opr(200,'JSON MEMBER',[yyv[yysp-0].yyPointer]); 
        end;
 14 : begin
-         // source: sql.y line#623
+         // source: sql.y line#626
          yyval.yyPointer := opr(200,'REPEAT JSON MEMBER',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 15 : begin
-         // source: sql.y line#628
+         // source: sql.y line#631
          yyval.yyPointer := opr(202,'JSON PAIR',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 16 : begin
-         // source: sql.y line#632
+         // source: sql.y line#635
          yyval.yyPointer := opr(198,'EMPTY JSON ARRAY',[]); 
        end;
 17 : begin
-         // source: sql.y line#634
+         // source: sql.y line#637
          yyval.yyPointer := opr(199,'ELEMENTS ARRAY',[yyv[yysp-1].yyPointer]); 
        end;
 18 : begin
-         // source: sql.y line#638
+         // source: sql.y line#641
          yyval.yyPointer := opr(201,'JSON ELEMENT',[yyv[yysp-0].yyPointer]); 
        end;
 19 : begin
-         // source: sql.y line#640
+         // source: sql.y line#643
          yyval.yyPointer := opr(201,'REPEAT JSON ELEMENT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 20 : begin
-         // source: sql.y line#644
+         // source: sql.y line#647
          yyval.yyPointer := opr(203,'JSON STRING VALUE',[yyv[yysp-0].yyPointer]); 
        end;
 21 : begin
-         // source: sql.y line#646
+         // source: sql.y line#649
          yyval.yyPointer := opr(204,'JSON OBJECT VALUE',[yyv[yysp-0].yyPointer]); 
        end;
 22 : begin
-         // source: sql.y line#648
+         // source: sql.y line#651
          yyval.yyPointer := opr(205,'JSON ARRAY VALUE',[yyv[yysp-0].yyPointer]); 
        end;
 23 : begin
-         // source: sql.y line#659
+         // source: sql.y line#662
          yyval.yyPointer := opr(206,'JSON STRING',[yyv[yysp-0].yyPointer]); 
        end;
 24 : begin
-         // source: sql.y line#710
+         // source: sql.y line#713
          yyval.yyPointer := opr(207,'START TRANSACTION',[yyv[yysp-0].yyPointer]); 
        end;
 25 : begin
-         // source: sql.y line#712
+         // source: sql.y line#715
          yyval.yyPointer := opr(208,'ROLLBACK TRANSACTION',[yyv[yysp-0].yyPointer]); 
        end;
 26 : begin
-         // source: sql.y line#714
+         // source: sql.y line#717
          yyval.yyPointer := opr(209,'ROLLBACK TO',[yyv[yysp-0].yyPointer]); 
        end;
 27 : begin
-         // source: sql.y line#716
+         // source: sql.y line#719
          yyval.yyPointer := opr(210,'COMMIT TRANSACTION',[yyv[yysp-0].yyPointer]); 
        end;
 28 : begin
-         // source: sql.y line#718
+         // source: sql.y line#721
          yyval.yyPointer := opr(212,'HOLD SAVEPOINT',[yyv[yysp-0].yyPointer]); 
        end;
 29 : begin
-         // source: sql.y line#720
+         // source: sql.y line#723
          yyval.yyPointer := opr(214,'RELEASE SAVEPOINT',[yyv[yysp-0].yyPointer]); 
        end;
 30 : begin
-         // source: sql.y line#724
+         // source: sql.y line#727
          yyval.yyPointer := opr(211,'TRANSACTION NAME',[stcon(yyv[yysp-0].yystring)]); 
        end;
 31 : begin
-         // source: sql.y line#728
+         // source: sql.y line#731
          yyval.yyPointer := nil; 
        end;
 32 : begin
-         // source: sql.y line#730
+         // source: sql.y line#733
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 33 : begin
-         // source: sql.y line#734
+         // source: sql.y line#737
          yyval.yyPointer := opr(213,'SAVEPOINT NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 34 : begin
-         // source: sql.y line#746
+         // source: sql.y line#749
          yyval.yyPointer := opr(251,'LOCK TABLES',[yyv[yysp-0].yyPointer]); 
        end;
 35 : begin
-         // source: sql.y line#748
+         // source: sql.y line#751
          yyval.yyPointer := opr(254,'UNLOCK TABLES',[]); 
        end;
 36 : begin
-         // source: sql.y line#752
+         // source: sql.y line#755
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 37 : begin
-         // source: sql.y line#754
+         // source: sql.y line#757
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 38 : begin
-         // source: sql.y line#758
+         // source: sql.y line#761
          yyval.yyPointer := opr(252,'READ',[yyv[yysp-1].yyPointer]); 
        end;
 39 : begin
-         // source: sql.y line#760
+         // source: sql.y line#763
          yyval.yyPointer := opr(252,'READ',[yyv[yysp-3].yyPointer,opr(255,'LOCK TABLE ALIAS NAME',[yyv[yysp-1].yyPointer])]); 
        end;
 40 : begin
-         // source: sql.y line#762
+         // source: sql.y line#765
          yyval.yyPointer := opr(253,'WRITE',[yyv[yysp-1].yyPointer]); 
        end;
 41 : begin
-         // source: sql.y line#764
+         // source: sql.y line#767
          yyval.yyPointer := opr(253,'WRITE',[yyv[yysp-3].yyPointer,opr(255,'LOCK TABLE ALIAS NAME',[yyv[yysp-1].yyPointer])]); 
        end;
 42 : begin
-         // source: sql.y line#768
+         // source: sql.y line#771
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 43 : begin
-         // source: sql.y line#770
+         // source: sql.y line#773
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 44 : begin
-         // source: sql.y line#793
+         // source: sql.y line#796
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 45 : begin
-         // source: sql.y line#795
+         // source: sql.y line#798
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 46 : begin
-         // source: sql.y line#797
+         // source: sql.y line#800
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 47 : begin
-         // source: sql.y line#799
+         // source: sql.y line#802
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 48 : begin
-         // source: sql.y line#803
+         // source: sql.y line#806
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 49 : begin
-         // source: sql.y line#805
+         // source: sql.y line#808
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 50 : begin
-         // source: sql.y line#807
+         // source: sql.y line#810
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 51 : begin
-         // source: sql.y line#811
+         // source: sql.y line#814
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 52 : begin
-         // source: sql.y line#813
+         // source: sql.y line#816
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 53 : begin
-         // source: sql.y line#815
+         // source: sql.y line#818
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-2].yyPointer,opr(242,'ADD CONSTRAINT',[yyv[yysp-0].yyPointer])]); 
        end;
 54 : begin
-         // source: sql.y line#817
+         // source: sql.y line#820
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-3].yyPointer,opr(169,'DROP CONSTRAINT',[yyv[yysp-0].yyPointer])]); 
        end;
 55 : begin
-         // source: sql.y line#819
+         // source: sql.y line#822
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-3].yyPointer,opr(170,'MODIFY',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer])]); 
        end;
 56 : begin
-         // source: sql.y line#821
+         // source: sql.y line#824
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-5].yyPointer,opr(155,'RENAME COLUMN',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer])]); 
        end;
 57 : begin
-         // source: sql.y line#823
+         // source: sql.y line#826
          yyval.yyPointer := opr(166,'ALTER TABLE',[yyv[yysp-3].yyPointer,opr(239,'RENAME TABLE',[yyv[yysp-0].yyPointer])]); 
        end;
 58 : begin
-         // source: sql.y line#827
+         // source: sql.y line#830
          yyval.yyPointer := opr(167,'ADD COLUMN',[yyv[yysp-0].yyPointer]); 
        end;
 59 : begin
-         // source: sql.y line#829
+         // source: sql.y line#832
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,opr(167,'ADD COLUMN',[yyv[yysp-0].yyPointer])]); 
        end;
 60 : begin
-         // source: sql.y line#832
+         // source: sql.y line#835
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-0].yyPointer]); 
        end;
 61 : begin
-         // source: sql.y line#836
+         // source: sql.y line#839
          yyval.yyPointer := nil; 
        end;
 62 : begin
-         // source: sql.y line#838
+         // source: sql.y line#841
          yyval.yyPointer := nil; 
        end;
 63 : begin
-         // source: sql.y line#841
+         // source: sql.y line#844
          yyval.yyPointer := opr(168,'DROP COLUMN',[yyv[yysp-0].yyPointer]); 
        end;
 64 : begin
-         // source: sql.y line#843
+         // source: sql.y line#846
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,opr(168,'DROP COLUMN',[yyv[yysp-0].yyPointer])]); 
        end;
 65 : begin
-         // source: sql.y line#846
+         // source: sql.y line#849
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 66 : begin
-         // source: sql.y line#850
+         // source: sql.y line#853
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 67 : begin
-         // source: sql.y line#852
+         // source: sql.y line#855
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 68 : begin
-         // source: sql.y line#854
+         // source: sql.y line#857
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 69 : begin
-         // source: sql.y line#856
+         // source: sql.y line#859
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 70 : begin
-         // source: sql.y line#858
+         // source: sql.y line#861
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 71 : begin
-         // source: sql.y line#860
+         // source: sql.y line#863
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 72 : begin
-         // source: sql.y line#862
+         // source: sql.y line#865
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 73 : begin
-         // source: sql.y line#864
+         // source: sql.y line#867
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 74 : begin
-         // source: sql.y line#866
+         // source: sql.y line#869
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 75 : begin
-         // source: sql.y line#870
+         // source: sql.y line#873
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 76 : begin
-         // source: sql.y line#872
+         // source: sql.y line#875
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 77 : begin
-         // source: sql.y line#874
+         // source: sql.y line#877
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 78 : begin
-         // source: sql.y line#876
+         // source: sql.y line#879
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 79 : begin
-         // source: sql.y line#878
+         // source: sql.y line#881
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 80 : begin
-         // source: sql.y line#880
+         // source: sql.y line#883
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 81 : begin
          yyval := yyv[yysp-0];
        end;
 82 : begin
-         // source: sql.y line#883
+         // source: sql.y line#886
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 83 : begin
-         // source: sql.y line#887
+         // source: sql.y line#890
          yyval.yyPointer := opr(1,'CREATE DATABASE',[yyv[yysp-0].yyPointer]); 
        end;
 84 : begin
-         // source: sql.y line#891
+         // source: sql.y line#894
          yyval.yyPointer := opr(2,'DATABASE NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 85 : begin
-         // source: sql.y line#895
+         // source: sql.y line#898
          yyval.yyPointer := opr(165,'DROP DATABASE',[yyv[yysp-0].yyPointer]); 
        end;
 86 : begin
-         // source: sql.y line#899
+         // source: sql.y line#902
          yyval.yyPointer := opr(3,'CREATE TABLE',[yyv[yysp-4].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 87 : begin
-         // source: sql.y line#901
+         // source: sql.y line#904
          yyval.yyPointer := opr(3,'CREATE TABLE',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 88 : begin
-         // source: sql.y line#905
+         // source: sql.y line#908
          yyval.yyPointer := opr(4,'TABLE NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 89 : begin
-         // source: sql.y line#907
+         // source: sql.y line#910
          yyval.yyPointer := opr(229,'NULL COMMAND',[opr(2,'DATABASE NAME',[DBName(yyv[yysp-2].yystring)]),opr(4,'TABLE NAME',[DBName(yyv[yysp-0].yystring)])]); 
        end;
 90 : begin
-         // source: sql.y line#911
+         // source: sql.y line#914
          yyval.yyPointer := opr(226,'CREATE VIEW',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 91 : begin
-         // source: sql.y line#915
+         // source: sql.y line#918
          yyval.yyPointer := opr(227,'VIEW NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 92 : begin
-         // source: sql.y line#919
+         // source: sql.y line#922
          yyval.yyPointer := opr(228,'CREATE USER',[yyv[yysp-4].yyPointer,opr(230,'PASSWORD',[yyv[yysp-0].yyPointer])]); 
        end;
 93 : begin
-         // source: sql.y line#923
+         // source: sql.y line#926
          yyval.yyPointer := opr(248,'ALTER USER',[yyv[yysp-7].yyPointer,opr(230,'PASSWORD',[yyv[yysp-3].yyPointer]),opr(249,'NEW PASSWORD',[yyv[yysp-0].yyPointer])]); 
        end;
 94 : begin
-         // source: sql.y line#927
+         // source: sql.y line#930
          yyval.yyPointer := opr(246,'CREATE ROLE',[yyv[yysp-0].yyPointer]); 
        end;
 95 : begin
-         // source: sql.y line#931
+         // source: sql.y line#934
          yyval.yyPointer := opr(247,'ROLE ID',[DBName(yyv[yysp-0].yystring)]); 
        end;
 96 : begin
-         // source: sql.y line#935
+         // source: sql.y line#938
          yyval.yyPointer := nil; 
        end;
 97 : begin
-         // source: sql.y line#937
+         // source: sql.y line#940
          yyval.yyPointer := nil; 
        end;
 98 : begin
-         // source: sql.y line#941
+         // source: sql.y line#944
          yyval.yyPointer := stcon(yyv[yysp-0].yystring); 
        end;
 99 : begin
-         // source: sql.y line#1016
+         // source: sql.y line#1019
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 100 : begin
-         // source: sql.y line#1018
+         // source: sql.y line#1021
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 101 : begin
-         // source: sql.y line#1020
+         // source: sql.y line#1023
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 102 : begin
-         // source: sql.y line#1024
+         // source: sql.y line#1027
          yyval.yyPointer := opr(231,'GRANT',[yyv[yysp-3].yyPointer,opr(250,'USER_ID OR ROLE_NAME',DBName(yyv[yysp-1].yystring)),yyv[yysp-0].yyPointer]); 
        end;
 103 : begin
-         // source: sql.y line#1028
+         // source: sql.y line#1031
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 104 : begin
-         // source: sql.y line#1030
+         // source: sql.y line#1033
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 105 : begin
-         // source: sql.y line#1034
+         // source: sql.y line#1037
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE DATABASE')]); 
        end;
 106 : begin
-         // source: sql.y line#1036
+         // source: sql.y line#1039
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE TABLE')]); 
        end;
 107 : begin
-         // source: sql.y line#1038
+         // source: sql.y line#1041
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE ANY TABLE')]); 
        end;
 108 : begin
-         // source: sql.y line#1040
+         // source: sql.y line#1043
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE VIEW')]); 
        end;
 109 : begin
-         // source: sql.y line#1042
+         // source: sql.y line#1045
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE ANY VIEW')]); 
        end;
 110 : begin
-         // source: sql.y line#1044
+         // source: sql.y line#1047
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE INDEX')]); 
        end;
 111 : begin
-         // source: sql.y line#1046
+         // source: sql.y line#1049
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE ANY INDEX')]); 
        end;
 112 : begin
-         // source: sql.y line#1048
+         // source: sql.y line#1051
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('ALTER')]); 
        end;
 113 : begin
-         // source: sql.y line#1050
+         // source: sql.y line#1053
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('DROP')]); 
        end;
 114 : begin
-         // source: sql.y line#1052
+         // source: sql.y line#1055
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('CREATE USERS')]); 
        end;
 115 : begin
-         // source: sql.y line#1054
+         // source: sql.y line#1057
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('ALL PRIVILEGES')]); 
        end;
 116 : begin
-         // source: sql.y line#1058
+         // source: sql.y line#1061
          yyval.yyPointer := opr(250,'GRANT ROLE',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 117 : begin
-         // source: sql.y line#1062
+         // source: sql.y line#1065
          yyval.yyPointer := opr(231,'GRANT',[yyv[yysp-5].yyPointer,opr(240,'DATABASE OBJECT',[yyv[yysp-3].yyPointer]),yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 118 : begin
-         // source: sql.y line#1066
+         // source: sql.y line#1069
          yyval.yyPointer := DBName(yyv[yysp-0].yystring); 
        end;
 119 : begin
-         // source: sql.y line#1068
+         // source: sql.y line#1071
          yyval.yyPointer := DBName(yyv[yysp-0].yystring); 
        end;
 120 : begin
-         // source: sql.y line#1072
+         // source: sql.y line#1075
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 121 : begin
-         // source: sql.y line#1074
+         // source: sql.y line#1077
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 122 : begin
-         // source: sql.y line#1078
+         // source: sql.y line#1081
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('SELECT')]); 
        end;
 123 : begin
-         // source: sql.y line#1080
+         // source: sql.y line#1083
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('INSERT')]); 
        end;
 124 : begin
-         // source: sql.y line#1082
+         // source: sql.y line#1085
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('UPDATE')]); 
        end;
 125 : begin
-         // source: sql.y line#1084
+         // source: sql.y line#1087
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('DELETE')]); 
        end;
 126 : begin
-         // source: sql.y line#1086
+         // source: sql.y line#1089
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('ALL')]); 
        end;
 127 : begin
-         // source: sql.y line#1090
+         // source: sql.y line#1093
          yyval.yyPointer := nil; 
        end;
 128 : begin
-         // source: sql.y line#1092
+         // source: sql.y line#1095
          yyval.yyPointer := opr(233,'PRIVILEGE',[stOption('GRANT OPTION')]); 
        end;
 129 : begin
-         // source: sql.y line#1096
+         // source: sql.y line#1099
          yyval.yyPointer := opr(190,'DROP TABlE',[yyv[yysp-0].yyPointer]); 
        end;
 130 : begin
-         // source: sql.y line#1100
+         // source: sql.y line#1103
          yyval.yyPointer := opr(235,'DROP VIEW',[yyv[yysp-0].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 131 : begin
-         // source: sql.y line#1104
+         // source: sql.y line#1107
          yyval.yyPointer := nil; 
        end;
 132 : begin
-         // source: sql.y line#1106
+         // source: sql.y line#1109
          yyval.yyPointer := opr(68,'EXISTS',[]); 
        end;
 133 : begin
-         // source: sql.y line#1110
+         // source: sql.y line#1113
          yyval.yyPointer := opr(236,'RENAME USER',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 134 : begin
-         // source: sql.y line#1114
+         // source: sql.y line#1117
          yyval.yyPointer := opr(237,'DROP USER',[yyv[yysp-0].yyPointer]); 
        end;
 135 : begin
-         // source: sql.y line#1118
+         // source: sql.y line#1121
          yyval.yyPointer := opr(191,'DROP INDEX',[yyv[yysp-0].yyPointer]); 
        end;
 136 : begin
-         // source: sql.y line#1122
+         // source: sql.y line#1125
          yyval.yyPointer := opr(192,'DROP JOIN INDEX',[yyv[yysp-0].yyPointer]); 
        end;
 137 : begin
-         // source: sql.y line#1126
+         // source: sql.y line#1129
          yyval.yyPointer := opr(238,'DROP TRIGGER',[yyv[yysp-0].yyPointer]); 
        end;
 138 : begin
-         // source: sql.y line#1131
-         yyval.yyPointer := yyv[yysp-0].yyPointer; 
-       end;
-139 : begin
          // source: sql.y line#1134
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
+139 : begin
+         // source: sql.y line#1137
+         yyval.yyPointer := yyv[yysp-0].yyPointer; 
+       end;
 140 : begin
-         // source: sql.y line#1138
+         // source: sql.y line#1141
          yyval.yyPointer := opr(232,'REVOKE',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 141 : begin
-         // source: sql.y line#1142
+         // source: sql.y line#1145
          yyval.yyPointer := opr(232,'REVOKE',[yyv[yysp-4].yyPointer,opr(240,'DATABASE OBJECT',[yyv[yysp-2].yyPointer]),yyv[yysp-0].yyPointer]); 
        end;
 142 : begin
-         // source: sql.y line#1146
+         // source: sql.y line#1149
          yyval.yyPointer := opr(188,'FILE NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 143 : begin
-         // source: sql.y line#1150
+         // source: sql.y line#1153
          yyval.yyPointer := opr(156,'REFERENCE TABLE NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 144 : begin
-         // source: sql.y line#1154
+         // source: sql.y line#1157
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 145 : begin
-         // source: sql.y line#1156
+         // source: sql.y line#1159
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 146 : begin
-         // source: sql.y line#1160
+         // source: sql.y line#1163
          yyval.yyPointer := opr(5,'NEW COLUMN',[yyv[yysp-3].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 147 : begin
-         // source: sql.y line#1164
+         // source: sql.y line#1167
          yyval.yyPointer := opr(6,'COLUMN NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 148 : begin
-         // source: sql.y line#1168
+         // source: sql.y line#1171
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 149 : begin
-         // source: sql.y line#1170
+         // source: sql.y line#1173
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 150 : begin
-         // source: sql.y line#1172
+         // source: sql.y line#1175
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 151 : begin
-         // source: sql.y line#1174
+         // source: sql.y line#1177
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 152 : begin
-         // source: sql.y line#1176
+         // source: sql.y line#1179
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 153 : begin
-         // source: sql.y line#1178
+         // source: sql.y line#1181
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 154 : begin
-         // source: sql.y line#1182
+         // source: sql.y line#1185
          yyval.yyPointer := opr(7,'CHAR',[con(yyv[yysp-1].yyInteger)]); 
        end;
 155 : begin
-         // source: sql.y line#1184
+         // source: sql.y line#1187
          yyval.yyPointer := opr(8,'VARCHAR',[con(yyv[yysp-1].yyInteger)]); 
        end;
 156 : begin
-         // source: sql.y line#1186
+         // source: sql.y line#1189
          yyval.yyPointer := opr(9,'CHAR VARYING',[con(yyv[yysp-1].yyInteger)]); 
        end;
 157 : begin
-         // source: sql.y line#1188
+         // source: sql.y line#1191
          yyval.yyPointer := opr(10,'CHARACTER',[con(yyv[yysp-1].yyInteger)]); 
        end;
 158 : begin
-         // source: sql.y line#1190
+         // source: sql.y line#1193
          yyval.yyPointer := opr(11,'CHARACTER VARYING',[con(yyv[yysp-1].yyInteger)]); 
        end;
 159 : begin
-         // source: sql.y line#1192
+         // source: sql.y line#1195
          yyval.yyPointer := opr(12,'CLOB',[con(yyv[yysp-1].yyInteger)]); 
        end;
 160 : begin
-         // source: sql.y line#1196
+         // source: sql.y line#1199
          yyval.yyPointer := opr(136,'BOOLEAN'); 
        end;
 161 : begin
-         // source: sql.y line#1200
+         // source: sql.y line#1203
          yyval.yyPointer := opr(13,'DATE'); 
        end;
 162 : begin
-         // source: sql.y line#1202
+         // source: sql.y line#1205
          yyval.yyPointer := opr(223,'DATETIME',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 163 : begin
-         // source: sql.y line#1204
+         // source: sql.y line#1207
          yyval.yyPointer := opr(132,'TIME',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 164 : begin
-         // source: sql.y line#1206
+         // source: sql.y line#1209
          yyval.yyPointer := opr(133,'TIMESTAMP',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 165 : begin
-         // source: sql.y line#1210
+         // source: sql.y line#1213
          yyval.yyPointer := nil; 
        end;
 166 : begin
-         // source: sql.y line#1212
+         // source: sql.y line#1215
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 167 : begin
-         // source: sql.y line#1216
+         // source: sql.y line#1219
          yyval.yyPointer := con(yyv[yysp-0].yyInteger); 
        end;
 168 : begin
-         // source: sql.y line#1220
+         // source: sql.y line#1223
          yyval.yyPointer := nil; 
        end;
 169 : begin
-         // source: sql.y line#1222
+         // source: sql.y line#1225
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 170 : begin
-         // source: sql.y line#1227
+         // source: sql.y line#1230
          yyval.yyPointer := opr(134,'WITH TIME ZONE'); 
        end;
 171 : begin
-         // source: sql.y line#1229
+         // source: sql.y line#1232
          yyval.yyPointer := opr(135,'WITHOUT TIME ZONE'); 
        end;
 172 : begin
-         // source: sql.y line#1233
+         // source: sql.y line#1236
          yyval.yyPointer := opr(14,'NUMBER',[con(yyv[yysp-1].yyInteger)]); 
        end;
 173 : begin
-         // source: sql.y line#1235
+         // source: sql.y line#1238
          yyval.yyPointer := opr(15,'FLOAT',[con(yyv[yysp-1].yyInteger)]); 
        end;
 174 : begin
-         // source: sql.y line#1237
+         // source: sql.y line#1240
          yyval.yyPointer := opr(16,'REAL'); 
        end;
 175 : begin
-         // source: sql.y line#1239
+         // source: sql.y line#1242
          yyval.yyPointer := opr(17,'DOUBLE PRECISION'); 
        end;
 176 : begin
-         // source: sql.y line#1241
+         // source: sql.y line#1244
          yyval.yyPointer := opr(17,'DOUBLE PRECISION'); 
        end;
 177 : begin
-         // source: sql.y line#1245
+         // source: sql.y line#1248
          yyval.yyPointer := opr(18,'NUMBER2',[con(yyv[yysp-3].yyInteger),con(yyv[yysp-1].yyInteger)]); 
        end;
 178 : begin
-         // source: sql.y line#1247
+         // source: sql.y line#1250
          yyval.yyPointer := opr(19,'DECIMAL',[con(yyv[yysp-3].yyInteger),con(yyv[yysp-1].yyInteger)]); 
        end;
 179 : begin
-         // source: sql.y line#1249
+         // source: sql.y line#1252
          yyval.yyPointer := opr(20,'DEC',[con(yyv[yysp-3].yyInteger),con(yyv[yysp-1].yyInteger)]); 
        end;
 180 : begin
-         // source: sql.y line#1251
+         // source: sql.y line#1254
          yyval.yyPointer := opr(21,'NUMERIC',[con(yyv[yysp-3].yyInteger),con(yyv[yysp-1].yyInteger)]); 
        end;
 181 : begin
-         // source: sql.y line#1254
+         // source: sql.y line#1257
          yyval.yyPointer := opr(22,'NUMBER1'); 
        end;
 182 : begin
-         // source: sql.y line#1256
+         // source: sql.y line#1259
          yyval.yyPointer := opr(23,'INTEGER'); 
        end;
 183 : begin
-         // source: sql.y line#1258
+         // source: sql.y line#1261
          yyval.yyPointer := opr(24,'INT'); 
        end;
 184 : begin
-         // source: sql.y line#1260
+         // source: sql.y line#1263
          yyval.yyPointer := opr(25,'SMALLINT'); 
        end;
 185 : begin
-         // source: sql.y line#1262
+         // source: sql.y line#1265
          yyval.yyPointer := opr(131,'BIGINT'); 
        end;
 186 : begin
-         // source: sql.y line#1266
+         // source: sql.y line#1269
          yyval.yyPointer := nil; 
        end;
 187 : begin
-         // source: sql.y line#1268
+         // source: sql.y line#1271
          yyval.yyPointer := opr(176,'AUTOINCREMENT'); 
        end;
 188 : begin
-         // source: sql.y line#1270
+         // source: sql.y line#1273
          yyval.yyPointer := opr(90,'DEFAULT',[yyv[yysp-0].yyPointer]); 
        end;
 189 : begin
-         // source: sql.y line#1274
+         // source: sql.y line#1277
          yyval.yyPointer := nil; 
        end;
 190 : begin
-         // source: sql.y line#1276
+         // source: sql.y line#1279
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 191 : begin
-         // source: sql.y line#1280
+         // source: sql.y line#1283
          yyval.yyPointer := opr(91,'CONSTRAINT',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 192 : begin
-         // source: sql.y line#1284
+         // source: sql.y line#1287
          yyval.yyPointer := nil; 
        end;
 193 : begin
-         // source: sql.y line#1286
+         // source: sql.y line#1289
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-0].yyPointer]); 
        end;
 194 : begin
-         // source: sql.y line#1290
+         // source: sql.y line#1293
          yyval.yyPointer := opr(26,'CONSTRAINT NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 195 : begin
-         // source: sql.y line#1294
+         // source: sql.y line#1297
          yyval.yyPointer := opr(27,'NULL'); 
        end;
 196 : begin
-         // source: sql.y line#1296
+         // source: sql.y line#1299
          yyval.yyPointer := opr(28,'NOT NULL'); 
        end;
 197 : begin
-         // source: sql.y line#1298
+         // source: sql.y line#1301
          yyval.yyPointer := opr(29,'UNIQUE'); 
        end;
 198 : begin
-         // source: sql.y line#1300
+         // source: sql.y line#1303
          yyval.yyPointer := opr(30,'PRIMARY KEY'); 
        end;
 199 : begin
-         // source: sql.y line#1302
+         // source: sql.y line#1305
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 200 : begin
-         // source: sql.y line#1304
+         // source: sql.y line#1307
          yyval.yyPointer := opr(130,'CHECK',[yyv[yysp-0].yyPointer]); 
        end;
 201 : begin
-         // source: sql.y line#1308
+         // source: sql.y line#1311
          yyval.yyPointer := opr(137,'FOREIGN KEY',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 202 : begin
-         // source: sql.y line#1310
+         // source: sql.y line#1313
          yyval.yyPointer := opr(31,'REFERENCES',[yyv[yysp-2].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 203 : begin
-         // source: sql.y line#1314
+         // source: sql.y line#1317
          yyval.yyPointer := nil; 
        end;
 204 : begin
-         // source: sql.y line#1316
+         // source: sql.y line#1319
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 205 : begin
-         // source: sql.y line#1320
+         // source: sql.y line#1323
          yyval.yyPointer := nil; 
        end;
 206 : begin
-         // source: sql.y line#1322
+         // source: sql.y line#1325
          yyval.yyPointer := opr(32,'ON DELETE CASCADE'); 
        end;
 207 : begin
-         // source: sql.y line#1326
+         // source: sql.y line#1329
          yyval.yyPointer := nil; 
        end;
 208 : begin
-         // source: sql.y line#1328
+         // source: sql.y line#1331
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 209 : begin
-         // source: sql.y line#1332
+         // source: sql.y line#1335
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 210 : begin
-         // source: sql.y line#1334
+         // source: sql.y line#1337
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 211 : begin
-         // source: sql.y line#1338
+         // source: sql.y line#1341
          yyval.yyPointer := opr(33,'TABLE CONSTRAINT',[yyv[yysp-0].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 212 : begin
-         // source: sql.y line#1342
+         // source: sql.y line#1345
          yyval.yyPointer := opr(29,'UNIQUE',[yyv[yysp-1].yyPointer]); 
        end;
 213 : begin
-         // source: sql.y line#1344
+         // source: sql.y line#1347
          yyval.yyPointer := opr(30,'PRIMARY KEY',[yyv[yysp-1].yyPointer]); 
        end;
 214 : begin
-         // source: sql.y line#1346
+         // source: sql.y line#1349
          yyval.yyPointer := opr(130,'CHECK',[yyv[yysp-0].yyPointer]); 
        end;
 215 : begin
-         // source: sql.y line#1348
+         // source: sql.y line#1351
          yyval.yyPointer := opr(137,'FOREIGN KEY',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 216 : begin
-         // source: sql.y line#1352
+         // source: sql.y line#1355
          yyval.yyPointer := opr(31,'REFERENCES',[yyv[yysp-2].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 217 : begin
-         // source: sql.y line#1356
+         // source: sql.y line#1359
          yyval.yyPointer := nil; 
        end;
 218 : begin
-         // source: sql.y line#1358
+         // source: sql.y line#1361
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 219 : begin
-         // source: sql.y line#1362
+         // source: sql.y line#1365
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 220 : begin
-         // source: sql.y line#1364
+         // source: sql.y line#1367
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 221 : begin
-         // source: sql.y line#1368
+         // source: sql.y line#1371
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-0].yyPointer]); 
        end;
 222 : begin
-         // source: sql.y line#1372
+         // source: sql.y line#1375
          yyval.yyPointer := opr(120,'CREATE INDEX',[yyv[yysp-5].yyPointer,yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 223 : begin
-         // source: sql.y line#1376
+         // source: sql.y line#1379
          yyval.yyPointer := opr(121,'INDEX NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 224 : begin
-         // source: sql.y line#1380
+         // source: sql.y line#1383
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 225 : begin
-         // source: sql.y line#1382
+         // source: sql.y line#1385
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 226 : begin
-         // source: sql.y line#1385
+         // source: sql.y line#1388
          yyval.yyPointer := opr(124,'INDEX COLUMN',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 227 : begin
-         // source: sql.y line#1388
+         // source: sql.y line#1391
          yyval.yyPointer := nil; 
        end;
 228 : begin
-         // source: sql.y line#1390
+         // source: sql.y line#1393
          yyval.yyPointer := opr(122,'ASC'); 
        end;
 229 : begin
-         // source: sql.y line#1392
+         // source: sql.y line#1395
          yyval.yyPointer := opr(123,'DESC'); 
        end;
 230 : begin
-         // source: sql.y line#1396
+         // source: sql.y line#1399
          yyval.yyPointer := opr(152,'CREATE JOIN INDEX',[yyv[yysp-5].yyPointer,yyv[yysp-3].yyPointer,opr(154,'JOIN TABLES CONDITION',[yyv[yysp-1].yyPointer]),yyv[yysp-0].yyPointer]); 
        end;
 231 : begin
-         // source: sql.y line#1400
+         // source: sql.y line#1403
          yyval.yyPointer :=  opr(153,'BASE TABLE',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 232 : begin
-         // source: sql.y line#1402
+         // source: sql.y line#1405
          yyval.yyPointer :=  opr(153,'BASE TABLE',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 233 : begin
-         // source: sql.y line#1406
+         // source: sql.y line#1409
          yyval.yyPointer := nil; 
        end;
 234 : begin
-         // source: sql.y line#1408
+         // source: sql.y line#1411
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 235 : begin
-         // source: sql.y line#1412
+         // source: sql.y line#1415
          yyval.yyPointer := nil; 
        end;
 236 : begin
-         // source: sql.y line#1414
+         // source: sql.y line#1417
          yyval.yyPointer := opr(70,'ORDER BY',[yyv[yysp-0].yyPointer]); 
        end;
 237 : begin
-         // source: sql.y line#1418
+         // source: sql.y line#1421
          yyval.yyPointer := opr(125,'TABLE COMMENT',[opr(4,'TABLE NAME',[DBName(yyv[yysp-2].yystring)]),yyv[yysp-0].yyPointer]); 
        end;
 238 : begin
-         // source: sql.y line#1420
+         // source: sql.y line#1423
          yyval.yyPointer := opr(125,'TABLE COMMENT',[opr(2,'DATABASE NAME',[DBName(yyv[yysp-4].yystring)]),opr(4,'TABLE NAME',[DBName(yyv[yysp-2].yystring)]),yyv[yysp-0].yyPointer]); 
        end;
 239 : begin
-         // source: sql.y line#1422
+         // source: sql.y line#1425
          yyval.yyPointer := opr(126,'COLUMN COMMENT',[opr(4,'TABLE NAME',[DBName(yyv[yysp-4].yystring)]),opr(6,'COLUMN NAME',[DBName(yyv[yysp-2].yystring)]),yyv[yysp-0].yyPointer]); 
        end;
 240 : begin
-         // source: sql.y line#1424
+         // source: sql.y line#1427
          yyval.yyPointer := opr(126,'COLUMN COMMENT',[opr(2,'DATABASE NAME',[DBName(yyv[yysp-6].yystring)]),opr(4,'TABLE NAME',[DBName(yyv[yysp-4].yystring)]),opr(6,'COLUMN NAME',[DBName(yyv[yysp-2].yystring)]),yyv[yysp-0].yyPointer]); 
        end;
 241 : begin
-         // source: sql.y line#1428
+         // source: sql.y line#1431
          yyval.yyPointer := opr(129,'VOID',[DBcomment(yyv[yysp-0].yystring)]); 
        end;
 242 : begin
-         // source: sql.y line#1432
+         // source: sql.y line#1435
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 243 : begin
-         // source: sql.y line#1434
+         // source: sql.y line#1437
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 244 : begin
-         // source: sql.y line#1436
+         // source: sql.y line#1439
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 245 : begin
-         // source: sql.y line#1438
+         // source: sql.y line#1441
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 246 : begin
-         // source: sql.y line#1440
+         // source: sql.y line#1443
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 247 : begin
-         // source: sql.y line#1442
+         // source: sql.y line#1445
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 248 : begin
-         // source: sql.y line#1444
+         // source: sql.y line#1447
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 249 : begin
-         // source: sql.y line#1446
+         // source: sql.y line#1449
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 250 : begin
-         // source: sql.y line#1448
+         // source: sql.y line#1451
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 251 : begin
-         // source: sql.y line#1450
+         // source: sql.y line#1453
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 252 : begin
-         // source: sql.y line#1454
+         // source: sql.y line#1457
          yyval.yyPointer := opr(216,'START CURSOR DECLARATION',[yyv[yysp-3].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 253 : begin
-         // source: sql.y line#1458
+         // source: sql.y line#1461
          yyval.yyPointer := opr(217,'OPEN CURSOR',[yyv[yysp-0].yyPointer]); 
        end;
 254 : begin
-         // source: sql.y line#1462
+         // source: sql.y line#1465
          yyval.yyPointer := opr(218,'FETCH CURSOR',[yyv[yysp-0].yyPointer]); 
        end;
 255 : begin
-         // source: sql.y line#1466
+         // source: sql.y line#1469
          yyval.yyPointer := opr(219,'CLOSE CURSOR',[yyv[yysp-0].yyPointer]); 
        end;
 256 : begin
-         // source: sql.y line#1470
+         // source: sql.y line#1473
          yyval.yyPointer := opr(220,'END CURSOR DECLARATION',[yyv[yysp-0].yyPointer]); 
        end;
 257 : begin
-         // source: sql.y line#1473
+         // source: sql.y line#1476
          yyval.yyPointer := opr(215,'CURSOR NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 258 : begin
-         // source: sql.y line#1489
+         // source: sql.y line#1492
          yyval.yyPointer := opr(157,'SHOW ALL DATABASES',[]); 
        end;
 259 : begin
-         // source: sql.y line#1491
+         // source: sql.y line#1494
          yyval.yyPointer := opr(157,'SHOW ALL DATABASES',[yyv[yysp-0].yyPointer]); 
        end;
 260 : begin
-         // source: sql.y line#1493
+         // source: sql.y line#1496
          yyval.yyPointer := opr(159,'SWITCH DATABASE',[yyv[yysp-0].yyPointer]); 
        end;
 261 : begin
-         // source: sql.y line#1495
+         // source: sql.y line#1498
          yyval.yyPointer := opr(160,'SHOW ALL TABLES',[]); 
        end;
 262 : begin
-         // source: sql.y line#1497
+         // source: sql.y line#1500
          yyval.yyPointer := opr(161,'SHOW ALL COLUMNS',[yyv[yysp-0].yyPointer]); 
        end;
 263 : begin
-         // source: sql.y line#1499
+         // source: sql.y line#1502
          yyval.yyPointer := opr(162,'SHOW ALL JOIN INDEXES',[]); 
        end;
 264 : begin
-         // source: sql.y line#1501
+         // source: sql.y line#1504
          yyval.yyPointer := opr(163,'SHOW ALL INDEXES FROM TABLE',[yyv[yysp-0].yyPointer]); 
        end;
 265 : begin
-         // source: sql.y line#1503
+         // source: sql.y line#1506
          yyval.yyPointer := opr(164,'SHOW ALL INDEXES',[]); 
        end;
 266 : begin
-         // source: sql.y line#1505
+         // source: sql.y line#1508
          yyval.yyPointer := opr(245,'SHOW ALL CONSTRAINTS',[yyv[yysp-0].yyPointer]); 
        end;
 267 : begin
-         // source: sql.y line#1507
+         // source: sql.y line#1510
          yyval.yyPointer := opr(186,' LOAD CSV',[yyv[yysp-0].yyPointer]); 
        end;
 268 : begin
-         // source: sql.y line#1509
+         // source: sql.y line#1512
          yyval.yyPointer := opr(195,' UPLOAD CSV',[yyv[yysp-0].yyPointer]); 
        end;
 269 : begin
-         // source: sql.y line#1511
+         // source: sql.y line#1514
          yyval.yyPointer := opr(187,' LOAD SQL',[yyv[yysp-0].yyPointer]); 
        end;
 270 : begin
-         // source: sql.y line#1513
+         // source: sql.y line#1516
          yyval.yyPointer := opr(184,'SHOW SELECT STATEMENT HEADER',[yyv[yysp-0].yyPointer]); 
        end;
 271 : begin
-         // source: sql.y line#1517
+         // source: sql.y line#1520
          yyval.yyPointer := opr(158,'USER ID',[DBName(yyv[yysp-0].yystring)]); 
        end;
 272 : begin
-         // source: sql.y line#1521
+         // source: sql.y line#1524
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 273 : begin
-         // source: sql.y line#1525
+         // source: sql.y line#1528
          yyval.yyPointer := nil; 
        end;
 274 : begin
-         // source: sql.y line#1527
+         // source: sql.y line#1530
          yyval.yyPointer := opr(35,'ALL'); 
        end;
 275 : begin
-         // source: sql.y line#1529
+         // source: sql.y line#1532
          yyval.yyPointer := opr(36,'DISTINCT'); 
        end;
 276 : begin
-         // source: sql.y line#1533
+         // source: sql.y line#1536
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 277 : begin
-         // source: sql.y line#1537
+         // source: sql.y line#1540
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 278 : begin
-         // source: sql.y line#1539
+         // source: sql.y line#1542
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 279 : begin
-         // source: sql.y line#1548
+         // source: sql.y line#1551
          yyval.yyPointer := opr(229,'DOT',[opr(4,'TABLE NAME',[DBName(yyv[yysp-2].yystring)]),opr(37,'ALL COLUMNS')]); 
        end;
 280 : begin
-         // source: sql.y line#1550
+         // source: sql.y line#1553
          yyval.yyPointer := opr(229,'DOT',[opr(2,'DATABASE NAME',[DBName(yyv[yysp-4].yystring)]),opr(4,'TABLE NAME',[DBName(yyv[yysp-2].yystring)]),opr(37,'ALL COLUMNS')]); 
        end;
 281 : begin
-         // source: sql.y line#1552
+         // source: sql.y line#1555
          yyval.yyPointer := opr(37,'ALL COLUMNS'); 
        end;
 282 : begin
-         // source: sql.y line#1554
+         // source: sql.y line#1557
          yyval.yyPointer := opr(39,'COLUMNS WITHIN EXPRESSION',[yyv[yysp-0].yyPointer]); 
        end;
 283 : begin
-         // source: sql.y line#1556
+         // source: sql.y line#1559
          yyval.yyPointer := opr(39,'COLUMNS WITHIN EXPRESSION',[yyv[yysp-1].yyPointer,opr(178,'COLUMN ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 284 : begin
-         // source: sql.y line#1558
+         // source: sql.y line#1561
          yyval.yyPointer := opr(39,'COLUMNS WITHIN EXPRESSION',[yyv[yysp-2].yyPointer,opr(178,'COLUMN ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 285 : begin
-         // source: sql.y line#1560
+         // source: sql.y line#1563
          yyval.yyPointer := opr(224,'COLUMN FROM SUBQUERY',[yyv[yysp-0].yyPointer]); 
        end;
 286 : begin
-         // source: sql.y line#1562
+         // source: sql.y line#1565
          yyval.yyPointer := opr(224,'COLUMN FROM SUBQUERY',[yyv[yysp-1].yyPointer,opr(178,'COLUMN ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 287 : begin
-         // source: sql.y line#1564
+         // source: sql.y line#1567
          yyval.yyPointer := opr(224,'COLUMN FROM SUBQUERY',[yyv[yysp-2].yyPointer,opr(178,'COLUMN ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 288 : begin
-         // source: sql.y line#1568
+         // source: sql.y line#1571
          yyval.yyPointer := DBName(yyv[yysp-0].yystring); 
        end;
 289 : begin
-         // source: sql.y line#1572
+         // source: sql.y line#1575
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 290 : begin
-         // source: sql.y line#1574
+         // source: sql.y line#1577
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 291 : begin
-         // source: sql.y line#1600
+         // source: sql.y line#1603
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 292 : begin
-         // source: sql.y line#1602
+         // source: sql.y line#1605
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 293 : begin
-         // source: sql.y line#1604
+         // source: sql.y line#1607
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,opr(40,'FROM ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 294 : begin
-         // source: sql.y line#1606
+         // source: sql.y line#1609
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-2].yyPointer,opr(40,'FROM ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 295 : begin
-         // source: sql.y line#1608
+         // source: sql.y line#1611
          yyval.yyPointer := opr(225,'TABLE FROM SUBQUERY',[yyv[yysp-1].yyPointer,opr(40,'FROM ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 296 : begin
-         // source: sql.y line#1610
+         // source: sql.y line#1613
          yyval.yyPointer := opr(225,'TABLE FROM SUBQUERY',[yyv[yysp-2].yyPointer,opr(40,'FROM ALIAS NAME',[yyv[yysp-0].yyPointer])]); 
        end;
 297 : begin
-         // source: sql.y line#1614
+         // source: sql.y line#1617
          yyval.yyPointer := opr(129,'TABLE COLUMN COUPLES',[opr(153,'BASE TABLE',[yyv[yysp-2].yyPointer]),opr(154,'JOIN TABLES CONDITION',[yyv[yysp-0].yyPointer])])  ; 
        end;
 298 : begin
-         // source: sql.y line#1616
+         // source: sql.y line#1619
          yyval.yyPointer := opr(129,'TABLE COLUMN COUPLES',[yyv[yysp-4].yyPointer,opr(153,'BASE TABLE',[yyv[yysp-2].yyPointer]),opr(154,'JOIN TABLES CONDITION',[yyv[yysp-0].yyPointer])])  ; 
        end;
 299 : begin
-         // source: sql.y line#1620
+         // source: sql.y line#1623
          yyval.yyPointer := nil; 
        end;
 300 : begin
-         // source: sql.y line#1622
+         // source: sql.y line#1625
          yyval.yyPointer := opr(41,'WHERE',[yyv[yysp-0].yyPointer]); 
        end;
 301 : begin
-         // source: sql.y line#1626
+         // source: sql.y line#1629
          yyval.yyPointer := opr(50,'EQ',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 302 : begin
-         // source: sql.y line#1628
+         // source: sql.y line#1631
          yyval.yyPointer := opr(53,'NE',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 303 : begin
-         // source: sql.y line#1630
+         // source: sql.y line#1633
          yyval.yyPointer := opr(51,'LT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 304 : begin
-         // source: sql.y line#1632
+         // source: sql.y line#1635
          yyval.yyPointer := opr(52,'GT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 305 : begin
-         // source: sql.y line#1634
+         // source: sql.y line#1637
          yyval.yyPointer := opr(54,'LE',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 306 : begin
-         // source: sql.y line#1636
+         // source: sql.y line#1639
          yyval.yyPointer := opr(55,'GE',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 307 : begin
-         // source: sql.y line#1638
+         // source: sql.y line#1641
          yyval.yyPointer := opr(83,'ADD',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 308 : begin
-         // source: sql.y line#1640
+         // source: sql.y line#1643
          yyval.yyPointer := opr(44,'AND',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 309 : begin
-         // source: sql.y line#1642
+         // source: sql.y line#1645
          yyval.yyPointer := opr(84,'SUB',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 310 : begin
-         // source: sql.y line#1644
+         // source: sql.y line#1647
          yyval.yyPointer := opr(85,'MUL',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 311 : begin
-         // source: sql.y line#1646
+         // source: sql.y line#1649
          yyval.yyPointer := opr(43,'OR',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 312 : begin
-         // source: sql.y line#1648
+         // source: sql.y line#1651
          yyval.yyPointer := opr(86,'DIV',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 313 : begin
-         // source: sql.y line#1650
+         // source: sql.y line#1653
          yyval.yyPointer := opr(95,'MOD',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 314 : begin
-         // source: sql.y line#1652
+         // source: sql.y line#1655
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 315 : begin
-         // source: sql.y line#1654
+         // source: sql.y line#1657
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 316 : begin
-         // source: sql.y line#1656
+         // source: sql.y line#1659
          yyval.yyPointer := opr(79,'UMINUS',[yyv[yysp-0].yyPointer]); 
        end;
 317 : begin
-         // source: sql.y line#1658
+         // source: sql.y line#1661
          yyval.yyPointer := opr(42,'NOT',[yyv[yysp-0].yyPointer]); 
        end;
 318 : begin
-         // source: sql.y line#1660
+         // source: sql.y line#1663
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 319 : begin
-         // source: sql.y line#1662
+         // source: sql.y line#1665
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 320 : begin
-         // source: sql.y line#1665
+         // source: sql.y line#1668
          yyval.yyPointer := opr(46,'LIKE',[yyv[yysp-2].yyPointer,stcon(yyv[yysp-0].yystring)]); 
        end;
 321 : begin
-         // source: sql.y line#1668
+         // source: sql.y line#1671
          yyval.yyPointer := opr(46,'LIKE',[yyv[yysp-4].yyPointer,stcon(yyv[yysp-2].yystring),opr(243,'ESCAPE',stcon(yyv[yysp-0].yystring))]); 
        end;
 322 : begin
-         // source: sql.y line#1671
+         // source: sql.y line#1674
          yyval.yyPointer := opr(42,'NOT',[opr(46,'LIKE',[yyv[yysp-3].yyPointer,stcon(yyv[yysp-0].yystring)])]); 
        end;
 323 : begin
-         // source: sql.y line#1674
+         // source: sql.y line#1677
          yyval.yyPointer := opr(42,'NOT',[opr(46,'LIKE',[yyv[yysp-5].yyPointer,stcon(yyv[yysp-2].yystring),opr(243,'ESCAPE',stcon(yyv[yysp-0].yystring))])]); 
        end;
 324 : begin
-         // source: sql.y line#1677
+         // source: sql.y line#1680
          yyval.yyPointer := opr(44,'AND',[opr(55,'GE',[yyv[yysp-4].yyPointer,yyv[yysp-2].yyPointer]),opr(54,'LE',[yyv[yysp-4].yyPointer,yyv[yysp-0].yyPointer])]); 
        end;
 325 : begin
-         // source: sql.y line#1680
+         // source: sql.y line#1683
          yyval.yyPointer := opr(43,'OR',[opr(51,'LT',[yyv[yysp-5].yyPointer,yyv[yysp-2].yyPointer]),opr(52,'GT',[yyv[yysp-5].yyPointer,yyv[yysp-0].yyPointer])]); 
        end;
 326 : begin
-         // source: sql.y line#1683
+         // source: sql.y line#1686
          yyval.yyPointer := opr(48,'IS NULL',[yyv[yysp-2].yyPointer]); 
        end;
 327 : begin
-         // source: sql.y line#1686
+         // source: sql.y line#1689
          yyval.yyPointer := opr(49,'IS NOT NULL',[yyv[yysp-3].yyPointer]); 
        end;
 328 : begin
-         // source: sql.y line#1689
+         // source: sql.y line#1692
          yyval.yyPointer := opr(45,'IN',[yyv[yysp-4].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 329 : begin
-         // source: sql.y line#1692
+         // source: sql.y line#1695
          yyval.yyPointer := opr(42,'NOT',[opr(45,'IN',[yyv[yysp-5].yyPointer,yyv[yysp-1].yyPointer])]); 
        end;
 330 : begin
-         // source: sql.y line#1695
+         // source: sql.y line#1698
          yyval.yyPointer := opr(45,'IN',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 331 : begin
-         // source: sql.y line#1698
+         // source: sql.y line#1701
          yyval.yyPointer := opr(42,'NOT',[opr(45,'IN',[yyv[yysp-3].yyPointer,yyv[yysp-0].yyPointer])]); 
        end;
 332 : begin
-         // source: sql.y line#1701
+         // source: sql.y line#1704
          yyval.yyPointer := opr(68,'EXISTS',[opr(244,'START EXISTS',[]),yyv[yysp-0].yyPointer]); 
        end;
 333 : begin
-         // source: sql.y line#1704
+         // source: sql.y line#1707
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 334 : begin
-         // source: sql.y line#1707
+         // source: sql.y line#1710
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 335 : begin
-         // source: sql.y line#1712
+         // source: sql.y line#1715
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 336 : begin
-         // source: sql.y line#1714
+         // source: sql.y line#1717
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 337 : begin
-         // source: sql.y line#1722
+         // source: sql.y line#1725
          yyval.yyInteger := 0; 
        end;
 338 : begin
-         // source: sql.y line#1724
+         // source: sql.y line#1727
          yyval.yyInteger := 1; 
        end;
 339 : begin
-         // source: sql.y line#1726
+         // source: sql.y line#1729
          yyval.yyInteger := 2; 
        end;
 340 : begin
-         // source: sql.y line#1728
+         // source: sql.y line#1731
          yyval.yyInteger := 3; 
        end;
 341 : begin
-         // source: sql.y line#1730
+         // source: sql.y line#1733
          yyval.yyInteger := 4; 
        end;
 342 : begin
-         // source: sql.y line#1732
+         // source: sql.y line#1735
          yyval.yyInteger := 5; 
        end;
 343 : begin
-         // source: sql.y line#1737
+         // source: sql.y line#1740
          yyval.yystring := yyv[yysp-0].yystring; 
        end;
 344 : begin
-         // source: sql.y line#1741
+         // source: sql.y line#1744
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 345 : begin
-         // source: sql.y line#1745
+         // source: sql.y line#1748
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 346 : begin
-         // source: sql.y line#1747
+         // source: sql.y line#1750
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 347 : begin
-         // source: sql.y line#1751
+         // source: sql.y line#1754
          yyval.yyPointer := con(yyv[yysp-0].yyInteger); 
        end;
 348 : begin
-         // source: sql.y line#1753
+         // source: sql.y line#1756
          yyval.yyPointer := con(yyv[yysp-0].yyExtended); 
        end;
 349 : begin
-         // source: sql.y line#1755
+         // source: sql.y line#1758
          yyval.yyPointer := stcon(yyv[yysp-0].yystring); 
        end;
 350 : begin
-         // source: sql.y line#1757
+         // source: sql.y line#1760
          yyval.yyPointer := boolcon(yyv[yysp-0].yyBoolean); 
        end;
 351 : begin
-         // source: sql.y line#1761
+         // source: sql.y line#1764
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 352 : begin
-         // source: sql.y line#1765
+         // source: sql.y line#1768
          yyval.yyPointer := opr(50+yyv[yysp-1].yyInteger,'',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 353 : begin
-         // source: sql.y line#1767
+         // source: sql.y line#1770
          yyval.yyPointer := opr(56+yyv[yysp-2].yyInteger,'' + ' ALL',[yyv[yysp-3].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 354 : begin
-         // source: sql.y line#1769
+         // source: sql.y line#1772
          yyval.yyPointer := opr(62+yyv[yysp-2].yyInteger,'' + ' ANY',[yyv[yysp-3].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 355 : begin
-         // source: sql.y line#1773
+         // source: sql.y line#1776
          yyval.yyPointer := nil; 
        end;
 356 : begin
-         // source: sql.y line#1775
+         // source: sql.y line#1778
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 357 : begin
-         // source: sql.y line#1779
+         // source: sql.y line#1782
          yyval.yyPointer := opr(69,'GROUP BY',[yyv[yysp-0].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 358 : begin
-         // source: sql.y line#1781
+         // source: sql.y line#1784
          yyval.yyPointer := opr(69,'GROUP BY',[yyv[yysp-4].yyPointer,yyv[yysp-0].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 359 : begin
-         // source: sql.y line#1783
+         // source: sql.y line#1786
          yyval.yyPointer := opr(70,'ORDER BY',[yyv[yysp-0].yyPointer]); 
        end;
 360 : begin
-         // source: sql.y line#1785
+         // source: sql.y line#1788
          yyval.yyPointer := opr(70,'ORDER BY',[yyv[yysp-3].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 361 : begin
-         // source: sql.y line#1789
+         // source: sql.y line#1792
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 362 : begin
-         // source: sql.y line#1791
+         // source: sql.y line#1794
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 363 : begin
-         // source: sql.y line#1795
+         // source: sql.y line#1798
          yyval.yyPointer := nil; 
        end;
 364 : begin
-         // source: sql.y line#1797
+         // source: sql.y line#1800
          yyval.yyPointer := opr(71,'HAVING',[yyv[yysp-0].yyPointer]); 
        end;
 365 : begin
-         // source: sql.y line#1804
+         // source: sql.y line#1807
          yyval.yyPointer := opr(34,'SELECT',[opr(87,'FROM',[yyv[yysp-2].yyPointer]),yyv[yysp-5].yyPointer, opr(150,'COLUMNS PROJECTION',[yyv[yysp-4].yyPointer]),yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 366 : begin
-         // source: sql.y line#1806
+         // source: sql.y line#1809
          yyval.yyPointer := opr(222,'UNION',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 367 : begin
-         // source: sql.y line#1808
+         // source: sql.y line#1811
          yyval.yyPointer := opr(72,'UNION ALL',[yyv[yysp-3].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 368 : begin
-         // source: sql.y line#1810
+         // source: sql.y line#1813
          yyval.yyPointer := opr(73,'INTERSECT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 369 : begin
-         // source: sql.y line#1812
+         // source: sql.y line#1815
          yyval.yyPointer := opr(74,'MINUS',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 370 : begin
-         // source: sql.y line#1816
+         // source: sql.y line#1819
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 371 : begin
-         // source: sql.y line#1818
+         // source: sql.y line#1821
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 372 : begin
-         // source: sql.y line#1822
+         // source: sql.y line#1825
          yyval.yyPointer := opr(75,'ASC',[yyv[yysp-0].yyPointer]); 
        end;
 373 : begin
-         // source: sql.y line#1824
+         // source: sql.y line#1827
          yyval.yyPointer := opr(75,'ASC',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 374 : begin
-         // source: sql.y line#1826
+         // source: sql.y line#1829
          yyval.yyPointer := opr(75,'ASC',[yyv[yysp-1].yyPointer]); 
        end;
 375 : begin
-         // source: sql.y line#1828
+         // source: sql.y line#1831
          yyval.yyPointer := opr(75,'ASC',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 376 : begin
-         // source: sql.y line#1830
+         // source: sql.y line#1833
          yyval.yyPointer := opr(76,'DESC',[yyv[yysp-1].yyPointer]); 
        end;
 377 : begin
-         // source: sql.y line#1832
+         // source: sql.y line#1835
          yyval.yyPointer := opr(76,'ASC',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 378 : begin
-         // source: sql.y line#1836
+         // source: sql.y line#1839
          yyval.yyPointer := opr(77,'INSERT INTO',[yyv[yysp-4].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 379 : begin
-         // source: sql.y line#1838
+         // source: sql.y line#1841
          yyval.yyPointer := opr(77,'INSERT INTO',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 380 : begin
-         // source: sql.y line#1840
+         // source: sql.y line#1843
          yyval.yyPointer := opr(77,'INSERT INTO',[yyv[yysp-4].yyPointer,yyv[yysp-2].yyPointer,opr(78,'VALUE',[yyv[yysp-0].yyPointer])]); 
        end;
 381 : begin
-         // source: sql.y line#1844
+         // source: sql.y line#1847
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 382 : begin
-         // source: sql.y line#1848
+         // source: sql.y line#1851
          yyval.yyPointer := opr(78,'VALUE',[yyv[yysp-1].yyPointer]); 
        end;
 383 : begin
-         // source: sql.y line#1850
+         // source: sql.y line#1853
          yyval.yyPointer := opr(78,'VALUE',[yyv[yysp-4].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 384 : begin
-         // source: sql.y line#1859
+         // source: sql.y line#1862
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 385 : begin
-         // source: sql.y line#1861
+         // source: sql.y line#1864
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 386 : begin
-         // source: sql.y line#1865
+         // source: sql.y line#1868
          opr(129,'VOID',[yyv[yysp-0].yyPointer]) 
        end;
 387 : begin
-         // source: sql.y line#1869
+         // source: sql.y line#1872
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 388 : begin
-         // source: sql.y line#1874
+         // source: sql.y line#1877
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 389 : begin
-         // source: sql.y line#1876
+         // source: sql.y line#1879
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 390 : begin
-         // source: sql.y line#1880
+         // source: sql.y line#1883
          yyval.yyPointer := opr(80,'UPDATE',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 391 : begin
-         // source: sql.y line#1882
+         // source: sql.y line#1885
          yyval.yyPointer := opr(80,'UPDATE',[yyv[yysp-4].yyPointer,yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 392 : begin
-         // source: sql.y line#1886
+         // source: sql.y line#1889
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 393 : begin
-         // source: sql.y line#1888
+         // source: sql.y line#1891
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 394 : begin
-         // source: sql.y line#1892
+         // source: sql.y line#1895
          yyval.yyPointer := opr(81,'SET',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 395 : begin
-         // source: sql.y line#1894
+         // source: sql.y line#1897
          yyval.yyPointer := opr(81,'SET',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 396 : begin
-         // source: sql.y line#1899
+         // source: sql.y line#1902
          yyval.yyPointer := opr(80,'UPDATE',[yyv[yysp-8].yyPointer,yyv[yysp-5].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 397 : begin
-         // source: sql.y line#1902
+         // source: sql.y line#1905
          yyval.yyPointer := opr(80,'UPDATE',[yyv[yysp-9].yyPointer,yyv[yysp-8].yyPointer,yyv[yysp-5].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 398 : begin
-         // source: sql.y line#1906
+         // source: sql.y line#1909
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 399 : begin
-         // source: sql.y line#1908
+         // source: sql.y line#1911
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 400 : begin
-         // source: sql.y line#1912
+         // source: sql.y line#1915
          yyval.yyPointer := opr(82,'DELETE FROM',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 401 : begin
-         // source: sql.y line#1914
+         // source: sql.y line#1917
          yyval.yyPointer := opr(82,'DELETE FROM',[yyv[yysp-0].yyPointer]); 
        end;
 402 : begin
-         // source: sql.y line#1916
+         // source: sql.y line#1919
          yyval.yyPointer := opr(82,'DELETE FROM',[yyv[yysp-0].yyPointer]); 
        end;
 403 : begin
-         // source: sql.y line#1928
+         // source: sql.y line#1931
          yyval.yyPointer := opr(83,'ADD',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 404 : begin
-         // source: sql.y line#1930
+         // source: sql.y line#1933
          yyval.yyPointer := opr(84,'SUB',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 405 : begin
-         // source: sql.y line#1932
+         // source: sql.y line#1935
          yyval.yyPointer := opr(44,'AND',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 406 : begin
-         // source: sql.y line#1934
+         // source: sql.y line#1937
          yyval.yyPointer := opr(85,'MUL',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 407 : begin
-         // source: sql.y line#1936
+         // source: sql.y line#1939
          yyval.yyPointer := opr(43,'OR',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 408 : begin
-         // source: sql.y line#1938
+         // source: sql.y line#1941
          yyval.yyPointer := opr(86,'DIV',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 409 : begin
-         // source: sql.y line#1940
+         // source: sql.y line#1943
          yyval.yyPointer := opr(95,'MOD',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 410 : begin
-         // source: sql.y line#1942
+         // source: sql.y line#1945
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 411 : begin
-         // source: sql.y line#1944
+         // source: sql.y line#1947
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 412 : begin
-         // source: sql.y line#1946
+         // source: sql.y line#1949
          yyval.yyPointer := opr(79,'UMINUS',[yyv[yysp-0].yyPointer]); 
        end;
 413 : begin
-         // source: sql.y line#1948
+         // source: sql.y line#1951
          yyval.yyPointer := opr(42,'NOT',[yyv[yysp-0].yyPointer]); 
        end;
 414 : begin
-         // source: sql.y line#1950
+         // source: sql.y line#1953
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 415 : begin
-         // source: sql.y line#1952
+         // source: sql.y line#1955
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 416 : begin
-         // source: sql.y line#1954
+         // source: sql.y line#1957
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 417 : begin
-         // source: sql.y line#1956
+         // source: sql.y line#1959
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 418 : begin
-         // source: sql.y line#1958
-         yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,yyv[yysp-3].yyPointer]); 
+         // source: sql.y line#1961
+         yyval.yyPointer := opr(129,'VOID',[yyv[yysp-3].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
 419 : begin
          yyval := yyv[yysp-2];
        end;
 420 : begin
-         // source: sql.y line#1965
+         // source: sql.y line#1968
          yyval.yyPointer := opr(180,'ALL COLUMNS AGGREGATE'); 
        end;
 421 : begin
-         // source: sql.y line#1967
+         // source: sql.y line#1970
          yyval.yyPointer := opr(181,'EXPRESSION AGGREGATE',[yyv[yysp-0].yyPointer]); 
        end;
 422 : begin
-         // source: sql.y line#1969
+         // source: sql.y line#1972
          yyval.yyPointer := opr(181,'EXPRESSION AGGREGATE',[yyv[yysp-0].yyPointer]); 
        end;
 423 : begin
-         // source: sql.y line#1971
+         // source: sql.y line#1974
          yyval.yyPointer := opr(182,'DISTINCT AGGREGATE',[yyv[yysp-0].yyPointer]); 
        end;
 424 : begin
-         // source: sql.y line#1975
+         // source: sql.y line#1978
          yyval.yyPointer := opr(6,'COLUMN NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 425 : begin
-         // source: sql.y line#1977
+         // source: sql.y line#1980
          yyval.yyPointer := opr(229,'DOT',[opr(4,'TABLE NAME',[DBName(yyv[yysp-2].yystring)]),opr(6,'COLUMN NAME',[DBName(yyv[yysp-0].yystring)])]); 
        end;
 426 : begin
-         // source: sql.y line#1979
+         // source: sql.y line#1982
          yyval.yyPointer := opr(229,'DOT',[opr(2,'DATABASE NAME',[DBName(yyv[yysp-4].yystring)]),opr(4,'TABLE NAME',[DBName(yyv[yysp-2].yystring)]),opr(6,'COLUMN NAME',[DBName(yyv[yysp-0].yystring)])]); 
        end;
 427 : begin
-         // source: sql.y line#1983
+         // source: sql.y line#1986
          yyval.yyPointer := con(yyv[yysp-0].yyInteger); 
        end;
 428 : begin
-         // source: sql.y line#1985
+         // source: sql.y line#1988
          yyval.yyPointer := con(yyv[yysp-0].yyExtended); 
        end;
 429 : begin
-         // source: sql.y line#1987
+         // source: sql.y line#1990
          yyval.yyPointer := stcon(yyv[yysp-0].yystring); 
        end;
 430 : begin
-         // source: sql.y line#1989
+         // source: sql.y line#1992
          yyval.yyPointer := boolcon(yyv[yysp-0].yyBoolean); 
        end;
 431 : begin
-         // source: sql.y line#1991
+         // source: sql.y line#1994
          yyval.yyPointer := nullcon(); 
        end;
 432 : begin
-         // source: sql.y line#2027
+         // source: sql.y line#2030
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 433 : begin
-         // source: sql.y line#2029
+         // source: sql.y line#2032
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 434 : begin
-         // source: sql.y line#2031
+         // source: sql.y line#2034
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 435 : begin
-         // source: sql.y line#2035
+         // source: sql.y line#2038
          yyval.yyPointer := opr(92,'ABS'); 
        end;
 436 : begin
-         // source: sql.y line#2037
+         // source: sql.y line#2040
          yyval.yyPointer := opr(93,'CEIL'); 
        end;
 437 : begin
-         // source: sql.y line#2039
+         // source: sql.y line#2042
          yyval.yyPointer := opr(94,'FLOOR'); 
        end;
 438 : begin
-         // source: sql.y line#2041
+         // source: sql.y line#2044
          yyval.yyPointer := opr(95,'MOD'); 
        end;
 439 : begin
-         // source: sql.y line#2043
+         // source: sql.y line#2046
          yyval.yyPointer := opr(96,'POWER'); 
        end;
 440 : begin
-         // source: sql.y line#2045
+         // source: sql.y line#2048
          yyval.yyPointer := opr(97,'ROUND'); 
        end;
 441 : begin
-         // source: sql.y line#2047
+         // source: sql.y line#2050
          yyval.yyPointer := opr(98,'SIGN'); 
        end;
 442 : begin
-         // source: sql.y line#2049
+         // source: sql.y line#2052
          yyval.yyPointer := opr(99,'SQRT'); 
        end;
 443 : begin
-         // source: sql.y line#2051
+         // source: sql.y line#2054
          yyval.yyPointer := opr(100,'TRUNC'); 
        end;
 444 : begin
-         // source: sql.y line#2055
+         // source: sql.y line#2058
          yyval.yyPointer := opr(101,'CHR'); 
        end;
 445 : begin
-         // source: sql.y line#2057
+         // source: sql.y line#2060
          yyval.yyPointer := opr(102,'LPAD'); 
        end;
 446 : begin
-         // source: sql.y line#2059
+         // source: sql.y line#2062
          yyval.yyPointer := opr(103,'LTRIM'); 
        end;
 447 : begin
-         // source: sql.y line#2061
+         // source: sql.y line#2064
          yyval.yyPointer := opr(104,'RPAD'); 
        end;
 448 : begin
-         // source: sql.y line#2063
+         // source: sql.y line#2066
          yyval.yyPointer := opr(105,'RTRIM'); 
        end;
 449 : begin
-         // source: sql.y line#2065
+         // source: sql.y line#2068
          yyval.yyPointer := opr(106,'SOUNDEX'); 
        end;
 450 : begin
-         // source: sql.y line#2067
+         // source: sql.y line#2070
          yyval.yyPointer := opr(107,'SUBSTR'); 
        end;
 451 : begin
-         // source: sql.y line#2069
+         // source: sql.y line#2072
          yyval.yyPointer := opr(108,'LENGTH'); 
        end;
 452 : begin
-         // source: sql.y line#2071
+         // source: sql.y line#2074
          yyval.yyPointer := opr(108,'LENGTH'); 
        end;
 453 : begin
-         // source: sql.y line#2073
+         // source: sql.y line#2076
          yyval.yyPointer := opr(171,'UCASE'); 
        end;
 454 : begin
-         // source: sql.y line#2075
+         // source: sql.y line#2078
          yyval.yyPointer := opr(172,'LCASE'); 
        end;
 455 : begin
-         // source: sql.y line#2077
+         // source: sql.y line#2080
          yyval.yyPointer := opr(173,'MID'); 
        end;
 456 : begin
-         // source: sql.y line#2079
+         // source: sql.y line#2082
          yyval.yyPointer := opr(174,'NOW'); 
        end;
 457 : begin
-         // source: sql.y line#2081
+         // source: sql.y line#2084
          yyval.yyPointer := opr(175,'FORMAT'); 
        end;
 458 : begin
-         // source: sql.y line#2086
+         // source: sql.y line#2089
          yyval.yyPointer := opr(109,'TO_CHAR'); 
        end;
 459 : begin
-         // source: sql.y line#2088
+         // source: sql.y line#2091
          yyval.yyPointer := opr(110,'TO_DATE'); 
        end;
 460 : begin
-         // source: sql.y line#2090
+         // source: sql.y line#2093
          yyval.yyPointer := opr(111,'TO_NUMBER'); 
        end;
 461 : begin
-         // source: sql.y line#2094
+         // source: sql.y line#2097
          yyval.yyPointer := opr(112,'AVG'); 
        end;
 462 : begin
-         // source: sql.y line#2096
+         // source: sql.y line#2099
          yyval.yyPointer := opr(113,'COUNT'); 
        end;
 463 : begin
-         // source: sql.y line#2098
+         // source: sql.y line#2101
          yyval.yyPointer := opr(114,'MAX'); 
        end;
 464 : begin
-         // source: sql.y line#2100
+         // source: sql.y line#2103
          yyval.yyPointer := opr(115,'MIN'); 
        end;
 465 : begin
-         // source: sql.y line#2102
+         // source: sql.y line#2105
          yyval.yyPointer := opr(116,'SUM'); 
        end;
 466 : begin
-         // source: sql.y line#2114
+         // source: sql.y line#2117
          yyval.yyPointer := opr(138,'CREATE TRIGGER',[yyv[yysp-3].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 467 : begin
-         // source: sql.y line#2118
+         // source: sql.y line#2121
          yyval.yyPointer := opr(139,'TRIGGER NAME',[DBName(yyv[yysp-0].yystring)]); 
        end;
 468 : begin
-         // source: sql.y line#2122
+         // source: sql.y line#2125
          yyval.yyPointer := opr(140,'TRIGGER SYNC',[yyv[yysp-3].yyPointer,yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 469 : begin
-         // source: sql.y line#2126
+         // source: sql.y line#2129
          yyval.yyPointer := opr(141,'BEFORE'); 
        end;
 470 : begin
-         // source: sql.y line#2128
+         // source: sql.y line#2131
          yyval.yyPointer := opr(142,'AFTER'); 
        end;
 471 : begin
-         // source: sql.y line#2132
+         // source: sql.y line#2135
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 472 : begin
-         // source: sql.y line#2134
+         // source: sql.y line#2137
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 473 : begin
-         // source: sql.y line#2138
+         // source: sql.y line#2141
          yyval.yyPointer := opr(143,'TRIGGER DELETE'); 
        end;
 474 : begin
-         // source: sql.y line#2140
+         // source: sql.y line#2143
          yyval.yyPointer := opr(144,'TRIGGER INSERT'); 
        end;
 475 : begin
-         // source: sql.y line#2142
+         // source: sql.y line#2145
          yyval.yyPointer := opr(145,'TRIGGER UPDATE',[yyv[yysp-0].yyPointer]); 
        end;
 476 : begin
-         // source: sql.y line#2146
+         // source: sql.y line#2149
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 477 : begin
-         // source: sql.y line#2150
+         // source: sql.y line#2153
          yyval.yyPointer := nil; 
        end;
 478 : begin
-         // source: sql.y line#2152
+         // source: sql.y line#2155
          yyval.yyPointer := opr(129,'VOID',[yyv[yysp-1].yyPointer,yyv[yysp-0].yyPointer]); 
        end;
 479 : begin
-         // source: sql.y line#2156
+         // source: sql.y line#2159
          yyval.yyPointer := nil; 
        end;
 480 : begin
-         // source: sql.y line#2158
+         // source: sql.y line#2161
          yyval.yyPointer := opr(146,'FOR EACH ROW'); 
        end;
 481 : begin
-         // source: sql.y line#2162
+         // source: sql.y line#2165
          yyval.yyPointer := nil; 
        end;
 482 : begin
-         // source: sql.y line#2164
+         // source: sql.y line#2167
          yyval.yyPointer := opr(147,'WHEN CONDITION',[yyv[yysp-1].yyPointer]); 
        end;
 483 : begin
-         // source: sql.y line#2168
+         // source: sql.y line#2171
          yyval.yyPointer := opr(148,'TRIGGER STEP',[yyv[yysp-0].yyPointer]); 
        end;
 484 : begin
-         // source: sql.y line#2170
+         // source: sql.y line#2173
          yyval.yyPointer := opr(149,'BLOCK',[yyv[yysp-1].yyPointer]); 
        end;
 485 : begin
-         // source: sql.y line#2174
+         // source: sql.y line#2177
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 486 : begin
-         // source: sql.y line#2176
+         // source: sql.y line#2179
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 487 : begin
-         // source: sql.y line#2178
+         // source: sql.y line#2181
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 488 : begin
-         // source: sql.y line#2180
+         // source: sql.y line#2183
          yyval.yyPointer := yyv[yysp-0].yyPointer; 
        end;
 489 : begin
-         // source: sql.y line#2184
+         // source: sql.y line#2187
          yyval.yyPointer := yyv[yysp-1].yyPointer; 
        end;
 490 : begin
-         // source: sql.y line#2186
+         // source: sql.y line#2189
          yyval.yyPointer := opr(0,'REPEAT',[yyv[yysp-2].yyPointer,yyv[yysp-1].yyPointer]); 
        end;
-// source: sql.cod line# 171
+// source: sql.cod line# 178
   end;
 end(*yyaction*);
 
@@ -15485,7 +15495,7 @@ yyr : array [1..yynrules] of YYRRec = (
 { 490: } ( len: 3; sym: -147 )
 );
 
-// source: sql.cod line# 177
+// source: sql.cod line# 184
 
 const _error = 256; (* error token *)
 

@@ -1381,6 +1381,8 @@ type
    end;
 
    runstacktype = array of runstacksingletype;
+ var
+   aggregateValues: runstacktype = nil;
 
  type
    executePlanType = record
@@ -2244,6 +2246,14 @@ var
   useSelect: boolean = false;
   flagDistinctAggregate: boolean = false;
   flagAggregate: boolean = false;
+  aggregatePosition: Integer = 0;
+  aggregateValues: array of record
+    grpkind: aggregateset;
+    aggregateType: byte;
+    BoolValue: Boolean;
+    extValue: extended;
+    stValue: string;
+  end = nil;
   AggregateRowId: Integer;
   DistinctAggregateRowId: Integer;
 
@@ -4286,97 +4296,72 @@ begin
 
       6: // Opr CLN: POP colName and insert it into a structure
       begin
-        if flagAggregate then
+        setLength(expr, length(expr) + 1);
+        expr[high(expr)].mnemonic := 151;
+        expr[high(expr)].Value := 0.0;
+        colname := lowercase(stk[High(stk)].strValue);
+        { #todo : query alias should have the table name }
+        for index1 := 0 to high(queryalias) do
+          if queryalias[index1].aliasname = colname then colname := queryalias[index1].colname;
+        if (tblcolName = '') and (fromTablesLen <> 0) then
           begin
-            { #todo : try to process the aggregate function and return result and push it }
-//            Parser.yyerror('not yet implemented ');
-//            exit;
-            for index2 := low(expr) to high(expr) do
-              if expr[index2].mnemonic in [112..116] then
-                begin
-                  selectColsInstructions := nil;
-                  setlength(selectColsInstructions,1);
-                  setlength(selectColsInstructions[High(selectColsInstructions)],2);
-                  selectColsInstructions[high(selectColsInstructions),0] := expr[index2];
-                  break;
-                end;
-            // check for all columns aggregate
-            setLength(expr, length(expr) + 1);
-            expr[high(expr)].mnemonic := 183;
-            expr[high(expr)].Value := 0.0;
-            colname := lowercase(stk[High(stk)].strValue);
-            expr[high(expr)].stvalue := colname;
-            expr[high(expr)].printInstruction := 'AGGREGATE COLUMN NAME';
-            // same case as 151 in extractselect but with calculate aggregate
-          end else
-          begin
-            setLength(expr, length(expr) + 1);
-            expr[high(expr)].mnemonic := 151;
-            expr[high(expr)].Value := 0.0;
-            colname := lowercase(stk[High(stk)].strValue);
-            { #todo : query alias should have the table name }
-            for index1 := 0 to high(queryalias) do
-              if queryalias[index1].aliasname = colname then colname := queryalias[index1].colname;
-            if (tblcolName = '') and (fromTablesLen <> 0) then
+            counterFound := 0;
+            tblName := '';
+            for index1 := 0 to fromTablesLen - 1 do
               begin
-                counterFound := 0;
-                tblName := '';
-                for index1 := 0 to fromTablesLen - 1 do
+                tblFields := loadTableFields(fromtables[index1].Name);
+                for index2 := 0 to length(tblFields.columns)- 1 do
                   begin
-                    tblFields := loadTableFields(fromtables[index1].Name);
-                    for index2 := 0 to length(tblFields.columns)- 1 do
+                    if colname = tblFields.columns[index2].colname then
                       begin
-                        if colname = tblFields.columns[index2].colname then
-                          begin
-                            tblname := tblFields.tblName;
-                            counterFound += 1;
-                            continue;
-                          end;
+                        tblname := tblFields.tblName;
+                        counterFound += 1;
+                        continue;
                       end;
-                  end;
-                if counterFound = 0 then
-                  begin
-                    Parser.yyerror('Column ' + colname + ' doesn''t belongs to any table');
-                    Exit;
-                  end else
-                  begin
-                    if counterFound > 1 then
-                      begin
-                        Parser.yyerror('Column ' + colname + ' is ambiguous');
-                        Exit;
-                      end
-                  end
-              end else
-              begin
-                found := false;
-                if tblcolName <> '' then
-                  begin
-                    tblFields := loadTableFields(tblcolName);
-                    for index2 := 0 to length(tblFields.columns)- 1 do
-                      begin
-                        if colname = tblFields.columns[index2].colname then
-                          begin
-                            found := true;
-                            break;
-                          end;
-                      end;
-                    if not found then
-                      begin
-                        Parser.yyerror('Column ' +  colname + ' doesn''t belong to the table ' + tblcolName);
-                        Exit;
-                      end
                   end;
               end;
-            {#todo : insert here the code to check if the column belongs to any from list}
-            expr[high(expr)].stvalue := tblName + '.' + lowercase(stk[High(stk)].strValue);
-            expr[high(expr)].printInstruction := 'PUSH COLUMN NAME';
+            if counterFound = 0 then
+              begin
+                Parser.yyerror('Column ' + colname + ' doesn''t belongs to any table');
+                Exit;
+              end else
+              begin
+                if counterFound > 1 then
+                  begin
+                    Parser.yyerror('Column ' + colname + ' is ambiguous');
+                    Exit;
+                  end
+              end
+          end else
+          begin
+            found := false;
+            if tblcolName <> '' then
+              begin
+                tblFields := loadTableFields(tblcolName);
+                for index2 := 0 to length(tblFields.columns)- 1 do
+                  begin
+                    if colname = tblFields.columns[index2].colname then
+                      begin
+                        found := true;
+                        break;
+                      end;
+                  end;
+                if not found then
+                  begin
+                    Parser.yyerror('Column ' +  colname + ' doesn''t belong to the table ' + tblcolName);
+                    Exit;
+                  end
+              end;
+          end;
+        {#todo : insert here the code to check if the column belongs to any from list}
+        expr[high(expr)].stvalue := tblName + '.' + lowercase(stk[High(stk)].strValue);
+        expr[high(expr)].printInstruction := 'PUSH COLUMN NAME';
 
-            setLength(colsName, length(colsName) + 1);
-            colsName[high(colsName)] := lowercase(stk[High(stk)].strValue);
-            setLength(stk, Length(stk) - 1);
-            //setLength(tblcolName, length(colsName));
-            tblColName := '';
-        end;
+        setLength(colsName, length(colsName) + 1);
+        colsName[high(colsName)] := lowercase(stk[High(stk)].strValue);
+        setLength(stk, Length(stk) - 1);
+        //setLength(tblcolName, length(colsName));
+        tblColName := '';
       end;
 
       7, 10: // Opr TYPE: POP colTypeSize and insert it with colTypeName into a structure
@@ -4594,11 +4579,17 @@ begin
         begin
           flagAggregate := true;
           grpkind := aggregateset(sqlMemProg[i].Mnemonic - 111);
-          setlength(expr,length(expr) + 1);
-          expr[high(expr)].mnemonic := sqlMemProg[i].Mnemonic;
+{          setlength(expr,length(expr) + 1);
+          expr[high(expr)].mnemonic := sqlMemProg[i].Mnemonic; }
         end;
+
        180: // ALL COLUMNS AGGREGATE
         begin
+          setlength(aggregateValues,length(aggregateValues)+1);
+          aggregateValues[High(aggregateValues)].grpkind := CountKind;
+          aggregateValues[High(aggregateValues)].aggregateType := 1; // Integer type
+          aggregateValues[High(aggregateValues)].extValue := Low(Integer);
+          aggregatePosition += 1;
           if grpKind <> countKind then
             begin
               Parser.yyerror('only * allowed with count ');
@@ -4606,25 +4597,36 @@ begin
             end;
           setlength(expr,length(expr) + 1);
           expr[High(expr)].mnemonic := 180;
-          expr[High(expr)].Value := 111 + ord(grpKind);
-          expr[High(expr)].stvalue := '';
+          expr[High(expr)].Value := ord(grpKind);
+          expr[High(expr)].stvalue := 'Position: ' + intToStr(aggregatePosition);
           expr[High(expr)].printInstruction := 'ALL COLUMNS AGGREGATE';
+          {
+          setlength(selectColsInstructions,length(expr));
+          for index := low(expr) to high(expr) do
+            selectColsInstructions[high(selectColsInstructions), index] :=
+              expr[index];
+          expr := nil;
+          }
         end;
 
        181: // EXPRESSION AGGREGATE
         begin
+          aggregatePosition += 1;
           setlength(expr,length(expr) + 1);
           expr[High(expr)].mnemonic := 181;
-          expr[High(expr)].Value := 111 + ord(grpKind);
+          expr[High(expr)].Value := ord(grpKind);
+          expr[High(expr)].stvalue := 'Position: ' + intToStr(aggregatePosition);
           expr[High(expr)].printInstruction := 'EXPRESSION AGGREGATE';
         end;
 
        182: // DISTINCT AGGREGATE
         begin
           flagDistinctAggregate := true;
+          aggregatePosition += 1;
           setlength(expr,length(expr) + 1);
           expr[High(expr)].mnemonic := 182;
           expr[High(expr)].Value := 111 + ord(grpKind);
+          expr[High(expr)].stvalue := 'Position: ' + intToStr(aggregatePosition);
           expr[High(expr)].printInstruction := 'DISTINCT AGGREGATE';
         end;
 
@@ -4754,6 +4756,7 @@ begin
                           for index2 := low(setInstructions[index1]) + 1 to high(setInstructions[index1]) - 1 do
                             begin
                               runstack(setInstructions[index1,index2],setstk);
+                              if yyerrmsgs <> nil then Exit;
                             end;
                           colName := copy(setInstructions[index1,0].stvalue,pos('.',setInstructions[index1,0].stvalue)+1, length(setInstructions[index1,0].stvalue));
 
@@ -6536,7 +6539,8 @@ begin
                   with tblFields.columns[index1] do
                     inscols[index1].value :=
                       isCompatibleType(valuesList[index4,index1],colSQLtypename,
-                        colTypeScale.precision,colTypeScale.scale)
+                        colTypeScale.precision,colTypeScale.scale);
+                  if yyerrmsgs <> nil then exit;
                 end
             end else
             begin
@@ -6930,7 +6934,7 @@ begin
                           mnemonic := 177;
                           Value := 0;
                           stvalue := '';
-                          printInstruction := 'Show Column';
+                          printInstruction := 'SHOW COLUMN';
                         end;
                     end;
 
@@ -6969,122 +6973,112 @@ begin
         39: // COLUMN WITIHIN EXPRESSION
         begin
           // check the table is in the from clause as tablename or aliasname
-          if not flagAggregate then
+          aggregateValues := nil;
+          for index := low(expr) to high(expr) do
             begin
-              for index := low(expr) to high(expr) do
+              if (expr[index].mnemonic = 151) then
                 begin
-                  if (expr[index].mnemonic = 151) then
+                  found := False;
+                  if foundTable then
                     begin
-                      found := False;
-                      if foundTable then
+                      for index1 := 0 to fromTableslen - 1 do
                         begin
-                          for index1 := 0 to fromTableslen - 1 do
+                          if (tblName = fromTables[index1].Name) then
                             begin
-                              if (tblName = fromTables[index1].Name) then
+                              found := True;
+                              tblFields := loadTableFields(fromTables[index1].Name);
+                              break;
+                            end;
+                          for aliasindex := low(fromTables[index1].aliasname)
+                            to high(fromTables[index1].aliasname) do
+                              if (tblName = fromTables[index1].aliasname[index]) then
                                 begin
+                                  tblFields :=
+                                    loadTableFields(fromTables[index1].Name);
                                   found := True;
-                                  tblFields := loadTableFields(fromTables[index1].Name);
                                   break;
                                 end;
-                              for aliasindex := low(fromTables[index1].aliasname)
-                                to high(fromTables[index1].aliasname) do
-                                  if (tblName = fromTables[index1].aliasname[index]) then
-                                    begin
-                                      tblFields :=
-                                        loadTableFields(fromTables[index1].Name);
-                                      found := True;
-                                      break;
-                                    end;
-                            end;
+                        end;
 
-                          if not found then
-                          begin
-                            Parser.yyerror('the table/alias: ' + tblName + ' not found in database');
-                            exit;
-                          end;
-                          found := False;
+                      if not found then
+                      begin
+                        Parser.yyerror('the table/alias: ' + tblName + ' not found in database');
+                        exit;
+                      end;
+                      found := False;
+                      for index2 := 0 to tblFields.numCols - 1 do
+                        if (copy(expr[index].stvalue,
+                          pos('.', expr[index].stvalue) + 1, length(expr[index].stvalue)) =
+                          tblFields.columns[index2].colname) then
+                        begin
+                          found := True;
+                          break;
+                        end;
+                      if not found then
+                      begin
+                        Parser.yyerror('the column: '+ copy(expr[index].stvalue,
+                          pos('.', expr[index].stvalue) + 1, length(expr[index].stvalue)) +' doesn''t belong to the table: ' +
+                          tblFields.tblName);
+                        exit;
+                      end;
+                    end
+                   else
+                    begin
+                      for index1 := 0 to fromTableslen - 1 do
+                        begin
+                          tblFields := loadTableFields(fromTables[index1].Name);
                           for index2 := 0 to tblFields.numCols - 1 do
-                            if (copy(expr[index].stvalue,
-                              pos('.', expr[index].stvalue) + 1, length(expr[index].stvalue)) =
+                            if (
+                              copy(expr[index].stvalue, pos('.', expr[index].stvalue) + 1,
+                              length(expr[index].stvalue)) =
                               tblFields.columns[index2].colname) then
                             begin
                               found := True;
                               break;
                             end;
-                          if not found then
-                          begin
-                            Parser.yyerror('the column: '+ copy(expr[index].stvalue,
-                              pos('.', expr[index].stvalue) + 1, length(expr[index].stvalue)) +' doesn''t belong to the table: ' +
-                              tblFields.tblName);
-                            exit;
-                          end;
-                        end
-                       else
-                        begin
-                          for index1 := 0 to fromTableslen - 1 do
-                            begin
-                              tblFields := loadTableFields(fromTables[index1].Name);
-                              for index2 := 0 to tblFields.numCols - 1 do
-                                if (
-                                  copy(expr[index].stvalue, pos('.', expr[index].stvalue) + 1,
-                                  length(expr[index].stvalue)) =
-                                  tblFields.columns[index2].colname) then
-                                begin
-                                  found := True;
-                                  break;
-                                end;
-                              if found then
-                                break;
-                            end;
-                          if not found then
-                            begin
-                              Parser.yyerror('the column doesn''t belong to the table ');
-                              exit;
-                            end;
+                          if found then
+                            break;
                         end;
-                      expr[index].stvalue :=
-                        tblFields.tblName + '.' + tblFields.columns[index2].colname;
+                      if not found then
+                        begin
+                          Parser.yyerror('the column doesn''t belong to the table ');
+                          exit;
+                        end;
                     end;
+                  expr[index].stvalue :=
+                    tblFields.tblName + '.' + tblFields.columns[index2].colname;
                 end;
-                setlength(selectColsInstructions, length(selectColsInstructions) + 1);
-                setlength(selectColsInstructions[high(selectColsInstructions)],
-                  length(expr) + 1);
-                for index := low(expr) to high(expr) do
-                  selectColsInstructions[high(selectColsInstructions), index] :=
-                    expr[index];
-                if expr = nil then index := -1;
-                with selectColsInstructions[high(selectColsInstructions), index + 1] do
-                  begin
-                    mnemonic := 177;
-                    Value := 0;
-                    stvalue := '';
-                    printInstruction := 'Show Column';
-                  end;
-                expr := nil;
-                tblName := '';
             end;
+            setlength(selectColsInstructions, length(selectColsInstructions) + 1);
+            setlength(selectColsInstructions[high(selectColsInstructions)],
+              length(expr) + 1);
+            for index := low(expr) to high(expr) do
+              selectColsInstructions[high(selectColsInstructions), index] :=
+                expr[index];
+            if expr = nil then index := -1;
+            if flagAggregate then
+              with selectColsInstructions[high(selectColsInstructions), index + 1] do
+                begin
+                  mnemonic := 183;
+                  Value := 0;
+                  stvalue := '';
+                  printInstruction := 'AGGREGATE COLUMN NAME';
+                end else
+              with selectColsInstructions[high(selectColsInstructions), index + 1] do
+                begin
+                  mnemonic := 177;
+                  Value := 0;
+                  stvalue := '';
+                  printInstruction := 'SHOW COLUMN';
+                end;
+            expr := nil;
+            tblName := '';
         end;
 
         150: // COLUMNS PROJECTION
         begin
           // End of columns clause: selectColsInstructions has a stack to process the columns
-          if flagAggregate then
-            begin
-              selectColsInstructions := nil;
-              setlength(selectColsInstructions,1);
-              setlength(selectColsInstructions[High(selectColsInstructions)],2);
-              with selectColsInstructions[high(selectColsInstructions),
-                     0] do
-              begin
-                mnemonic := 180;
-                Value := 0;
-                stvalue := '';
-                printInstruction := 'Aggregate Column';
-              end;
-            end;
           colsName := nil;
-          expr := nil;
-          tblname := '';
         end;
 
         41: // where
@@ -7430,10 +7424,12 @@ begin
                         resultshifting += length(fromTables[index].fromrow)
                       end;
 
+                      storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
                       if rowcondition(conditionInstructions,resultTable) then
                       begin
                         resultRows := ResultRows + 1;
-                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,dataRef[0] = -1);
+                        if yyerrmsgs <> nil then Exit;
                       end;
                       storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
                     end;
@@ -7464,12 +7460,13 @@ begin
                                             fromTables[0].fromrow[resultindex];
                                         end;
 
+                                      storageIndexes[fromTables[0].fromFields.idxdata[Number].storageIndex].idxstorage.NextKey(keys,DataRef[0]);
                                       if rowcondition(conditionInstructions,resultTable) then
                                       begin
                                         resultRows := ResultRows + 1;
-                                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,(dataref[0]= -1) or (keys[0] <> value));
+                                        if yyerrmsgs <> nil then Exit;
                                       end;
-                                      storageIndexes[fromTables[0].fromFields.idxdata[Number].storageIndex].idxstorage.NextKey(keys,DataRef[0])
                                     end else dataref[0] := -1;
                               until dataref[0] = -1
 
@@ -7510,7 +7507,9 @@ begin
                             if rowcondition(conditionInstructions,resultTable) then
                               begin
                                 resultRows := ResultRows + 1;
-                                extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows);
+                                extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,
+                                              container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow);
+                                if yyerrmsgs <> nil then Exit;
                               end
                           end
                       end else break;
