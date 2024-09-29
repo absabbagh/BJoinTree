@@ -78,6 +78,9 @@ type
     procedure yyacceptmessage(msg: string);
     (* accept message printing routine used by the parser *)
 
+    procedure yywarningmessage(msg: string);
+    (* warning message printing routine used by the parser *)
+
     procedure yyerror(msg: string); reintroduce;
     (* error message printing routine used by the parser *)
 
@@ -164,7 +167,7 @@ var
 
   sqlMemProg: progInstrunctionsType;
 
-  sqlResults: array of string;
+  sqlResults: array of string = nil;
 
   resParams: array of string = nil;
 
@@ -1955,7 +1958,7 @@ expr    :  expr '+' expr
         | function option_expression
                 { $$ := opr(129,'VOID',[$1,$2]); }
         | group_function '(' option_group ')'
-                { $$ := opr(129,'VOID',[$3,$1]); }
+                { $$ := opr(129,'VOID',[$1,$3]); }
 	;
 
 option_expression : '(' expr_list ')'

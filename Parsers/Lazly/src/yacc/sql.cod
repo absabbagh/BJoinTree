@@ -75,6 +75,13 @@ begin
   yymiscmsgs[High(yymiscmsgs)] := msg;
 end(*yyacceptmsg*);
 
+procedure TParser.yywarningmessage(msg: string);
+begin
+  msg := 'WARNING: '+ msg;
+  setLength(yywarningmsgs,length(yywarningmsgs) + 1);
+  yywarningmsgs[High(yywarningmsgs)] := msg;
+end(*yywarningmsg*);
+
 function con(value: extended): NodePointer;
 begin
   new(result);
