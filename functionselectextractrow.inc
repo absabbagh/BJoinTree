@@ -1928,6 +1928,9 @@ var
   flagShowColumn: boolean = false;
   flagAggregate: boolean = false;
   aggregatePosition: Integer = 0;
+  tmpAvg: extended;
+  isNullAvg: boolean;
+  tmpCount: extended;
 begin
   result := true;
   selectstk := nil;
@@ -1968,7 +1971,6 @@ begin
           if (selectColsInstructions[index2,index3].mnemonic <> 151) and
              (selectColsInstructions[index2,index3].mnemonic <> 177) then isExpr := true;
           case selectColsInstructions[index2,index3].mnemonic of
-
             180:
               begin
                 flagAggregate := true;
@@ -2008,7 +2010,6 @@ begin
                    if yyerrmsgs <> nil then Exit;
                   end;
               end;
-
             181:
               begin
                 flagAggregate := true;
@@ -2025,12 +2026,7 @@ begin
                               extvalue := 0;
                             end;
                         end;
-                      if aggregateValues = nil then
-                        begin
-                          setlength(aggregateValues,1);
-                          aggregateValues[0].extValue += 1;
-                          aggregatePosition := 1
-                        end else
+                      if aggregateValues <> nil then
                         begin
                           if length(aggregateValues) <= aggregatePosition then
                             begin
@@ -2175,6 +2171,131 @@ begin
                               aggregatePosition += 1
                             end
                         end
+                    end;
+                  ord(SumKind):
+                    begin
+                      flagAggregate := true;
+                      if aggregateValues = nil then
+                        begin
+                          setlength(aggregateValues,1);
+                          with aggregateValues[0] do
+                            begin
+                              caseValue := 7;
+                              extValue := 0;
+                            end;
+                        end;
+                      if aggregateValues <> nil then
+                        begin
+                          if length(aggregateValues) <= aggregatePosition then
+                            begin
+                              setlength(aggregateValues,Length(aggregateValues)+1);
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                if selectstk[High(selectstk)].caseValue = 4 then
+                                  begin
+                                    aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                    aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
+                                  end;
+                              aggregatePosition += 1
+                            end else
+                            begin
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                if selectstk[High(selectstk)].caseValue = 4 then
+                                  begin
+                                    aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
+                                    aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
+                                  end;
+                              aggregatePosition += 1
+                            end
+                        end;
+                      if nomoreRows then
+                       begin
+                         selectstk := nil;
+                         with selectColsInstructions[index2,index3] do
+                           begin
+                             if aggregateValues[aggregatePosition-1].caseValue = 7 then
+                               mnemonic := 241 else
+                               mnemonic := 88;
+                             value := aggregateValues[aggregatePosition-1].extValue;
+                             boolvalue := false;
+                             stvalue := '';
+                             if aggregateValues[aggregatePosition-1].caseValue = 7 then
+                               printInstruction := 'PUSH NULL ' else
+                               printInstruction := 'PUSH ' + floattostr(value)
+                           end;
+                         runstack(selectColsInstructions[index2,index3],selectstk);
+                         if yyerrmsgs <> nil then Exit;
+                        end;
+                    end;
+                  ord(avgKind):
+                    begin
+                      flagAggregate := true;
+                      if aggregateValues = nil then
+                        begin
+                          setlength(aggregateValues,2);
+                          with aggregateValues[0] do
+                            begin
+                              caseValue := 7;
+                              extValue := 0;
+                            end;
+                          with aggregateValues[1] do
+                            begin
+                              caseValue := 4;
+                              extvalue := 0;
+                            end;
+                        end;
+                      if aggregateValues <> nil then
+                        begin
+                          if length(aggregateValues) <= aggregatePosition then
+                            begin
+                              setlength(aggregateValues,Length(aggregateValues)+1);
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                if selectstk[High(selectstk)].caseValue = 4 then
+                                  begin
+                                    aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                    aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
+                                  end;
+
+                              setlength(aggregateValues,Length(aggregateValues)+1);
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                aggregateValues[High(aggregateValues)].extValue += 1;
+                              aggregatePosition += 2
+                            end else
+                            begin
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                if selectstk[High(selectstk)].caseValue = 4 then
+                                  begin
+                                    aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
+                                    aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
+                                  end;
+                              aggregatePosition += 1;
+
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                aggregateValues[aggregatePosition].extValue += 1;
+                              aggregatePosition += 1
+                            end
+                        end;
+                      if nomoreRows then
+                       begin
+                         isNullAvg := aggregateValues[aggregatePosition-2].caseValue = 7;
+                         tmpAvg := aggregateValues[aggregatePosition-2].extValue;
+                         tmpCount := aggregateValues[aggregatePosition-1].extValue;
+                         selectstk := nil;
+                         with selectColsInstructions[index2,index3] do
+                           begin
+                             if IsNullAvg then
+                               mnemonic := 241 else
+                               mnemonic := 88;
+                             if not IsNullAvg then
+                               value := tmpAvg / tmpCount;
+                             boolvalue := false;
+                             stvalue := '';
+                             if IsNullAvg then
+                               printInstruction := 'PUSH NULL ' else
+                               printInstruction := 'PUSH ' + floattostr(value)
+                           end;
+                         runstack(selectColsInstructions[index2,index3],selectstk);
+                         if yyerrmsgs <> nil then Exit;
+                        end;
                     end;
                 end
               end;
