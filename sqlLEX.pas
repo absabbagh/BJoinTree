@@ -18,12 +18,12 @@ begin
                                     if (yylval.yyExtended >= low(Integer)) and (yylval.yyExtended <= high(Integer)) then
                                       begin
                                         yylval.yyInteger := Trunc(yylval.yyExtended);
-                                        //yylval.yyInt64 := yylval.yyInteger;
+                                        yylval.yyInt64 := yylval.yyInteger;
                                         return(NUM)
                                       end else
                                       if (yylval.yyExtended >= low(Int64)) and(yylval.yyExtended <= high(Int64)) then
                                         begin
-                                          //yylval.yyInt64 := Trunc(yylval.yyExtended);
+                                          yylval.yyInt64 := Trunc(yylval.yyExtended);
                                           return(NUMBER)
                                         end
                                      else
@@ -174,6 +174,7 @@ begin
                                   if Uppercase(yytext) = 'LTRIM' then return( tknLTRIM );
                                   if Uppercase(yytext) = 'RPAD' then return( tknRPAD );
                                   if Uppercase(yytext) = 'RTRIM' then return( tknRTRIM );
+                                  if Uppercase(yytext) = 'TRIM' then return( tknTRIM );
                                   if Uppercase(yytext) = 'SOUNDEX' then return( tknSOUNDEX );
                                   if Uppercase(yytext) = 'SUBSTR' then return( tknSUBSTR );
                                   if Uppercase(yytext) = 'LENGTH' then return( tknLENGTH );
