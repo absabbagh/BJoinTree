@@ -1,25 +1,3 @@
-%{
-unit sqlLEX;
-type
-  TLexer = class(TCustomLexer)
-  private
-    bufptr: integer;
-    buf: array [1 .. max_chars] of AnsiChar;
-  protected
-    function get_char: AnsiChar; override;
-    procedure unget_char(c: AnsiChar); override;
-    procedure put_char(c: AnsiChar); override;
-    procedure yyclear; override;
-    function yywrap: boolean; override;
-  public
-    yyInputText: string;
-
-    function parse() : integer; override;
-  end;
-
-
-%}
-
 L				[A-Za-z]
 D				[0-9]
 
@@ -181,6 +159,7 @@ D				[0-9]
                                   if Uppercase(yytext) = 'LTRIM' then return( tknLTRIM );
                                   if Uppercase(yytext) = 'RPAD' then return( tknRPAD );
                                   if Uppercase(yytext) = 'RTRIM' then return( tknRTRIM );
+                                  if Uppercase(yytext) = 'TRIM' then return( tknTRIM );
                                   if Uppercase(yytext) = 'SOUNDEX' then return( tknSOUNDEX );
                                   if Uppercase(yytext) = 'SUBSTR' then return( tknSUBSTR );
                                   if Uppercase(yytext) = 'LENGTH' then return( tknLENGTH );
