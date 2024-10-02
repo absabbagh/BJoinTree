@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="/usr/bin/fpc" Date="1649687632"/>
+  <Params Value=" -MDelphi -Scghi -Cg -O1 -g -gl -l -vewnhibq -Fu/home/alan/Documents/Parsers/Lazly/src -Fu/home/alan/Documents/BJoinData/server -Fu/home/alan/.lazarus/lib/units/x86_64-linux/gtk2 -Fu/home/alan/.lazarus/lib/LCLBase/units/x86_64-linux -Fu/home/alan/.lazarus/lib/freetypelaz/lib/x86_64-linux -Fu/usr/lib/lazarus/2.2.0/components/lazutils/lib/x86_64-linux -Fu/usr/lib/lazarus/2.2.0/packager/units/x86_64-linux -Fu/home/alan/Documents/BJoinTree/ -o/home/alan/Documents/BJoinTree/sqlProject -dLCL -dLCLgtk2 -dBorland -dVer150 -dDelphi7 -dCompiler6_Up -dPUREPASCAL sqlProject.lpr"/>
+</CONFIG>
