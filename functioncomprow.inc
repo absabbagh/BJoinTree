@@ -40,7 +40,8 @@ begin
   // Check the Where Condition
   for index2 := low(lconditionInstructions) to high(lconditionInstructions) do
     begin
-      if lconditionInstructions[index2].mnemonic in [42..44,50..55,79,83..86,88,89,221,241] then
+      if lconditionInstructions[index2].mnemonic in
+           [42..44,50..55,79,83..86,88,89,221,241,47,92..111,38,171..175] then
         runStack(lconditionInstructions[index2],runstk);
 
       case lconditionInstructions[index2].mnemonic of

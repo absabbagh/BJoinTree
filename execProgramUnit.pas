@@ -209,7 +209,8 @@ uses
   binU,
   SDFUnit,
   regexpr{,
-  lockmanager};
+  lockmanager},
+  MATH;
 
   var
     Lexer: TLexer;
@@ -2699,6 +2700,12 @@ begin
           stk[High(stk)].strValue := sqlMemProg[i].stvalue;
         end;
 
+        47, 92 .. 100:  // DOUBLE, ABS(), CEIL(), FLOOR(), MOD(),  POWER(), ROUND(), SIGN(), SQRT(),TRUNC()
+        begin
+          setLength(expr, length(expr) + 1);
+          expr[high(expr)] := sqlMemProg[i];
+        end;
+
         119: // PUSH: name
         begin
           setLength(stk, Length(stk) + 1);
@@ -4666,7 +4673,7 @@ begin
           flagSubquery := true;
         end;
 
-        79, 83 .. 86, 95: // ADD .. DIV
+        79, 83 .. 86: // UMINUS, ADD .. DIV
         begin
           setLength(expr, length(expr) + 1);
           expr[high(expr)] := sqlMemProg[i];
@@ -7427,8 +7434,8 @@ begin
                       storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
                       if rowcondition(conditionInstructions,resultTable) then
                       begin
-                        resultRows := ResultRows + 1;
-                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,dataRef[0] = -1);
+                        resultRows := resultRows + 1;
+                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,(dataRef[0] = -1));
                         if yyerrmsgs <> nil then Exit;
                       end;
                       storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
@@ -7464,12 +7471,11 @@ begin
                                       if rowcondition(conditionInstructions,resultTable) then
                                       begin
                                         resultRows := ResultRows + 1;
-                                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,(dataref[0]= -1) or (keys[0] <> value));
+                                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,(dataref[0]= -1));
                                         if yyerrmsgs <> nil then Exit;
                                       end;
                                     end else dataref[0] := -1;
-                              until dataref[0] = -1
-
+                              until dataref[0] = -1;
                             end
 
                         end
@@ -7508,7 +7514,7 @@ begin
                               begin
                                 resultRows := ResultRows + 1;
                                 extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,
-                                              container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow);
+                                              (container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow));
                                 if yyerrmsgs <> nil then Exit;
                               end
                           end

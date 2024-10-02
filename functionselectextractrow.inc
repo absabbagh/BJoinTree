@@ -238,6 +238,9 @@ begin
   setLength(runstk,Length(runstk)-1)
 end;
 
+var
+  isDoubleArgument: Boolean;
+
 function runStack(conditionInstruction: singleInstructiontype;
                   var runstk: runstacktype): boolean;
 var
@@ -246,6 +249,102 @@ var
 begin
   result := true;
   case conditionInstruction.mnemonic of
+    92: // ABS
+       begin
+         case runstk[High(runstk)].caseValue of
+           4:
+             begin
+               runstk[High(runstk)].extValue := ABS(runstk[High(runstk)].extValue);
+             end;
+         end;
+       end;
+
+    93: // CEIL
+       begin
+         runstk[High(runstk)].caseValue := 4;
+         runstk[High(runstk)].extValue := Ceil(runstk[High(runstk)].extValue);
+       end;
+
+    94: // FLOOR
+       begin
+         runstk[High(runstk)].caseValue := 4;
+         runstk[High(runstk)].extValue := Floor(runstk[High(runstk)].extValue);
+       end;
+    {
+    95: // MOD
+       begin
+         case runstk[High(runstk)].caseValue of
+           4:
+             begin
+               runstk[High(runstk)-1].caseValue := 4;
+               runstk[High(runstk)-1].extValue := runstk[High(runstk)-1].extValue Mod
+                                                  runstk[High(runstk)].extValue;
+               setLength(runstk,Length(runstk)-1)
+             end;
+         end;
+       end;
+    }
+    96: // POWER
+       begin
+         case runstk[High(runstk)].caseValue of
+           4:
+             begin
+               runstk[High(runstk)-1].caseValue := 4;
+               runstk[High(runstk)-1].extValue := Power(runstk[High(runstk)-1].extValue,
+                                                        runstk[High(runstk)].extValue);
+               setLength(runstk,Length(runstk)-1)
+             end;
+         end;
+       end;
+
+    47: // DOUBLE
+       begin
+         isDoubleArgument := true;
+       end;
+
+    97: // ROUND To Check
+       begin
+         case runstk[High(runstk)].caseValue of
+           4:
+             begin
+               if isDoubleArgument then
+                 begin
+                   runstk[High(runstk)-1].caseValue := 4;
+                   runstk[High(runstk)-1].extValue := RoundTo(runstk[High(runstk)-1].extValue,
+                                                              Round(runstk[High(runstk)].extValue));
+                   setLength(runstk,Length(runstk)-1)
+                 end else
+                 begin
+                   runstk[High(runstk)].caseValue := 4;
+                   runstk[High(runstk)].extValue := Round(runstk[High(runstk)].extValue);
+                 end;
+
+             end;
+         end;
+         isDoubleArgument := false;
+       end;
+
+    98: // SIGN
+       begin
+         case runstk[High(runstk)].caseValue of
+           4:
+             begin
+               runstk[High(runstk)].caseValue := 4;
+               if runstk[High(runstk)].extValue > 0 then
+                 runstk[High(runstk)].extValue := 1 else
+                  if runstk[High(runstk)].extValue = 0 then
+                    runstk[High(runstk)].extValue := 0 else
+                    runstk[High(runstk)].extValue := -1
+             end;
+         end;
+       end;
+
+    99: // SQRT
+       begin
+         runstk[High(runstk)].caseValue := 4;
+         runstk[High(runstk)].extValue := Sqrt(runstk[High(runstk)].extValue)
+       end;
+
     83: // ADD
        begin
          case runstk[high(runstk)].caseValue of // can be seen false as 0 and true as 1
@@ -1951,6 +2050,7 @@ begin
                       printInstruction := 'SHOW COLUMN';
                     end;
               end;
+
         end;
       // colsIdTxt := 'sys_queryId' + #8 + 'sys_user' + #8 + 'rowId' + #8;
       // colsValTxt := '"' + lqueryId + '"' + #8 + '"' + dbuserId + '"' + #8 + intToStr(resultRows) + #8;
@@ -1963,7 +2063,8 @@ begin
         exprname := 'Expr' + intToStr(index2+1);
         for index3 := low(selectColsInstructions[index2]) to high(selectColsInstructions[index2]) do
         begin
-          if (selectColsInstructions[index2,index3].mnemonic in [42..44,50..55,79,83..86,88,89,221,241]) then
+          if (selectColsInstructions[index2,index3].mnemonic in
+               [42..44,50..55,79,83..86,88,89,221,241,47,92..111,38,171..175]) then
             begin
               runstack(selectColsInstructions[index2,index3],selectstk);
               if yyerrmsgs <> nil then Exit;
@@ -2033,6 +2134,8 @@ begin
                               setlength(aggregateValues,Length(aggregateValues)+1);
                               if selectstk[High(selectstk)].caseValue <> 7 then
                                 aggregateValues[High(aggregateValues)].extValue += 1;
+{                              selectstk[High(selectstk)].caseValue := 4;
+                              selectstk[High(selectstk)].extValue := ;}
                               aggregatePosition += 1
                             end else
                             begin
@@ -2043,7 +2146,7 @@ begin
                         end;
                       if nomoreRows then
                        begin
-                         selectstk := nil;
+{                         selectstk := nil;
                          with selectColsInstructions[index2,index3] do
                            begin
                              mnemonic := 88;
@@ -2051,8 +2154,18 @@ begin
                              boolvalue := false;
                              stvalue := '';
                              printInstruction := 'PUSH ' + floattostr(value)
-                           end;
+                           end;}
+                         selectstk[high(selectstk)].extValue := aggregateValues[aggregatePosition-1].extValue;
                          runstack(selectColsInstructions[index2,index3],selectstk);
+                                                 selectstk := nil;
+                                                  with selectColsInstructions[index2,index3] do
+                                                    begin
+                                                      mnemonic := 88;
+                                                      value := aggregateValues[aggregatePosition-1].extValue;
+                                                      boolvalue := false;
+                                                      stvalue := '';
+                                                      printInstruction := 'PUSH ' + floattostr(value)
+                                                    end;
                          if yyerrmsgs <> nil then Exit;
                         end;
                     end;
