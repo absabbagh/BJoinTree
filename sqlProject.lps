@@ -4,12 +4,12 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="98">
+    <Units Count="100">
       <Unit0>
         <Filename Value="sqlProject.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
         <CursorPos Y="17"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -20,45 +20,44 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="257"/>
-        <CursorPos X="5" Y="267"/>
+        <TopLine Value="561"/>
+        <CursorPos X="47" Y="571"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="execProgramUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1372"/>
-        <CursorPos X="4" Y="1384"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4719"/>
+        <CursorPos X="52" Y="4731"/>
         <UsageCount Value="200"/>
-        <Bookmarks Count="7">
+        <Bookmarks Count="5">
           <Item0 Y="4600" ID="9"/>
-          <Item1 Y="7088" ID="5"/>
+          <Item1 Y="7081" ID="5"/>
           <Item2 X="13" Y="2257" ID="8"/>
-          <Item3 X="4" Y="1384" ID="6"/>
-          <Item4 Y="2687" ID="1"/>
-          <Item5 X="17" Y="2703" ID="3"/>
-          <Item6 X="31" Y="7435" ID="7"/>
+          <Item3 X="31" Y="7428" ID="7"/>
+          <Item4 Y="4587" ID="1"/>
         </Bookmarks>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="sql.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="55"/>
-        <CursorPos X="11" Y="63"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="177"/>
+        <CursorPos Y="198"/>
         <UsageCount Value="200"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="BPlusTreeU.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1467"/>
-        <CursorPos Y="1477"/>
+        <TopLine Value="533"/>
+        <CursorPos Y="548"/>
         <UsageCount Value="200"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
       <Unit5>
         <Filename Value="msgslib.pas"/>
@@ -126,6 +125,7 @@
         <TopLine Value="939"/>
         <CursorPos X="6" Y="944"/>
         <UsageCount Value="92"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
       <Unit15>
         <Filename Value="sql.y"/>
@@ -176,6 +176,7 @@
         <TopLine Value="809"/>
         <CursorPos Y="821"/>
         <UsageCount Value="100"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit20>
       <Unit21>
         <Filename Value="functioncomprow.inc"/>
@@ -183,13 +184,19 @@
         <TopLine Value="180"/>
         <CursorPos X="40" Y="183"/>
         <UsageCount Value="100"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit21>
       <Unit22>
         <Filename Value="functionselectextractrow.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2322"/>
-        <CursorPos Y="2337"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="2190"/>
+        <CursorPos X="67" Y="2200"/>
         <UsageCount Value="100"/>
+        <Bookmarks Count="1">
+          <Item0 X="60" Y="2098" ID="3"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="..\..\Parsers\Lazly\ndyacclex-master\src\yacc\sql.pas"/>
@@ -272,6 +279,7 @@
         <EditorIndex Value="-1"/>
         <CursorPos X="3" Y="8"/>
         <UsageCount Value="49"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit32>
       <Unit33>
         <Filename Value="text.txt"/>
@@ -589,14 +597,16 @@
       </Unit71>
       <Unit72>
         <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="554"/>
-        <CursorPos X="46" Y="566"/>
-        <UsageCount Value="49"/>
-        <Bookmarks Count="2">
-          <Item0 Y="2003" ID="4"/>
-          <Item1 X="33" Y="2076" ID="2"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="2071"/>
+        <CursorPos X="32" Y="2076"/>
+        <UsageCount Value="52"/>
+        <Bookmarks Count="3">
+          <Item0 Y="1994" ID="4"/>
+          <Item1 X="5" Y="1886" ID="2"/>
+          <Item2 Y="1637" ID="6"/>
         </Bookmarks>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit72>
       <Unit73>
@@ -610,9 +620,10 @@
       <Unit74>
         <Filename Value="..\Parsers\Lazly\src\lexlib.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="319"/>
-        <CursorPos Y="329"/>
-        <UsageCount Value="7"/>
+        <TopLine Value="196"/>
+        <CursorPos Y="217"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit74>
       <Unit75>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\objpash.inc"/>
@@ -786,11 +797,145 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit97>
+      <Unit98>
+        <Filename Value="..\Parsers\Lazly\src\yacc\backup\sqlconditions.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1951"/>
+        <CursorPos Y="1971"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="..\..\..\..\usr\share\fpcsrc\3.2.2\packages\regexpr\src\regexpr.pas"/>
+        <UnitName Value="RegExpr"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="6"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
+      </Unit99>
     </Units>
-    <General>
-      <ActiveWindowIndexAtStart Value="-1"/>
-    </General>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1346" Column="68" TopLine="1329"/>
+      </Position1>
+      <Position2>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1431" Column="68" TopLine="1414"/>
+      </Position2>
+      <Position3>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1459" Column="67" TopLine="1442"/>
+      </Position3>
+      <Position4>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1605" Column="59" TopLine="1588"/>
+      </Position4>
+      <Position5>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1607" Column="61" TopLine="1590"/>
+      </Position5>
+      <Position6>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1628" Column="61" TopLine="1611"/>
+      </Position6>
+      <Position7>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1630" Column="75" TopLine="1613"/>
+      </Position7>
+      <Position8>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1689" Column="74" TopLine="1672"/>
+      </Position8>
+      <Position9>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1691" Column="63" TopLine="1674"/>
+      </Position9>
+      <Position10>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1717" Column="73" TopLine="1700"/>
+      </Position10>
+      <Position11>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1719" Column="74" TopLine="1702"/>
+      </Position11>
+      <Position12>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1827" Column="59" TopLine="1810"/>
+      </Position12>
+      <Position13>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1829" Column="61" TopLine="1812"/>
+      </Position13>
+      <Position14>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1850" Column="61" TopLine="1833"/>
+      </Position14>
+      <Position15>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1852" Column="75" TopLine="1835"/>
+      </Position15>
+      <Position16>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1911" Column="74" TopLine="1894"/>
+      </Position16>
+      <Position17>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1913" Column="63" TopLine="1896"/>
+      </Position17>
+      <Position18>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2052" Column="23" TopLine="2035"/>
+      </Position18>
+      <Position19>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2116" Column="50" TopLine="2099"/>
+      </Position19>
+      <Position20>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2160" Column="56" TopLine="2143"/>
+      </Position20>
+      <Position21>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2205" Column="56" TopLine="2188"/>
+      </Position21>
+      <Position22>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2263" Column="56" TopLine="2246"/>
+      </Position22>
+      <Position23>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2317" Column="56" TopLine="2300"/>
+      </Position23>
+      <Position24>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2244" Column="84" TopLine="2239"/>
+      </Position24>
+      <Position25>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2253" Column="55" TopLine="2236"/>
+      </Position25>
+      <Position26>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2263" Column="55" TopLine="2246"/>
+      </Position26>
+      <Position27>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2276" Column="72" TopLine="2259"/>
+      </Position27>
+      <Position28>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2277" Column="82" TopLine="2260"/>
+      </Position28>
+      <Position29>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2281" Column="89" TopLine="2264"/>
+      </Position29>
+      <Position30>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2285" Column="89" TopLine="2268"/>
+      </Position30>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
@@ -803,7 +948,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="7385"/>
+        <Line Value="7378"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
@@ -824,7 +969,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="7212"/>
+        <Line Value="7205"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
@@ -838,42 +983,14 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="4934"/>
+        <Line Value="4927"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="6750"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="functionselectextractrow.inc"/>
-        <Line Value="2290"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="functionselectextractrow.inc"/>
-        <Line Value="375"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="functionselectextractrow.inc"/>
-        <Line Value="365"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="functionselectextractrow.inc"/>
-        <Line Value="2072"/>
+        <Line Value="6743"/>
       </Item>
     </BreakPoints>
     <Watches>

@@ -435,7 +435,7 @@ constructor BtrPlusClass.Create(AFileName: string; IsOpen: Boolean;
                                 ANumberOfDataRef: word);
 var
   i: Integer;
-  ASC: array of boolean;
+  ASC: array of boolean = nil;
 begin
   setLength(ASC,length(Thekeys));
   for i := low(ASC) to high(ASC) do ASC[i] := true;
@@ -493,13 +493,13 @@ begin
 end;
 
 procedure BtrPlusClass.GetLRUIndex(IndexPoint: IndexPointerType; var result: IndexPage);
+{$IFDEF LRU}
 var
   found: boolean;
   index: integer;
   i, j: integer;
-  {$IFDEF LRU}
   page: basicPage;
-  {$ENDIF}
+{$ENDIF}
 begin
   {$IFDEF LRU}
   found := false;
@@ -539,13 +539,13 @@ begin
 end;
 
 procedure BtrPlusClass.PutLRUIndex(IndexPoint: IndexPointerType; Buf: IndexPage);
+{$IFDEF LRU}
 var
   found: boolean;
   index: integer;
   i, j: integer;
-  {$IFDEF LRU}
   page: basicPage;
-  {$ENDIF}
+{$ENDIF}
 begin
   {$IFDEF LRU}
   found := false;

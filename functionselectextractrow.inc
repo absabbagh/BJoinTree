@@ -2030,6 +2030,7 @@ var
   tmpAvg: extended;
   isNullAvg: boolean;
   tmpCount: extended;
+  startAggregate: boolean = false;
 begin
   result := true;
   selectstk := nil;
@@ -2050,7 +2051,6 @@ begin
                       printInstruction := 'SHOW COLUMN';
                     end;
               end;
-
         end;
       // colsIdTxt := 'sys_queryId' + #8 + 'sys_user' + #8 + 'rowId' + #8;
       // colsValTxt := '"' + lqueryId + '"' + #8 + '"' + dbuserId + '"' + #8 + intToStr(resultRows) + #8;
@@ -2058,11 +2058,37 @@ begin
       flagShowColumn := false;
       flagAggregate := false;
       for index2 := low(selectColsInstructions) to high(selectColsInstructions) do
+        for index3 := low(selectColsInstructions[index2]) to high(selectColsInstructions[index2]) do
+          begin
+            if (selectColsInstructions[index2,index3].mnemonic in
+                 [112..116]) then
+              begin
+                flagAggregate := true;
+                break;
+              end;
+            if flagAggregate then continue;
+        end;
+      for index2 := low(selectColsInstructions) to high(selectColsInstructions) do
       begin
         isExpr := false;
         exprname := 'Expr' + intToStr(index2+1);
         for index3 := low(selectColsInstructions[index2]) to high(selectColsInstructions[index2]) do
         begin
+          if (selectColsInstructions[index2,index3].mnemonic in
+               [112..116]) then
+            if not nomorerows then
+              begin
+                startaggregate := true;
+                continue
+              end;
+          if not nomorerows then
+            if not startaggregate then
+              begin
+                continue
+              end;
+          if nomorerows then
+            startaggregate := startaggregate;
+
           if (selectColsInstructions[index2,index3].mnemonic in
                [42..44,50..55,79,83..86,88,89,221,241,47,92..111,38,171..175]) then
             begin
@@ -2074,6 +2100,7 @@ begin
           case selectColsInstructions[index2,index3].mnemonic of
             180:
               begin
+                startaggregate := false;
                 flagAggregate := true;
                 if aggregateValues = nil then
                   begin
@@ -2090,12 +2117,11 @@ begin
                       begin
                         setlength(aggregateValues,Length(aggregateValues)+1);
                         aggregateValues[High(aggregateValues)].extValue += 1;
-                        aggregatePosition += 1
                       end else
                       begin
                         aggregateValues[aggregatePosition].extValue += 1;
-                        aggregatePosition += 1
-                      end
+                      end;
+                    aggregatePosition += 1
                   end;
                 if nomoreRows then
                  begin
@@ -2113,6 +2139,7 @@ begin
               end;
             181:
               begin
+                startaggregate := false;
                 flagAggregate := true;
                 case round(selectColsInstructions[index2,index3].value) of
                   ord(CountKind):
@@ -2126,6 +2153,7 @@ begin
                               caseValue := 4;
                               extvalue := 0;
                             end;
+                          //aggregatePosition := 1
                         end;
                       if aggregateValues <> nil then
                         begin
@@ -2134,19 +2162,16 @@ begin
                               setlength(aggregateValues,Length(aggregateValues)+1);
                               if selectstk[High(selectstk)].caseValue <> 7 then
                                 aggregateValues[High(aggregateValues)].extValue += 1;
-{                              selectstk[High(selectstk)].caseValue := 4;
-                              selectstk[High(selectstk)].extValue := ;}
-                              aggregatePosition += 1
                             end else
                             begin
                               if selectstk[High(selectstk)].caseValue <> 7 then
                                 aggregateValues[aggregatePosition].extValue += 1;
-                              aggregatePosition += 1
-                            end
+                            end;
+                          aggregatePosition += 1
                         end;
                       if nomoreRows then
                        begin
-{                         selectstk := nil;
+                         setlength(selectstk,length(selectstk)-1);
                          with selectColsInstructions[index2,index3] do
                            begin
                              mnemonic := 88;
@@ -2154,18 +2179,8 @@ begin
                              boolvalue := false;
                              stvalue := '';
                              printInstruction := 'PUSH ' + floattostr(value)
-                           end;}
-                         selectstk[high(selectstk)].extValue := aggregateValues[aggregatePosition-1].extValue;
+                           end;
                          runstack(selectColsInstructions[index2,index3],selectstk);
-                                                 selectstk := nil;
-                                                  with selectColsInstructions[index2,index3] do
-                                                    begin
-                                                      mnemonic := 88;
-                                                      value := aggregateValues[aggregatePosition-1].extValue;
-                                                      boolvalue := false;
-                                                      stvalue := '';
-                                                      printInstruction := 'PUSH ' + floattostr(value)
-                                                    end;
                          if yyerrmsgs <> nil then Exit;
                         end;
                     end;
@@ -2322,7 +2337,7 @@ begin
                         end;
                       if nomoreRows then
                        begin
-                         selectstk := nil;
+                         setlength(selectstk,length(selectstk)-1);
                          with selectColsInstructions[index2,index3] do
                            begin
                              if aggregateValues[aggregatePosition-1].caseValue = 7 then

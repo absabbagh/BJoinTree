@@ -224,7 +224,7 @@ object Form1: TForm1
     Left = 18
     Height = 26
     Top = 224
-    Width = 35
+    Width = 27
     Caption = '>'
     Glyph.Data = {
       76030000424D760300000000000036000000280000000D000000100000000100
@@ -258,6 +258,7 @@ object Form1: TForm1
     }
     ParentBidiMode = False
     TabOrder = 6
+    Visible = False
   end
   object BitBtn2: TBitBtn
     Left = 18
@@ -266,6 +267,7 @@ object Form1: TForm1
     Width = 27
     Caption = '<'
     TabOrder = 7
+    Visible = False
   end
   object Label1: TLabel
     Left = 48

@@ -4584,10 +4584,10 @@ begin
 
        112 .. 116: // AVG .. SUM
         begin
+          setLength(expr, length(expr) + 1);
+          expr[high(expr)] := sqlMemProg[i];
           flagAggregate := true;
           grpkind := aggregateset(sqlMemProg[i].Mnemonic - 111);
-{          setlength(expr,length(expr) + 1);
-          expr[high(expr)].mnemonic := sqlMemProg[i].Mnemonic; }
         end;
 
        180: // ALL COLUMNS AGGREGATE
@@ -4607,13 +4607,6 @@ begin
           expr[High(expr)].Value := ord(grpKind);
           expr[High(expr)].stvalue := 'Position: ' + intToStr(aggregatePosition);
           expr[High(expr)].printInstruction := 'ALL COLUMNS AGGREGATE';
-          {
-          setlength(selectColsInstructions,length(expr));
-          for index := low(expr) to high(expr) do
-            selectColsInstructions[high(selectColsInstructions), index] :=
-              expr[index];
-          expr := nil;
-          }
         end;
 
        181: // EXPRESSION AGGREGATE

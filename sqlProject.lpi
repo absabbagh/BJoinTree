@@ -71,7 +71,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\Parsers\Lazly\src;..\BJoinData\server"/>
+      <OtherUnitFiles Value="..\Parsers\Lazly\src"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
