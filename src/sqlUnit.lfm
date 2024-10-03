@@ -1,0 +1,279 @@
+object Form1: TForm1
+  Left = 472
+  Height = 578
+  Top = 91
+  Width = 737
+  Caption = 'Database'
+  ClientHeight = 578
+  ClientWidth = 737
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  OnActivate = FormActivate
+  OnClose = FormClose
+  ParentBiDiMode = False
+  LCLVersion = '2.2.0.4'
+  object Button2: TButton
+    Left = 48
+    Height = 25
+    Top = 190
+    Width = 129
+    Caption = 'Parse SQL statement'
+    Enabled = False
+    OnClick = Button2Click
+    TabOrder = 5
+  end
+  object Memo1: TMemo
+    Left = 48
+    Height = 71
+    Hint = 'SQL STATEMENT'
+    Top = 217
+    Width = 336
+    Enabled = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 8
+  end
+  object Memo2: TMemo
+    Left = 393
+    Height = 159
+    Hint = 'VIRTUAL PROGRAM'
+    Top = 217
+    Width = 296
+    ParentShowHint = False
+    ReadOnly = True
+    ShowHint = True
+    TabOrder = 16
+  end
+  object Memo3: TMemo
+    Left = 393
+    Height = 152
+    Hint = 'PROJECTION'
+    Top = 384
+    Width = 295
+    ParentShowHint = False
+    ReadOnly = True
+    ShowHint = True
+    TabOrder = 17
+  end
+  object StringGrid1: TStringGrid
+    Left = 48
+    Height = 157
+    Top = 30
+    Width = 641
+    ColCount = 4
+    DefaultColWidth = 150
+    ParentBiDiMode = False
+    ParentShowHint = False
+    TabOrder = 19
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+  end
+  object Memo4: TMemo
+    Left = 48
+    Height = 248
+    Hint = 'MESSAGES'
+    Top = 288
+    Width = 336
+    ParentShowHint = False
+    ReadOnly = True
+    ShowHint = True
+    TabOrder = 18
+  end
+  object Button1: TButton
+    Left = 48
+    Height = 25
+    Top = 544
+    Width = 75
+    Caption = 'LoadCSV'
+    OnClick = Button1Click
+    TabOrder = 10
+  end
+  object Edit1: TEdit
+    Left = 129
+    Height = 24
+    Top = 544
+    Width = 160
+    TabOrder = 9
+    Text = 'DEPARTMENTS.csv'
+  end
+  object Button5: TButton
+    Left = 182
+    Height = 25
+    Top = 190
+    Width = 75
+    Caption = 'Test index'
+    OnClick = Button5Click
+    TabOrder = 13
+  end
+  object Edit7: TEdit
+    Left = 393
+    Height = 24
+    Hint = 'PASSWORD'
+    Top = 190
+    Width = 123
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 3
+    Text = 'password'
+  end
+  object Button6: TButton
+    Left = 448
+    Height = 25
+    Top = 545
+    Width = 75
+    Caption = 'LoadSQL'
+    OnClick = Button6Click
+    TabOrder = 12
+  end
+  object Edit3: TEdit
+    Left = 528
+    Height = 24
+    Top = 544
+    Width = 160
+    TabOrder = 11
+    Text = 'test.sql'
+  end
+  object Edit4: TEdit
+    Left = 261
+    Height = 24
+    Hint = 'USER ID'
+    Top = 190
+    Width = 123
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 2
+    Text = 'superuser'
+  end
+  object Edit5: TEdit
+    Left = 297
+    Height = 24
+    Top = 546
+    Width = 59
+    TabOrder = 14
+    Text = 'SQL'
+  end
+  object Edit6: TEdit
+    Left = 363
+    Height = 24
+    Top = 546
+    Width = 80
+    TabOrder = 15
+    Text = '0'
+  end
+  object Button8: TButton
+    Left = 310
+    Height = 23
+    Top = 1
+    Width = 80
+    Caption = 'CONNECT'
+    OnClick = Button8Click
+    TabOrder = 4
+  end
+  object Label9: TLabel
+    Left = 393
+    Height = 14
+    Top = 195
+    Width = 98
+    Caption = 'DATABASE NAME:'
+    ParentShowHint = False
+  end
+  object Edit8: TEdit
+    Left = 165
+    Height = 24
+    Top = 0
+    Width = 128
+    TabOrder = 0
+    Text = 'TWF'
+  end
+  object Label8: TLabel
+    Left = 93
+    Height = 14
+    Top = 6
+    Width = 68
+    Caption = 'Workspace'
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label10: TLabel
+    Left = 411
+    Height = 14
+    Top = 6
+    Width = 57
+    Caption = 'Text Data'
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Edit9: TEdit
+    Left = 470
+    Height = 24
+    Top = 0
+    Width = 128
+    TabOrder = 1
+    Text = 'data'
+  end
+  object BitBtn1: TBitBtn
+    Left = 18
+    Height = 26
+    Top = 224
+    Width = 27
+    Caption = '>'
+    Glyph.Data = {
+      76030000424D760300000000000036000000280000000D000000100000000100
+      2000000000004003000064000000640000000000000000000000FFFFFFFFFFFF
+      FFFFFFFFFFFFFAFCFAFF97D697FF4CC54CFF4CC54CFF4CC54CFF4EC44EFF75CD
+      75FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAFCFAFF7CCF
+      7CFF27C127FF27C127FF27C127FF2AC12AFF68C968FFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFAFCFAFF7ACE7AFF27C127FF27C127FF27C1
+      27FF2AC12AFF68C968FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFAFCFAFF7ACE7AFF27C127FF27C127FF27C127FF2AC12AFF68C968FFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAFCFAFF7ACE7AFF27C1
+      27FF27C127FF27C127FF2AC12AFF68C968FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFAFCFAFF7ACE7AFF27C127FF27C127FF27C127FF2AC1
+      2AFF68C968FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAFC
+      FAFF7ACE7AFF27C127FF27C127FF27C127FF2AC12AFF68C968FFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAFCFAFF7ACE7AFF27C127FF27C1
+      27FF27C127FF2AC12AFF68C968FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFAFCFAFF7ACE7AFF27C127FF27C127FF27C127FF2AC12AFF68C9
+      68FFFFFFFFFFFFFFFFFFFFFFFFFFFDFEFDFFD6ECD6FF97D597FF95D595FF53C6
+      53FF27C127FF27C127FF27C127FF2AC12AFF3BC33BFF97D597FF9BD89BFFC5E6
+      C5FFFEFEFEFFE5F4E5FF90D490FF35C235FF2AC12AFF27C127FF27C127FF27C1
+      27FF27C127FF2AC12AFF3FC33FFF8DD28DFFE2F2E2FFFFFFFFFFFCFDFCFFD9EE
+      D9FF7CCE7CFF27C127FF27C127FF27C127FF27C127FF27C127FF31C231FF7ACE
+      7AFFD8EDD8FFFEFEFEFFFFFFFFFFFFFFFFFFFBFDFBFFCEE9CEFF67CA67FF27C1
+      27FF27C127FF27C127FF2EC32EFF65C965FFCFEACFFFFDFEFDFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFAFCFAFFC4E5C4FF4FC54FFF27C127FF2AC12AFF4AC5
+      4AFFC6E6C6FFFDFEFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFF9FCF9FFB8E1B8FF27C127FF3FC33FFFBBE2BBFFFCFEFCFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9FCF9FFC2E4
+      C2FFB2E0B2FFFCFDFCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    }
+    ParentBidiMode = False
+    TabOrder = 6
+    Visible = False
+  end
+  object BitBtn2: TBitBtn
+    Left = 18
+    Height = 30
+    Top = 256
+    Width = 27
+    Caption = '<'
+    TabOrder = 7
+    Visible = False
+  end
+  object Label1: TLabel
+    Left = 48
+    Height = 14
+    Top = 17
+    Width = 40
+    Caption = 'Results'
+  end
+end

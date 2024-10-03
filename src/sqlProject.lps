@@ -1,0 +1,1002 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units Count="100">
+      <Unit0>
+        <Filename Value="sqlProject.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <CursorPos Y="17"/>
+        <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="sqlUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <TopLine Value="561"/>
+        <CursorPos X="47" Y="571"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="execProgramUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4719"/>
+        <CursorPos X="52" Y="4731"/>
+        <UsageCount Value="200"/>
+        <Bookmarks Count="5">
+          <Item0 Y="4600" ID="9"/>
+          <Item1 Y="7081" ID="5"/>
+          <Item2 X="13" Y="2257" ID="8"/>
+          <Item3 X="31" Y="7428" ID="7"/>
+          <Item4 Y="4587" ID="1"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="sql.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="177"/>
+        <CursorPos Y="198"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="BPlusTreeU.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="533"/>
+        <CursorPos Y="548"/>
+        <UsageCount Value="200"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="msgslib.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="45" Y="8"/>
+        <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="lexlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="202"/>
+        <CursorPos Y="214"/>
+        <UsageCount Value="192"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="76"/>
+        <CursorPos Y="97"/>
+        <UsageCount Value="192"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="mongobjointreeu.pas"/>
+        <UsageCount Value="156"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="subs.pas"/>
+        <UsageCount Value="156"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="lru.pas"/>
+        <UnitName Value="LRU"/>
+        <UsageCount Value="156"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="C:\BTR\btree.pas"/>
+        <UsageCount Value="156"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="text_1.txt"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="97"/>
+        <CursorPos X="5" Y="118"/>
+        <UsageCount Value="27"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="..\..\pascalmongo\mongo4delphi\demo\httpserver\execProgramUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="BJoinTreeU.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="939"/>
+        <CursorPos X="6" Y="944"/>
+        <UsageCount Value="92"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="sql.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="138"/>
+        <CursorPos Y="156"/>
+        <UsageCount Value="96"/>
+        <Bookmarks Count="3">
+          <Item0 X="47" Y="1552" ID="8"/>
+          <Item1 Y="1980" ID="7"/>
+          <Item2 Y="1157" ID="3"/>
+        </Bookmarks>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="D:\testback\pascalmongo\mongo4delphi\demo\httpserver\execProgramUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10501"/>
+        <CursorPos X="87" Y="10508"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="D:\testback\pascalmongo\mongo4delphi\demo\httpserver_username_database\execProgramUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7175"/>
+        <CursorPos X="5" Y="7195"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="D:\testback\pascalmongo\mongo4delphi\demo\httpserver_tables\execProgramUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4962"/>
+        <CursorPos X="11" Y="4976"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="D:\testback\pascalmongo\mongo4delphi\demo\httpserver_tables\casetbljoin.inc"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="TtableU.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="809"/>
+        <CursorPos Y="821"/>
+        <UsageCount Value="100"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="functioncomprow.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="180"/>
+        <CursorPos X="40" Y="183"/>
+        <UsageCount Value="100"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="functionselectextractrow.inc"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="2190"/>
+        <CursorPos X="67" Y="2200"/>
+        <UsageCount Value="100"/>
+        <Bookmarks Count="1">
+          <Item0 X="60" Y="2098" ID="3"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="..\..\Parsers\Lazly\ndyacclex-master\src\yacc\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="508"/>
+        <CursorPos X="17" Y="522"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="..\..\pascalmongo\mongo4delphi\demo\httpserver\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="424"/>
+        <CursorPos Y="439"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="..\..\Parsers\Lazly\ndyacclex-master\src\yacc\sql.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1254"/>
+        <CursorPos X="109" Y="1271"/>
+        <UsageCount Value="8"/>
+        <Bookmarks Count="1">
+          <Item0 X="98" Y="1265" ID="1"/>
+        </Bookmarks>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="..\..\pascalmongo\BPlusTreeU.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="184"/>
+        <CursorPos Y="185"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="C:\lazarus\lcl\forms.pp"/>
+        <UnitName Value="Forms"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="60"/>
+        <CursorPos X="3" Y="70"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="C:\lazarus\lcl\include\control.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2905"/>
+        <CursorPos Y="2915"/>
+        <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="C:\lazarus\lcl\include\buttoncontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="45"/>
+        <CursorPos Y="56"/>
+        <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="C:\lazarus\lcl\lclmessageglue.pas"/>
+        <UnitName Value="LCLMessageGlue"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="106"/>
+        <CursorPos Y="116"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="..\..\OneDrive\LENOVO\Documents\pascalmongo\mongo4delphi\demo\httpserver\bplustree\bplustree.basic.pas"/>
+        <UnitName Value="BPlusTree.Basic"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="1"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="SDFUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="8"/>
+        <UsageCount Value="49"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="text.txt"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="132"/>
+        <CursorPos X="8" Y="151"/>
+        <UsageCount Value="26"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="..\pascalmongo\mongo4delphi\demo\httpserver\execProgramUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2006"/>
+        <CursorPos Y="2024"/>
+        <UsageCount Value="1"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="BPlusTreeU1.pas"/>
+        <UnitName Value="BPlusTreeU"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2988"/>
+        <CursorPos X="11" Y="2874"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="C:\lazarus\lcl\valedit.pas"/>
+        <UnitName Value="ValEdit"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1410"/>
+        <CursorPos Y="1431"/>
+        <UsageCount Value="1"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\objpas\sysutils\datih.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="112"/>
+        <CursorPos X="21" Y="122"/>
+        <UsageCount Value="1"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="..\pascalmongo\mongo4delphi\demo\httpserver\functioncomprow.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="383"/>
+        <CursorPos Y="403"/>
+        <UsageCount Value="1"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="..\..\Downloads\functioncomprow.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="461"/>
+        <CursorPos Y="482"/>
+        <UsageCount Value="1"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="sql1.pas"/>
+        <UnitName Value="sql"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2555"/>
+        <CursorPos X="40" Y="2575"/>
+        <UsageCount Value="3"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="sqlLEX.l"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="63"/>
+        <CursorPos X="49" Y="68"/>
+        <UsageCount Value="30"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="sqlLEX.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="156"/>
+        <CursorPos X="15" Y="172"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\src\lex\sqlLEX.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="232"/>
+        <CursorPos Y="232"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="..\twf\Pascal\LockU.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="44"/>
+        <CursorPos Y="65"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="..\twf\Pascal\Mutex.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="21"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win\wininc\ascdef.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="49"/>
+        <CursorPos X="10" Y="60"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="D:\Sony_Vaio8_18_2015\RAD Studio\Projects\Account\Transaction.pas"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="268"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\src\lexlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="248"/>
+        <CursorPos Y="249"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\inc\systemh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="432"/>
+        <CursorPos X="3" Y="443"/>
+        <UsageCount Value="3"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="936"/>
+        <CursorPos X="3" Y="947"/>
+        <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\rtl-objpas\src\inc\variants.pp"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="..\nx\nxpascal-master\nxpascal-master\demos\fpc\networkTest\server\locks.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="7" Y="33"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="locksu.pas"/>
+        <UnitName Value="locksU"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="12"/>
+        <CursorPos Y="29"/>
+        <UsageCount Value="3"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="ConverterBackup\sqlLEX.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="219"/>
+        <CursorPos Y="240"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="ConverterBackup\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="15395"/>
+        <CursorPos X="29" Y="15412"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\src\yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="71"/>
+        <CursorPos Y="71"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\test\generated\exprlex.l"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6"/>
+        <CursorPos X="16" Y="27"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\test\generated\expr.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="15"/>
+        <CursorPos Y="36"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="..\nx\nxpascal-master\nxpascal-master\demos\fpc\networkTest\server\locksmanager.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="82" Y="29"/>
+        <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1025"/>
+        <CursorPos X="14" Y="1035"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="..\BJoinTree-master - Copy\lexlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="299"/>
+        <CursorPos X="16" Y="319"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="..\BJoinTree-master - Copy\yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="79"/>
+        <CursorPos Y="89"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\src\yacc\yyparse.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="78"/>
+        <CursorPos X="12" Y="78"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\test\yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="66"/>
+        <CursorPos Y="66"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\test\uStreamLexer.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="43"/>
+        <CursorPos X="19" Y="56"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\src\yacc\tlexerparser.pas"/>
+        <UnitName Value="TLexerParser"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="94"/>
+        <CursorPos X="8" Y="113"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="sql2.pas"/>
+        <UnitName Value="sql"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="483"/>
+        <CursorPos Y="501"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="..\BJoinTree-master_old\dlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19" Y="7"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\test\generated\expr.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="29"/>
+        <CursorPos X="3" Y="40"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="..\Parsers\Lazly\ndyacclex-master\test\lexlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="41"/>
+        <CursorPos X="3" Y="54"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="..\Parsers\Lazly\src\yacc\yyparse.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <CursorPos Y="25"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="2071"/>
+        <CursorPos X="32" Y="2076"/>
+        <UsageCount Value="52"/>
+        <Bookmarks Count="3">
+          <Item0 Y="1994" ID="4"/>
+          <Item1 X="5" Y="1886" ID="2"/>
+          <Item2 Y="1637" ID="6"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="..\Parsers\Lazly\src\yacclib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="70"/>
+        <CursorPos X="16" Y="91"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="..\Parsers\Lazly\src\lexlib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="196"/>
+        <CursorPos Y="217"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\objpash.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="198"/>
+        <CursorPos Y="209"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="sql.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="79"/>
+        <CursorPos Y="86"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="..\Parsers\Lazly\Test\Calculator\generated\exprlex.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="55"/>
+        <CursorPos X="30" Y="55"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="sqlLEX.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="55"/>
+        <CursorPos Y="76"/>
+        <UsageCount Value="6"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\sysunih.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="10" Y="21"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="..\Parsers\Lazly\src\lex\sql.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="..\..\Downloads\BJoinTree-master2\BJoinTree-master\BJoinTreeMaster\msgslib.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="..\..\Downloads\BJoinTree-master\BJoinTree-master\BJoinTreeMaster\sqlProject.lpr"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="ulogin.pas"/>
+        <ComponentName Value="fLogin"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="..\Parsers\Lazly\Test\Calculator\frmTest.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="frmtest"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="..\BJoinData\server\lockmanager.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="90"/>
+        <CursorPos X="33" Y="90"/>
+        <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\diskh.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="10" Y="21"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="..\EE\stocks.sql"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="SQL"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="..\..\..\..\usr\lib\lazarus\2.2.0\lcl\graphics.pp"/>
+        <UnitName Value="Graphics"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="61"/>
+        <CursorPos X="104" Y="71"/>
+        <UsageCount Value="2"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="..\..\..\..\usr\lib\lazarus\2.2.0\components\lazutils\graphmath.pp"/>
+        <UnitName Value="GraphMath"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="259"/>
+        <CursorPos X="6" Y="268"/>
+        <UsageCount Value="2"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="tmp\u1.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="63" Y="8"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.cod"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="6"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="..\Parsers\Lazly\src\lex\sqlLEX.l"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="143"/>
+        <CursorPos X="18" Y="149"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="..\Parsers\Lazly\src\lex\sqlLEX.cod"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="109"/>
+        <CursorPos Y="130"/>
+        <UsageCount Value="6"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="..\..\..\..\usr\share\fpcsrc\3.2.2\packages\rtl-objpas\src\inc\variants.pp"/>
+        <UnitName Value="Variants"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="579"/>
+        <CursorPos Y="600"/>
+        <UsageCount Value="6"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="..\..\..\..\usr\share\fpcsrc\3.2.2\rtl\objpas\math.pp"/>
+        <UnitName Value="Math"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2641"/>
+        <CursorPos Y="2662"/>
+        <UsageCount Value="10"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="..\Parsers\Lazly\src\sql.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="669"/>
+        <CursorPos X="19" Y="680"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="..\Parsers\Lazly\src\yacc\backup\sqlconditions.y"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1951"/>
+        <CursorPos Y="1971"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="..\..\..\..\usr\share\fpcsrc\3.2.2\packages\regexpr\src\regexpr.pas"/>
+        <UnitName Value="RegExpr"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="6"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
+      </Unit99>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1346" Column="68" TopLine="1329"/>
+      </Position1>
+      <Position2>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1431" Column="68" TopLine="1414"/>
+      </Position2>
+      <Position3>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1459" Column="67" TopLine="1442"/>
+      </Position3>
+      <Position4>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1605" Column="59" TopLine="1588"/>
+      </Position4>
+      <Position5>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1607" Column="61" TopLine="1590"/>
+      </Position5>
+      <Position6>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1628" Column="61" TopLine="1611"/>
+      </Position6>
+      <Position7>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1630" Column="75" TopLine="1613"/>
+      </Position7>
+      <Position8>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1689" Column="74" TopLine="1672"/>
+      </Position8>
+      <Position9>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1691" Column="63" TopLine="1674"/>
+      </Position9>
+      <Position10>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1717" Column="73" TopLine="1700"/>
+      </Position10>
+      <Position11>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1719" Column="74" TopLine="1702"/>
+      </Position11>
+      <Position12>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1827" Column="59" TopLine="1810"/>
+      </Position12>
+      <Position13>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1829" Column="61" TopLine="1812"/>
+      </Position13>
+      <Position14>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1850" Column="61" TopLine="1833"/>
+      </Position14>
+      <Position15>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1852" Column="75" TopLine="1835"/>
+      </Position15>
+      <Position16>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1911" Column="74" TopLine="1894"/>
+      </Position16>
+      <Position17>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="1913" Column="63" TopLine="1896"/>
+      </Position17>
+      <Position18>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2052" Column="23" TopLine="2035"/>
+      </Position18>
+      <Position19>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2116" Column="50" TopLine="2099"/>
+      </Position19>
+      <Position20>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2160" Column="56" TopLine="2143"/>
+      </Position20>
+      <Position21>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2205" Column="56" TopLine="2188"/>
+      </Position21>
+      <Position22>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2263" Column="56" TopLine="2246"/>
+      </Position22>
+      <Position23>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2317" Column="56" TopLine="2300"/>
+      </Position23>
+      <Position24>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2244" Column="84" TopLine="2239"/>
+      </Position24>
+      <Position25>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2253" Column="55" TopLine="2236"/>
+      </Position25>
+      <Position26>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2263" Column="55" TopLine="2246"/>
+      </Position26>
+      <Position27>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2276" Column="72" TopLine="2259"/>
+      </Position27>
+      <Position28>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2277" Column="82" TopLine="2260"/>
+      </Position28>
+      <Position29>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2281" Column="89" TopLine="2264"/>
+      </Position29>
+      <Position30>
+        <Filename Value="functionselectextractrow.inc"/>
+        <Caret Line="2285" Column="89" TopLine="2268"/>
+      </Position30>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode="default"/>
+    </RunParams>
+  </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="7378"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="1529"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="1715"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="7205"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="1579"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="4927"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="execProgramUnit.pas"/>
+        <Line Value="6743"/>
+      </Item>
+    </BreakPoints>
+    <Watches>
+      <Item>
+        <Expression Value="fromtables"/>
+      </Item>
+    </Watches>
+  </Debugging>
+</CONFIG>
