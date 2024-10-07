@@ -247,7 +247,7 @@ var
   outText: TextFile;
   logfile: TextFile;
 
-  { #todo : check all the fields in BSON, if someone is messing put it as default or yyerror }
+  { #todo : check all the fields in BSON, if someone is missing put it as default or yyerror }
   { #done : To put boolean values as a new kind in sqlLex and sql.y }
 
 procedure closeSchemaTables;
@@ -1382,8 +1382,6 @@ type
    end;
 
    runstacktype = array of runstacksingletype;
- var
-   aggregateValues: runstacktype = nil;
 
  type
    executePlanType = record
@@ -2248,13 +2246,6 @@ var
   flagDistinctAggregate: boolean = false;
   flagAggregate: boolean = false;
   aggregatePosition: Integer = 0;
-  aggregateValues: array of record
-    grpkind: aggregateset;
-    aggregateType: byte;
-    BoolValue: Boolean;
-    extValue: extended;
-    stValue: string;
-  end = nil;
   AggregateRowId: Integer;
   DistinctAggregateRowId: Integer;
 
@@ -2268,6 +2259,9 @@ var
   AggregateColumns: array of string = nil;
   AggregateCol: Integer = 0;
   AggregateValue: Extended = 0;
+
+  aggregateValues: runstacktype = nil;
+
   havingconditionInstructions: conditionInstructionstype = nil;
   lPassword: string = '';
   lPrivilege: array of string = nil;
@@ -4592,10 +4586,6 @@ begin
 
        180: // ALL COLUMNS AGGREGATE
         begin
-          setlength(aggregateValues,length(aggregateValues)+1);
-          aggregateValues[High(aggregateValues)].grpkind := CountKind;
-          aggregateValues[High(aggregateValues)].aggregateType := 1; // Integer type
-          aggregateValues[High(aggregateValues)].extValue := Low(Integer);
           aggregatePosition += 1;
           if grpKind <> countKind then
             begin
@@ -6973,7 +6963,6 @@ begin
         39: // COLUMN WITIHIN EXPRESSION
         begin
           // check the table is in the from clause as tablename or aliasname
-          aggregateValues := nil;
           for index := low(expr) to high(expr) do
             begin
               if (expr[index].mnemonic = 151) then
@@ -7428,7 +7417,8 @@ begin
                       if rowcondition(conditionInstructions,resultTable) then
                       begin
                         resultRows := resultRows + 1;
-                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,(dataRef[0] = -1));
+                        extractselect(dbUserId, selectColsInstructions, outText, resultTable,
+                                      resultRows,aggregateValues,(dataRef[0] = -1));
                         if yyerrmsgs <> nil then Exit;
                       end;
                       storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
@@ -7464,7 +7454,8 @@ begin
                                       if rowcondition(conditionInstructions,resultTable) then
                                       begin
                                         resultRows := ResultRows + 1;
-                                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,(dataref[0]= -1));
+                                        extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,
+                                                      aggregateValues,(dataref[0]= -1));
                                         if yyerrmsgs <> nil then Exit;
                                       end;
                                     end else dataref[0] := -1;
@@ -7506,8 +7497,8 @@ begin
                             if rowcondition(conditionInstructions,resultTable) then
                               begin
                                 resultRows := ResultRows + 1;
-                                extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,
-                                              (container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow));
+                                extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows, aggregateValues,
+                                              container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow);
                                 if yyerrmsgs <> nil then Exit;
                               end
                           end

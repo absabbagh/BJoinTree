@@ -239,7 +239,7 @@ begin
 end;
 
 var
-  isDoubleArgument: Boolean;
+  count_Parameter: integer = 0;
 
 function runStack(conditionInstruction: singleInstructiontype;
                   var runstk: runstacktype): boolean;
@@ -251,98 +251,169 @@ begin
   case conditionInstruction.mnemonic of
     92: // ABS
        begin
-         case runstk[High(runstk)].caseValue of
-           4:
-             begin
-               runstk[High(runstk)].extValue := ABS(runstk[High(runstk)].extValue);
-             end;
-         end;
+         if count_parameter > 1 then
+           begin
+             Parser.yyerror('Too many parameters ');
+             setLength(runstk,Length(runstk)-count_parameter);
+           end else
+           begin
+             case runstk[High(runstk)].caseValue of
+               4:
+                 begin
+                   runstk[High(runstk)].extValue := ABS(runstk[High(runstk)].extValue);
+                 end;
+             end
+           end;
        end;
 
     93: // CEIL
        begin
-         runstk[High(runstk)].caseValue := 4;
-         runstk[High(runstk)].extValue := Ceil(runstk[High(runstk)].extValue);
+         if count_parameter > 1 then
+           begin
+             Parser.yyerror('Too many parameters ');
+             setLength(runstk,Length(runstk)-count_parameter);
+           end else
+           begin
+             case runstk[High(runstk)].caseValue of
+               4:
+                 begin
+                   runstk[High(runstk)].extValue := CEIL(runstk[High(runstk)].extValue);
+                 end;
+             end
+           end;
        end;
 
     94: // FLOOR
        begin
-         runstk[High(runstk)].caseValue := 4;
-         runstk[High(runstk)].extValue := Floor(runstk[High(runstk)].extValue);
+         if count_parameter > 1 then
+           begin
+             Parser.yyerror('Too many parameters ');
+             setLength(runstk,Length(runstk)-count_parameter);
+           end else
+           begin
+             case runstk[High(runstk)].caseValue of
+               4:
+                 begin
+                   runstk[High(runstk)].extValue := FLOOR(runstk[High(runstk)].extValue);
+                 end;
+             end
+           end;
        end;
-    {
-    95: // MOD
-       begin
-         case runstk[High(runstk)].caseValue of
-           4:
-             begin
-               runstk[High(runstk)-1].caseValue := 4;
-               runstk[High(runstk)-1].extValue := runstk[High(runstk)-1].extValue Mod
-                                                  runstk[High(runstk)].extValue;
-               setLength(runstk,Length(runstk)-1)
-             end;
-         end;
-       end;
-    }
     96: // POWER
        begin
          case runstk[High(runstk)].caseValue of
            4:
              begin
-               runstk[High(runstk)-1].caseValue := 4;
-               runstk[High(runstk)-1].extValue := Power(runstk[High(runstk)-1].extValue,
-                                                        runstk[High(runstk)].extValue);
-               setLength(runstk,Length(runstk)-1)
+               if count_parameter > 2 then
+                 begin
+                   Parser.yyerror('Too many parameters ');
+                   setLength(runstk,Length(runstk)-count_parameter);
+                 end else
+                 begin
+                   runstk[High(runstk)-1].caseValue := 4;
+                   runstk[High(runstk)-1].extValue := Power(runstk[High(runstk)-1].extValue,
+                                                            runstk[High(runstk)].extValue);
+                   setLength(runstk,Length(runstk)-1)
+                 end;
              end;
          end;
        end;
 
-    47: // DOUBLE
+    47: // PARAMETER
        begin
-         isDoubleArgument := true;
+         count_Parameter += 1;
        end;
 
-    97: // ROUND To Check
+    97: // ROUND
        begin
          case runstk[High(runstk)].caseValue of
            4:
              begin
-               if isDoubleArgument then
+               if count_parameter > 2 then
                  begin
-                   runstk[High(runstk)-1].caseValue := 4;
-                   runstk[High(runstk)-1].extValue := RoundTo(runstk[High(runstk)-1].extValue,
-                                                              Round(runstk[High(runstk)].extValue));
-                   setLength(runstk,Length(runstk)-1)
+                   Parser.yyerror('Too many parameters ');
+                   setLength(runstk,Length(runstk)-count_parameter);
                  end else
-                 begin
-                   runstk[High(runstk)].caseValue := 4;
-                   runstk[High(runstk)].extValue := Round(runstk[High(runstk)].extValue);
-                 end;
-
+                 if count_parameter = 2 then
+                   begin
+                     runstk[High(runstk)-1].caseValue := 4;
+                     if runstk[High(runstk)].extValue >= 0 then
+                       begin
+                         runstk[High(runstk)-1].extValue := runstk[High(runstk)-1].extValue * Power(10,runstk[High(runstk)].extValue);
+                         runstk[High(runstk)-1].extValue := Round(runstk[High(runstk)-1].extValue) / Power(10,runstk[High(runstk)].extValue);
+                       end else
+                       begin
+                         runstk[High(runstk)-1].extValue := Floor(runstk[High(runstk)-1].extValue);
+                         runstk[High(runstk)-1].extValue := Round(runstk[High(runstk)-1].extValue) / Power(10,(-runstk[High(runstk)].extValue));
+                         runstk[High(runstk)-1].extValue := Round(runstk[High(runstk)-1].extValue);
+                         runstk[High(runstk)-1].extValue := runstk[High(runstk)-1].extValue * Power(10,(-runstk[High(runstk)].extValue));
+                       end;
+                     setLength(runstk,Length(runstk)-1);
+                   end else
+                   begin
+                     runstk[High(runstk)].caseValue := 4;
+                     runstk[High(runstk)].extValue := Round(runstk[High(runstk)].extValue);
+                   end;
              end;
          end;
-         isDoubleArgument := false;
+         count_parameter := 0;
        end;
 
     98: // SIGN
        begin
-         case runstk[High(runstk)].caseValue of
-           4:
-             begin
-               runstk[High(runstk)].caseValue := 4;
-               if runstk[High(runstk)].extValue > 0 then
-                 runstk[High(runstk)].extValue := 1 else
-                  if runstk[High(runstk)].extValue = 0 then
-                    runstk[High(runstk)].extValue := 0 else
-                    runstk[High(runstk)].extValue := -1
+         if count_parameter > 1 then
+           begin
+             Parser.yyerror('Too many parameters ');
+             setLength(runstk,Length(runstk)-count_parameter);
+           end else
+           begin
+             case runstk[High(runstk)].caseValue of
+               4:
+                 begin
+                   if runstk[High(runstk)].extValue > 0 then
+                     runstk[High(runstk)].extValue := 1 else
+                      if runstk[High(runstk)].extValue = 0 then
+                        runstk[High(runstk)].extValue := 0 else
+                        runstk[High(runstk)].extValue := -1
+                 end;
              end;
-         end;
+           end
        end;
 
     99: // SQRT
        begin
-         runstk[High(runstk)].caseValue := 4;
-         runstk[High(runstk)].extValue := Sqrt(runstk[High(runstk)].extValue)
+         if count_parameter > 1 then
+           begin
+             Parser.yyerror('Too many parameters ');
+             setLength(runstk,Length(runstk)-count_parameter);
+           end else
+           begin
+             runstk[High(runstk)].extValue := Sqrt(runstk[High(runstk)].extValue)
+           end
+       end;
+
+   100: //TRUNCATE
+       begin
+         if count_parameter <> 2 then
+           begin
+             Parser.yyerror('Wrong number of parameters ');
+             setLength(runstk,Length(runstk)-count_parameter);
+           end else
+           begin
+             runstk[High(runstk)-1].caseValue := 4;
+             if runstk[High(runstk)].extValue >= 0 then
+               begin
+                 runstk[High(runstk)-1].extValue := runstk[High(runstk)-1].extValue * Power(10,runstk[High(runstk)].extValue);
+                 runstk[High(runstk)-1].extValue := Floor(runstk[High(runstk)-1].extValue) / Power(10,runstk[High(runstk)].extValue);
+               end else
+               begin
+                 runstk[High(runstk)-1].extValue := Floor(runstk[High(runstk)-1].extValue);
+                 runstk[High(runstk)-1].extValue := Floor(runstk[High(runstk)-1].extValue) / Power(10,(-runstk[High(runstk)].extValue));
+                 runstk[High(runstk)-1].extValue := Floor(runstk[High(runstk)-1].extValue);
+                 runstk[High(runstk)-1].extValue := runstk[High(runstk)-1].extValue * Power(10,(-runstk[High(runstk)].extValue));
+               end;
+             setLength(runstk,Length(runstk)-1);
+           end
        end;
 
     83: // ADD
@@ -2002,6 +2073,7 @@ function extractselect(dbUserId: string;
                        var outText: TextFile;
                        resultTable: resulttabletype;
                        var resultRows: Integer;
+                       var AggregateValues: runstacktype;
                        nomoreRows: Boolean): Boolean;
 var
   selectstk: runstacktype;
@@ -2027,7 +2099,7 @@ var
   flagShowColumn: boolean = false;
   flagAggregate: boolean = false;
   aggregatePosition: Integer = 0;
-  tmpAvg: extended;
+  tmpSum: extended;
   isNullAvg: boolean;
   tmpCount: extended;
   startAggregate: boolean = false;
@@ -2066,7 +2138,7 @@ begin
                 flagAggregate := true;
                 break;
               end;
-            if flagAggregate then continue;
+            if flagAggregate then break;
         end;
       for index2 := low(selectColsInstructions) to high(selectColsInstructions) do
       begin
@@ -2081,13 +2153,12 @@ begin
                 startaggregate := true;
                 continue
               end;
-          if not nomorerows then
-            if not startaggregate then
-              begin
-                continue
-              end;
-          if nomorerows then
-            startaggregate := startaggregate;
+          if flagAggregate then
+            if not nomorerows then
+              if not startaggregate then
+                begin
+                  continue
+                end;
 
           if (selectColsInstructions[index2,index3].mnemonic in
                [42..44,50..55,79,83..86,88,89,221,241,47,92..111,38,171..175]) then
@@ -2153,7 +2224,6 @@ begin
                               caseValue := 4;
                               extvalue := 0;
                             end;
-                          //aggregatePosition := 1
                         end;
                       if aggregateValues <> nil then
                         begin
@@ -2359,13 +2429,8 @@ begin
                       flagAggregate := true;
                       if aggregateValues = nil then
                         begin
-                          setlength(aggregateValues,2);
+                          setlength(aggregateValues,1);
                           with aggregateValues[0] do
-                            begin
-                              caseValue := 7;
-                              extValue := 0;
-                            end;
-                          with aggregateValues[1] do
                             begin
                               caseValue := 4;
                               extvalue := 0;
@@ -2377,16 +2442,31 @@ begin
                             begin
                               setlength(aggregateValues,Length(aggregateValues)+1);
                               if selectstk[High(selectstk)].caseValue <> 7 then
-                                if selectstk[High(selectstk)].caseValue = 4 then
-                                  begin
-                                    aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
-                                    aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
-                                  end;
-
+                                aggregateValues[High(aggregateValues)].extValue += 1;
+                            end else
+                            begin
+                              if selectstk[High(selectstk)].caseValue <> 7 then
+                                aggregateValues[aggregatePosition].extValue += 1;
+                            end;
+                          aggregatePosition += 1
+                        end;
+                      if aggregateValues <> nil then
+                        begin
+                          if length(aggregateValues) <= aggregatePosition then
+                            begin
                               setlength(aggregateValues,Length(aggregateValues)+1);
                               if selectstk[High(selectstk)].caseValue <> 7 then
-                                aggregateValues[High(aggregateValues)].extValue += 1;
-                              aggregatePosition += 2
+                                begin
+                                  if selectstk[High(selectstk)].caseValue = 4 then
+                                    begin
+                                      aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                      aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
+                                    end
+                                  end else
+                                  begin
+                                    aggregateValues[High(aggregateValues)].caseValue := 7;
+                                    aggregateValues[High(aggregateValues)].extValue := 0;
+                                  end;
                             end else
                             begin
                               if selectstk[High(selectstk)].caseValue <> 7 then
@@ -2395,18 +2475,14 @@ begin
                                     aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
                                     aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
                                   end;
-                              aggregatePosition += 1;
-
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                aggregateValues[aggregatePosition].extValue += 1;
-                              aggregatePosition += 1
-                            end
+                            end;
+                          aggregatePosition += 1
                         end;
                       if nomoreRows then
                        begin
-                         isNullAvg := aggregateValues[aggregatePosition-2].caseValue = 7;
-                         tmpAvg := aggregateValues[aggregatePosition-2].extValue;
-                         tmpCount := aggregateValues[aggregatePosition-1].extValue;
+                         tmpSum := aggregateValues[aggregatePosition-1].extValue;
+                         tmpCount := aggregateValues[aggregatePosition-2].extValue;
+                         isNullAvg := aggregateValues[aggregatePosition-1].caseValue = 7;
                          selectstk := nil;
                          with selectColsInstructions[index2,index3] do
                            begin
@@ -2414,7 +2490,7 @@ begin
                                mnemonic := 241 else
                                mnemonic := 88;
                              if not IsNullAvg then
-                               value := tmpAvg / tmpCount;
+                               value := tmpSum / tmpCount;
                              boolvalue := false;
                              stvalue := '';
                              if IsNullAvg then
@@ -2424,7 +2500,7 @@ begin
                          runstack(selectColsInstructions[index2,index3],selectstk);
                          if yyerrmsgs <> nil then Exit;
                         end;
-                    end;
+                      end;
                 end
               end;
 
