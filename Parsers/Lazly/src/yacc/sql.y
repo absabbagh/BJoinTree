@@ -90,55 +90,55 @@ type
 const
   Mnemonics: array [0..255] of string =
     ('REPEAT', 'CREATE DATABASE', 'DATABASE NAME', 'CREATE TABLE', 'TABLE NAME',
-     'NEW COLUMN', 'COLUMN NAME', 'CHAR', 'VARCHAR', 'CHAR VARYING',       //9
+     'NEW COLUMN', 'COLUMN NAME', 'CHAR', 'VARCHAR', 'CHAR VARYING',                                //   9
      'CHARACTER', 'CHARACTER VARYING', 'CLOB', 'DATE', 'NUMBER',
-     'FLOAT', 'REAL', 'DOUBLE PRECISION', 'NUMBER2','DECIMAL',             //19
+     'FLOAT', 'REAL', 'DOUBLE PRECISION', 'NUMBER2','DECIMAL',                                      //  19
      'DEC', 'NUMERIC', 'NUMBER1','INTEGER', 'INT',
-     'SMALLINT', 'CONSTRAINT NAME','NULL','NOT NULL', 'UNIQUE',            //29
+     'SMALLINT', 'CONSTRAINT NAME','NULL','NOT NULL', 'UNIQUE',                                     //  29
      'PRIMARY KEY', 'REFERENCES', 'ON DELETE CASCADE', 'TABLE CONSTRAINT', 'SELECT',
-     'ALL', 'DISTINCT', 'ALL COLUMNS', 'TRIM', 'COLUMNS WITHIN EXPRESSION',
+     'ALL', 'DISTINCT', 'ALL COLUMNS', 'TRIM', 'COLUMNS WITHIN EXPRESSION',                         //  39
      'FROM ALIAS NAME','WHERE', 'NOT', 'OR', 'AND',
-     'IN', 'LIKE', 'DOUBLE', 'IS NULL', 'IS NOT NULL',                    //49
+     'IN', 'LIKE', 'PARAMETER', 'IS NULL', 'IS NOT NULL',                                           //  49
      'EQ', 'LT', 'GT', 'NE', 'LE',
-     'GE', 'EQ ALL', 'LT ALL', 'GT ALL', 'NE ALL',
+     'GE', 'EQ ALL', 'LT ALL', 'GT ALL', 'NE ALL',                                                  //  59
      'LE ALL', 'GE ALL', 'EQ ANY', 'LT ANY', 'GT ANY',
-     'NE ANY', 'LE ANY', 'GE ANY', 'EXISTS', 'GROUP BY',                   //69
+     'NE ANY', 'LE ANY', 'GE ANY', 'EXISTS', 'GROUP BY',                                            //  69
      'ORDER BY', 'HAVING', 'UNION ALL', 'INTERSECT', 'MINUS',
-     'ASC', 'DESC', 'INSERT INTO', 'VALUES', 'UMINUS',
+     'ASC', 'DESC', 'INSERT INTO', 'VALUES', 'UMINUS',                                              //  79
      'UPDATE', 'SET', 'DELETE FROM', 'ADD', 'SUB',
-     'MUL', 'DIV', 'FROM', 'PUSH', 'PUSH LITERAL',                         //89
+     'MUL', 'DIV', 'FROM', 'PUSH', 'PUSH LITERAL',                                                  //  89
      'DEFAULT', 'COLUMN CONSTRAINT', 'ABS', 'CEIL', 'FLOOR',
-     'MOD', 'POWER', 'ROUND', 'SIGN', 'SQRT',
+     'MOD', 'POWER', 'ROUND', 'SIGN', 'SQRT',                                                       //  99
      'TRUNC', 'CHR', 'LPAD', 'LTRIM', 'RPAD',
-     'RTRIM', 'SOUNDEX', 'SUBSTR', 'LENGTH', 'TO_CHAR',                    //109
+     'RTRIM', 'SOUNDEX', 'SUBSTR', 'LENGTH', 'TO_CHAR',                                             // 109
      'TO_DATE', 'TO_NUMBER', 'AVG', 'COUNT', 'MAX',
-     'MIN', 'SUM', 'STDDEV', 'VARIANCE', 'PUSH NAME',                      //119
+     'MIN', 'SUM', 'STDDEV', 'VARIANCE', 'PUSH NAME',                                               // 119
      'CREATE INDEX', 'INDEX NAME', 'ASC', 'DESC','INDEX COLUMN',
-     'TABLE COMMENT', 'COLUMN COMMENT', 'COMMENT', 'PUSH COMMENT', 'VOID', //129
+     'TABLE COMMENT', 'COLUMN COMMENT', 'COMMENT', 'PUSH COMMENT', 'VOID',                          // 129
      'CHECK', 'BIGINT', 'TIME', 'TIMESTAMP', 'WITH TIME ZONE',
-     'WITHOUT TIME ZONE', 'BOOLEAN', 'FOREIGN KEY', 'CREATE TRIGGER', 'TRIGGER NAME', //139
+     'WITHOUT TIME ZONE', 'BOOLEAN', 'FOREIGN KEY', 'CREATE TRIGGER', 'TRIGGER NAME',               // 139
      'TRIGGER SYNC', 'BEFORE', 'AFTER', 'TRIGGER DELETE', 'TRIGGER INSERT',
-     'TRIGGER UPDATE', 'FOR EACH ROW', 'WHEN CONDITION','TRIGGER STEP', 'BLOCK',      //149
+     'TRIGGER UPDATE', 'FOR EACH ROW', 'WHEN CONDITION','TRIGGER STEP', 'BLOCK',                    // 149
      'COLUMNS PROJECTION', 'PUSH COLUMN NAME', 'CREATE JOIN INDEX', 'BASE TABLE', 'JOIN TABLES CONDITION',
-     'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE', //159
+     'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE',  // 159
      'SHOW ALL TABLES', 'SHOW ALL COLUMNS', 'SHOW ALL JOIN INDEXES', 'SHOW ALL INDEXES', 'SHOW INDEXES',
-     'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT', //169
+     'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT',                // 169
      'MODIFY', 'UCASE', 'LCASE', 'MID', 'NOW',
-     'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS', //179
+     'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS',             // 179
      'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'AGGREGATE COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
-     'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',
+     'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',                                    // 189
      'DROP TABLE', 'DROP INDEX', 'DROP JOIN INDEX', 'COLUMNS SPECIFIED', 'TABLES COLUMNS SPECIFIED',
-     'UPLOAD CSV', 'EMPTY JSON OBJECT', 'MEMBERS OBJECT', 'EMPTY JSON ARRAY', 'ELEMENTS ARRAY', //199
+     'UPLOAD CSV', 'EMPTY JSON OBJECT', 'MEMBERS OBJECT', 'EMPTY JSON ARRAY', 'ELEMENTS ARRAY',     // 199
      'JSON MEMBER', 'JSON ELEMENT', 'JSON PAIR', 'JSON STRING VALUE', 'JSON OBJECT VALUE',
-     'JSON ARRAY VALUE', 'JSON STRING', 'START TRANSACTION', 'ROLLBACK TRANSACTION', 'ROLLBACK TO', //209
+     'JSON ARRAY VALUE', 'JSON STRING', 'START TRANSACTION', 'ROLLBACK TRANSACTION', 'ROLLBACK TO', // 209
      'COMMIT TRANSACTION', 'TRANSACTION NAME', 'HOLD SAVEPOINT', 'SAVEPOINT NAME', 'RELEASE SAVEPOINT',
-     'CURSOR_NAME', 'START CURSOR DECLARATION', 'OPEN CURSOR', 'FETCH CURSOR', 'CLOSE CURSOR', //219
+     'CURSOR_NAME', 'START CURSOR DECLARATION', 'OPEN CURSOR', 'FETCH CURSOR', 'CLOSE CURSOR',      // 219
      'END CURSOR DECLARATION', 'PUSH BOOLEAN', 'UNION', 'DATETIME', 'COLUMN FROM SUBQUERY',
-     'TABLE FROM SUBQUERY', 'CREATE VIEW', 'VIEW NAME', 'CREATE USER', 'DOT', // 229
+     'TABLE FROM SUBQUERY', 'CREATE VIEW', 'VIEW NAME', 'CREATE USER', 'DOT',                       // 229
      'PASSWORD', 'GRANT', 'REVOKE', 'PRIVILEGE', 'PUSH OPTION',
-     'DROP VIEW', 'RENAME USER', 'DROP USER', 'DROP TRIGGER', 'RENAME TABLE', // 239
+     'DROP VIEW', 'RENAME USER', 'DROP USER', 'DROP TRIGGER', 'RENAME TABLE',                       // 239
      'DATABASE OBJECT', 'PUSH NULL', 'ADD CONSTRAINT', 'ESCAPE', 'START EXISTS',
-     'SHOW ALL CONSTRAINTS', 'CREATE ROLE', 'ROLE_NAME', 'ALTER USER', 'NEW PASSWORD', //249
+     'SHOW ALL CONSTRAINTS', 'CREATE ROLE', 'ROLE_NAME', 'ALTER USER', 'NEW PASSWORD',              // 249
      'USER_ID OR ROLE_NAME', 'LOCK TABLES', 'READ', 'WRITE', 'UNLOCK TABLES',
      'LOCK TABLE ALIAS NAME');
 
@@ -197,7 +197,6 @@ type YYSType = record
 %token <Extended> NUMBER                /* constants */
 %token <Integer> NUM                    /* constants */
 %token <string> ID                      /* variables */
-%type <Pointer> expr                    /* expressions */
 %token <string> QUOTED_STRING
 
 %token tknCREATE                        /* keyword */
@@ -380,6 +379,7 @@ type YYSType = record
 %token tknLE
 %token tknGE
 
+%type <Pointer> expr                    /* expressions */
 %type <Pointer> sql_command
 %type <Pointer> to_parse_data
 %type <Pointer> to_define_data
@@ -448,7 +448,7 @@ type YYSType = record
 %type <Pointer> indexed_column
 %type <Pointer> option_sort
 %type <Pointer> comment
-%type <Pointer> select_sys_command
+%type <Pointer> show_command
 %type <Pointer> select_command
 %type <Pointer> option_duplicate
 %type <Pointer> option_columns
@@ -462,19 +462,19 @@ type YYSType = record
 %type <Pointer> alias
 %type <Pointer> selected_table
 %type <Pointer> condition
-%type <Integer> comparaison_op
 %type <Pointer> exp_set
-%type <Pointer> quantified_factor
+%type <Integer> comparaison_op
+/* %type <Pointer> quantified_factor */
 %type <Pointer> rptnumber_quoted_string
 %type <Pointer> subquery
 %type <Pointer> number_quoted_string
 %type <Pointer> group_order_clause
 %type <Pointer> expr_list
+%type <Pointer> expr_parameter
 %type <Pointer> option_having
 %type <Pointer> set_clause
 %type <Pointer> rptsorted_def
 %type <Pointer> sorted_def
-%type <Pointer> rptgroup_order_clause
 %type <Pointer> insert_command
 %type <Pointer> value_list
 %type <Pointer> rptvalue
@@ -493,7 +493,7 @@ type YYSType = record
 %type <string>  pattern
 %type <Pointer> variable
 %type <Pointer> constant
-%type <Pointer> function
+%type <Pointer> general_function
 %type <Pointer> group_function
 %type <Pointer> option_group
 %type <Pointer> number_function
@@ -563,6 +563,10 @@ type YYSType = record
 %left '-' '+'  tknUNION tknMINUS           /* operators */
 %left '*' '/' '%' tknINTERSECT
 %left '(' ')'
+%left  tknABS tknCEIL tknFLOOR tknMOD tknPOWER tknROUND tknSIGN tknSQRT tknTRUNCATE
+%left  tknCHR tknLPAD tknLTRIM tknRPAD tknRTRIM tknTRIM tknSOUNDEX tknSUBSTR
+%left  tknLENGTH tknLEN tknUCASE tknLCASE tknMID tknNOW tknFORMAT
+%left  tknTO_CHAR tknTO_DATE tknTO_NUMBER
 %right UMINUS '.'
 
 
@@ -593,16 +597,22 @@ type YYSType = record
 input	: /* empty */
 	| input '\n'
                 { yyaccept; }
+
         | input json_format '\n'
                 { ex($2); yyaccept; }
+
         | input sql_transcations_statement ';' '\n'
                 { ex($2); yyaccept; }
+
         | input sql_locks_statement ';' '\n'
                 { ex($2); yyaccept; }
+
         | input sql_command ';' '\n'
                 { ex($2); yyaccept; }
-        | input condition '\n'
+
+        | input expr ';' '\n'
                 { ex($2); yyaccept; }
+
 	| error '\n'
                 { yyerrok; }
 	;
@@ -649,13 +659,9 @@ json_value : json_string
                 { $$ := opr(204,'JSON OBJECT VALUE',[$1]); }
            | json_array
                 { $$ := opr(205,'JSON ARRAY VALUE',[$1]); }
-/*
-           | 'true'
-           ;
-           | 'false'
-           ;
-           | 'null'
-*/
+           /*
+           | 'null' to implement a call to NULLCON()
+           */
            ;
 
 json_string : number_quoted_string
@@ -1443,7 +1449,7 @@ to_modify_data : cursor_declaration
                 { $$ := $1; }
                | select_command
                 { $$ := $1; }
-               | select_sys_command
+               | show_command
                 { $$ := $1; }
                | insert_command
                 { $$ := $1; }
@@ -1488,7 +1494,7 @@ cursor_name : ID
   +------------+----------+------+-----+---------+----------------+
 */
 
-select_sys_command :tknSHOW tknDATABASES
+show_command :tknSHOW tknDATABASES
                     { $$ := opr(157,'SHOW ALL DATABASES',[]); }
                     | tknSHOW tknDATABASES tknFOR user_id
                     { $$ := opr(157,'SHOW ALL DATABASES',[$4]); }
@@ -1512,8 +1518,10 @@ select_sys_command :tknSHOW tknDATABASES
                     { $$ := opr(195,' UPLOAD CSV',[$4]); }
                     | tknSYSTEM tknLOAD_SQL tknFROM file_name
                     { $$ := opr(187,' LOAD SQL',[$4]); }
+                    /*
                     | tknHEADER set_clause
                     { $$ := opr(184,'SHOW SELECT STATEMENT HEADER',[$2]); }
+                    */
                     ;
 
 user_id : ID
@@ -1627,45 +1635,10 @@ option_where_condition : /* empty */
                 { $$ := opr(41,'WHERE',[$2]); }
                        ;
 
-condition : condition tknEQ condition
-                { $$ := opr(50,'EQ',[$1,$3]); }
-          | condition tknNE condition
-                { $$ := opr(53,'NE',[$1,$3]); }
-          | condition tknLT condition
-                { $$ := opr(51,'LT',[$1,$3]); }
-          | condition tknGT condition
-                { $$ := opr(52,'GT',[$1,$3]); }
-          | condition tknLE condition
-                { $$ := opr(54,'LE',[$1,$3]); }
-          | condition tknGE condition
-                { $$ := opr(55,'GE',[$1,$3]); }
-          |  condition '+' condition
-                { $$ := opr(83,'ADD',[$1,$3]); }
-          |  condition tknAND condition
-                { $$ := opr(44,'AND',[$1,$3]); }
-          |  condition '-' condition
-                { $$ := opr(84,'SUB',[$1,$3]); }
-	  |  condition '*' condition
-                { $$ := opr(85,'MUL',[$1,$3]); }
-          |  condition tknOR condition
-                { $$ := opr(43,'OR',[$1,$3]); }
-	  |  condition '/' condition
-                { $$ := opr(86,'DIV',[$1,$3]); }
-          |  condition '%' condition
-                { $$ := opr(95,'MOD',[$1,$3]); }
+condition : expr
+                { $$ := $1; }
 	  |  '(' condition ')'
                 { $$ := $2; }
-	  |  '+' condition %prec UMINUS
-                { $$ := $2; }
-	  |  '-' condition %prec UMINUS
-                { $$ := opr(79,'UMINUS',[$2]); }
-	  |  tknNOT condition %prec UMINUS
-                { $$ := opr(42,'NOT',[$2]); }
-          |  constant
-                { $$ := $1; }
-          |  variable
-                { $$ := $1; }
-
           | condition tknLIKE pattern
                 { $$ := opr(46,'LIKE',[$1,stcon($3)]); }
 
@@ -1704,17 +1677,14 @@ condition : condition tknEQ condition
 
           | tknEXISTS subquery
                 { $$ := opr(68,'EXISTS',[opr(244,'START EXISTS',[]),$2]); }
-
-          | quantified_factor
-                { $$ := $1; }
-
           | '(' condition ')'
                 { $$ := $2; }
-
-           | function
-                { $$ := opr(129,'VOID',[$1]); }
+          /*
+          | quantified_factor
+                { $$ := $1; }
+          */
 	  ;
-
+/*
 comparaison_op : tknEQ
                 { $$ := 0; }
                | tknLT
@@ -1728,7 +1698,7 @@ comparaison_op : tknEQ
                | tknGE
                 { $$ := 5; }
                ;
-
+*/
 pattern : QUOTED_STRING
                 { $$ := $1; }
         ;
@@ -1757,6 +1727,7 @@ subquery : '(' select_command ')'
                 { $$ := $2; }
          ;
 
+/*
 quantified_factor : expr comparaison_op subquery
                 { $$ := opr(50+$2,'',[$1,$3]); }
                   | expr comparaison_op tknALL subquery
@@ -1764,21 +1735,15 @@ quantified_factor : expr comparaison_op subquery
                   | expr comparaison_op tknANY subquery
                 { $$ := opr(62+$2,'' + ' ANY',[$1,$4]); }
                   ;
+*/
 
-rptgroup_order_clause : /* empty */
-                { $$ := nil; }
-                      | group_order_clause
-                { $$ := $1; }
-                   ;
 
-group_order_clause : tknGROUP tknBY expr_list option_having
-                { $$ := opr(69,'GROUP BY',[$4,$3]); }
-                   |  group_order_clause tknGROUP tknBY expr_list option_having
-                { $$ := opr(69,'GROUP BY',[$1,$5,$4]); }
-                   |  tknORDER tknBY rptsorted_def
-                { $$ := opr(70,'ORDER BY',[$3]); }
-                   |  group_order_clause tknORDER tknBY rptsorted_def
-                { $$ := opr(70,'ORDER BY',[$1,$4]); }
+group_order_clause : tknGROUP tknBY expr_list option_having option_order_by
+                { $$ := opr(69,'GROUP BY',[$4,$5,$3]); }
+                   | tknHAVING condition option_order_by
+                { $$ := opr(71,'HAVING',[$2,$3]); }
+                   |  option_order_by
+                { $$ := opr(70,'ORDER BY',[$1]); }
              ;
 
 expr_list : expr
@@ -1796,7 +1761,7 @@ option_having : /* empty */
 set_clause : tknSELECT option_duplicate option_columns
              tknFROM selected_tables
              option_where_condition
-             rptgroup_order_clause
+             group_order_clause
                 { $$ := opr(34,'SELECT',[opr(87,'FROM',[$5]),$2, opr(150,'COLUMNS PROJECTION',[$3]),$6,$7]); }
              | set_clause tknUNION set_clause
                 { $$ := opr(222,'UNION',[$1,$3]); }
@@ -1867,9 +1832,9 @@ update_command : simple_update
                 { $$ := $1; }
                ;
 
-simple_update : tknUPDATE table_name tknSET rptset_column option_where_condition /* tknWHERE condition */
+simple_update : tknUPDATE table_name tknSET rptset_column option_where_condition
                 { $$ := opr(80,'UPDATE',[$2,$4,$5]); }
-              | tknUPDATE table_name alias tknSET rptset_column option_where_condition /* tknWHERE condition */
+              | tknUPDATE table_name alias tknSET rptset_column option_where_condition
                 { $$ := opr(80,'UPDATE',[$2,$3,$5,$6]); }
               ;
 
@@ -1907,18 +1872,23 @@ delete_command : tknDELETE tknFROM table_name option_where_condition
                 { $$ := opr(82,'DELETE FROM',[$3]); }
                ;
 
-/* exp → term {OR term};
-   term → factor {AND factor};
-   factor → id;
-   factor → NOT factor;
-   factor → LPAREN exp RPAREN;
-*/
-
 
 expr    :  expr '+' expr
                 { $$ := opr(83,'ADD',[$1,$3]); }
 	|  expr '-' expr
                 { $$ := opr(84,'SUB',[$1,$3]); }
+        |  expr tknEQ expr
+                { $$ := opr(50,'EQ',[$1,$3]); }
+        | expr tknNE expr
+                { $$ := opr(53,'NE',[$1,$3]); }
+        | expr tknLT expr
+                { $$ := opr(51,'LT',[$1,$3]); }
+        | expr tknGT expr
+                { $$ := opr(52,'GT',[$1,$3]); }
+        | expr tknLE expr
+                { $$ := opr(54,'LE',[$1,$3]); }
+        | expr tknGE expr
+                { $$ := opr(55,'GE',[$1,$3]); }
         |  expr tknAND expr
                 { $$ := opr(44,'AND',[$1,$3]); }
 	|  expr '*' expr
@@ -1928,6 +1898,8 @@ expr    :  expr '+' expr
 	|  expr '/' expr
                 { $$ := opr(86,'DIV',[$1,$3]); }
 	|  expr '%' expr
+                { $$ := opr(95,'MOD',[$1,$3]); }
+        |  expr tknMOD expr
                 { $$ := opr(95,'MOD',[$1,$3]); }
 	|  '(' expr ')'
                 { $$ := $2; }
@@ -1941,13 +1913,18 @@ expr    :  expr '+' expr
                 { $$ := $1; }
         |  variable
                 { $$ := $1; }
-        | function
+        | general_function
                 { $$ := opr(129,'VOID',[$1]); }
         | group_function '(' option_group ')'
                 { $$ := opr(129,'VOID',[$1,$3]); }
 	;
 
-option_group : '*'
+
+option_group :  ID '.' '*'
+                { $$ := opr(229,'DOT',[opr(4,'TABLE NAME',[DBName($1)]),opr(180,'ALL COLUMNS AGGREGATE')]); }
+             |  ID '.' ID '.' '*'
+                { $$ := opr(229,'DOT',[opr(2,'DATABASE NAME',[DBName($1)]),opr(4,'TABLE NAME',[DBName($3)]),opr(180,'ALL COLUMNS AGGREGATE')]); }
+             |  '*'
                 { $$ := opr(180,'ALL COLUMNS AGGREGATE'); }
              |  expr
                 { $$ := opr(181,'EXPRESSION AGGREGATE',[$1]); }
@@ -1991,25 +1968,9 @@ constant :  NUM
      MAX() - Returns the largest value
      MIN() - Returns the smallest value
      SUM() - Returns the sum
-
-   SQL Scalar functions
-
-   SQL scalar functions return a single value, based on the input value.
-
-   Useful scalar functions:
-
-     UCASE() - Converts a field to upper case  *** char_function ***
-     LCASE() - Converts a field to lower case  *** char_function ***
-     MID() - Extract characters from a text field   *** char_function ***
-     LEN() - Returns the length of a text field
-     ROUND() - Rounds a numeric field to the number of decimals specified  *** number_function ***
-     NOW() - Returns the current system date and time  *** date_function ***
-     FORMAT() - Formats how a field is to be displayed
 */
 
-
-
-function : number_function
+general_function : number_function
                 { $$ := $1; }
          | char_function
                 { $$ := $1; }
@@ -2017,79 +1978,80 @@ function : number_function
                 { $$ := $1; }
          ;
 
-number_function : tknABS expr
-                { $$ := opr(92,'ABS',[$2]); }
-                | tknCEIL expr
-                { $$ := opr(93,'CEIL',[$2]); }
-                | tknFLOOR expr
-                { $$ := opr(94,'FLOOR',[$2]); }
-                | tknMOD  '(' expr ',' expr ')' /* MOD(N,M), N % M, N MOD M */
-                { $$ := opr(95,'MOD',[$3,$5]); }
-                | tknPOWER '(' expr ',' expr ')' /* POWER(X,Y) or POW(X,Y) which returns the value of X raised to the power of Y */
-                { $$ := opr(96,'POWER',[$3,$5]); }
-                | tknROUND expr
-                { $$ := opr(97,'ROUND',[$2]); }
-                | tknROUND '(' expr ',' expr ')' /* Rounds the argument X to D decimal places. D defaults to 0 if not specified.
-                                                   D can be negative to cause D digits left of the decimal point of the value X
-                                                   to become zero. */
-                { $$ := opr(97,'ROUND',[OPR(47,'DOUBLE',[$3,$5])]); }
-                | tknSIGN expr /* SIGN( number ) -1 Number negative, 0 Number 0, 1 Number positive */
-                { $$ := opr(98,'SIGN',[$2]); }
-                | tknSQRT expr /* SQRT( number ) */
-                { $$ := opr(99,'SQRT',[$2]); }
-                | tknTRUNC '(' expr ',' expr ')' /* TRUNCATE(X,D) returns the number X, truncated to D decimal places.
-                                                    If D is 0, the result has no decimal point or fractional part.
-                                                    D can be negative to cause D digits left of the decimal point of
-                                                    the value X to become zero. */
-                { $$ := opr(100,'TRUNC',[$3,$5]); }
+expr_parameter : expr
+                { $$ := opr(47,'PARAMETER',[$1]); }
+               | expr_parameter ',' expr
+                { $$ := opr(0,'REPEAT',[$1, opr(47,'PARAMETER',[$3])]); }
+                    ;
+
+number_function : tknABS '('expr_parameter ')'
+                { $$ := opr(92,'ABS',[$3]); }
+                | tknCEIL '(' expr_parameter ')'
+                { $$ := opr(93,'CEIL',[$3]); }
+                | tknFLOOR '(' expr_parameter ')'
+                { $$ := opr(94,'FLOOR',[$3]); }
+                | tknMOD  '(' expr_parameter ')' /* MOD(N,M), N % M, N MOD M */
+                { $$ := opr(95,'MOD',[$3]); }
+                | tknPOWER '(' expr_parameter ')' /* POWER(X,Y) or POW(X,Y) which returns the value of X raised to the power of Y */
+                { $$ := opr(96,'POWER',[$3]); }
+                | tknROUND '(' expr_parameter ')'
+                { $$ := opr(97,'ROUND',[$3]); }
+                | tknSIGN '(' expr_parameter ')' /* SIGN( number ) -1 Number negative, 0 Number 0, 1 Number positive */
+                { $$ := opr(98,'SIGN',[$3]); }
+                | tknSQRT '(' expr_parameter ')' /* SQRT( number ) */
+                { $$ := opr(99,'SQRT',[$3]); }
+                | tknTRUNC '(' expr_parameter ')'
+                { $$ := opr(100,'TRUNC',[$3]); }
+                | tknTRUNCATE '(' expr_parameter ')'
+                { $$ := opr(100,'TRUNC',[$3]); }
                 ;
 
-char_function : tknCHR expr /* CHR(N) N is a number */
-                { $$ := opr(101,'CHR',[$2]); }
-              | tknLPAD /* LPAD(str, len [,padstr]) */
-                { $$ := opr(102,'LPAD'); }
-              | tknLTRIM /* LTRIM(string[, trim]) string: The string to trim, trim: Optional. The string of characters to trim. Defaults to a space */
-                { $$ := opr(103,'LTRIM'); }
-              | tknRPAD /* RPAD(str, len [, padstr]) */
-                { $$ := opr(104,'RPAD'); }
-              | tknRTRIM /* RTRIM(string[, trim]) string: The string to trim, trim: Optional. The string of characters to trim. Defaults to a space */
-                { $$ := opr(105,'RTRIM'); }
-              | tknTRIM  /* TRIM(string) string: The string to trim */
-                { $$ := opr(38,'TRIM'); }
-              | tknSOUNDEX expr
-                { $$ := opr(106,'SOUNDEX',[$2]); }
-              | tknSUBSTR '(' expr ',' expr ',' expr ')' /* To be adjusted
-                                                            SUBSTR(str,pos),
-                                                            SUBSTR(str FROM pos),
-                                                            SUBSTR(str,pos,len),
-                                                            SUBSTR(str FROM pos FOR len) */
-                { $$ := opr(107,'SUBSTR',[$3,$5,$7]); }
-              | tknLENGTH expr
-                { $$ := opr(108,'LENGTH',[$2]); }
-              | tknLEN expr
-                { $$ := opr(108,'LENGTH',[$2]); }
-              | tknUCASE expr /* UCASE or UPPER ( CharacterExpression ) */
-                { $$ := opr(171,'UCASE',[$2]); }
-              | tknLCASE expr /* LCASE or LOWER ( CharacterExpression ) */
-                { $$ := opr(172,'LCASE',[$2]); }
-              | tknMID '(' expr ',' expr ',' expr ')' /* MID(str,pos,len) MID(str,pos,len) is a synonym for SUBSTRING(str,pos,len) */
-                { $$ := opr(173,'MID', [$3,$5,$7]); }
+char_function : tknCHR '(' expr_parameter ')' /* CHR(N) N is a number */
+                { $$ := opr(101,'CHR',[$3]); }
+              | tknLPAD '(' expr_parameter ')' /* LPAD(str, len [,padstr]) */
+                { $$ := opr(102,'LPAD',[$3]); }
+              | tknLTRIM '(' expr_parameter ')' /* LTRIM(string[, trim]) string: The string to trim, trim: Optional. The string of characters to trim. Defaults to a space */
+                { $$ := opr(103,'LTRIM',[$3]); }
+              | tknRPAD '(' expr_parameter ')' /* RPAD(str, len [, padstr]) */
+                { $$ := opr(104,'RPAD',[$3]); }
+              | tknRTRIM '(' expr_parameter ')' /* RTRIM(string[, trim]) string: The string to trim, trim: Optional. The string of characters to trim. Defaults to a space */
+                { $$ := opr(105,'RTRIM',[$3]); }
+              | tknTRIM  '(' expr_parameter ')' /* TRIM(string) string: The string to trim */
+                { $$ := opr(38,'TRIM',[$3]); }
+              | tknSOUNDEX '(' expr_parameter ')'
+                { $$ := opr(106,'SOUNDEX',[$3]); }
+              | tknSUBSTR '(' expr_parameter ')'
+                { $$ := opr(107,'SUBSTR',[$3]); }
+              | tknSUBSTR '(' expr tknFROM expr ')'
+                { $$ := opr(107,'SUBSTR',[$3,$5]); }
+              /* SUBSTR(str,pos),
+                 SUBSTR(str FROM pos),
+                 SUBSTR(str,pos,len),
+                 SUBSTR(str FROM pos FOR len) */
+              | tknSUBSTR '(' expr tknFROM expr tknFOR expr ')'
+                { $$ := opr(107,'SUBSTR',[OPR(47,'PARAMETER',[$3,$5,$7])]); }
+              | tknLENGTH '(' expr_parameter ')'
+                { $$ := opr(108,'LENGTH',[$3]); }
+              | tknLEN '(' expr_parameter ')'
+                { $$ := opr(108,'LENGTH',[$3]); }
+              | tknUCASE '(' expr_parameter ')'  /* UCASE or UPPER ( CharacterExpression ) */
+                { $$ := opr(171,'UCASE',[$3]); }
+              | tknLCASE '(' expr_parameter ')' /* LCASE or LOWER ( CharacterExpression ) */
+                { $$ := opr(172,'LCASE',[$3]); }
+              | tknMID '(' expr_parameter ')' /* MID(str,pos,len) is a synonym for SUBSTRING(str,pos,len) */
+                { $$ := opr(173,'MID', [$3]); }
               | tknNOW '(' ')'
                 { $$ := opr(174,'NOW'); }
-              | tknFORMAT  '(' expr ',' expr ')' /* FORMAT(num, decimal_position[, locale]) */
-                { $$ := opr(175,'FORMAT',[$3,$5]); }
+              | tknFORMAT '(' expr_parameter ')' /* FORMAT(num, decimal_position[, locale]) */
+                { $$ := opr(175,'FORMAT',[$3]); }
               ;
 
-conversion_function : tknTO_CHAR expr /* TO_CHAR(expr[, fmt]) */
-                { $$ := opr(109,'TO_CHAR',[$2]); }
-                    | tknTO_CHAR '(' expr ',' expr ')'
-                { $$ := opr(109,'DOUBLE',[OPR(47,'DOUBLE',[$3,$5])]); }
-                    | tknTO_DATE '(' expr ',' expr ')'
-                { $$ := opr(110,'TO_DATE',[$3,$5]); }
-                    | tknTO_NUMBER expr /* to be checked */
-                { $$ := opr(111,'TO_NUMBER',[$2]); }
-                    | tknTO_NUMBER '(' expr ',' expr ')' /* to be checked */
-                { $$ := opr(111,'TO_NUMBER',[$3,$5]); }
+conversion_function : tknTO_CHAR '(' expr_parameter ')' /* TO_CHAR(expr[, fmt]) */
+                { $$ := opr(109,'TO_CHAR',[$3]); }
+                    | tknTO_DATE '(' expr_parameter ',' expr ')'
+                { $$ := opr(110,'TO_DATE',[$3]); }
+                    | tknTO_NUMBER '(' expr_parameter ')'
+                { $$ := opr(111,'TO_NUMBER',[$3]); }
                     ;
 
 group_function : tknAVG
@@ -2103,7 +2065,7 @@ group_function : tknAVG
                | tknSUM
                 { $$ := opr(116,'SUM'); }
                /*
-               | tknSTDDEV
+               | tknSTD-DEV
                 { $$ := opr(117,'STDDEV'); }
                | tknVARIANCE
                 { $$ := opr(118,'VARIANCE'); }
