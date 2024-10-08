@@ -4,14 +4,19 @@ unit execProgramUnit;
 
 interface
 
-{ #todo : Nested SQL
-          More than one common key
+{ #todo : Check join index on tables in join, if not create one and scan the tables to populate it
+          Nested SQL (subquery)
+          More than one common key on the join
           add to Join the on clause key1 = key2
-          Having }
-
-{ #done : Aggregate functions
           Group by
+            Check index on the column of Group by, read the index and calculate aggregate functions
+          Having
+            No column acceptable, only aggregate function of numeric expression with no columns
           Ordered by
+            Check index on the column of Group by, read the index
+          }
+
+{ #done : Aggregate functions on columns not group by
 }
 
 uses
@@ -5160,7 +5165,6 @@ begin
         end;
 
         69: // group by
-            // It is not permissible to include column names in a SELECT clause that are not referenced in the GROUP BY clause.
         begin
           setLength(groupByColumns,length(colsName));
           groupByColumns := colsName;
@@ -7418,12 +7422,13 @@ begin
                       begin
                         resultRows := resultRows + 1;
                         extractselect(dbUserId, selectColsInstructions, outText, resultTable,
-                                      resultRows,aggregateValues,(dataRef[0] = -1));
+                                      resultRows,aggregateValues,false);
                         if yyerrmsgs <> nil then Exit;
                       end;
                       storageJoinIndexes[workingSchema.joinidxdata[Executeplan.Index[High(Executeplan.Index)].Number].storageIndex].idxstorage.NextKey(keys,dataref);
                     end;
-
+                  if flagAggregate then extractselect(dbUserId, selectColsInstructions, outText, resultTable,
+                                                      resultRows,aggregateValues,true);
                 end else
                 begin
                   // use executeplan to get the rows
@@ -7455,11 +7460,13 @@ begin
                                       begin
                                         resultRows := ResultRows + 1;
                                         extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,
-                                                      aggregateValues,(dataref[0]= -1));
+                                                      aggregateValues,false);
                                         if yyerrmsgs <> nil then Exit;
                                       end;
                                     end else dataref[0] := -1;
                               until dataref[0] = -1;
+                              if flagAggregate then extractselect(dbUserId, selectColsInstructions, outText, resultTable,
+                                                                  resultRows,aggregateValues,true);
                             end
 
                         end
@@ -7497,13 +7504,14 @@ begin
                             if rowcondition(conditionInstructions,resultTable) then
                               begin
                                 resultRows := ResultRows + 1;
-                                extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows, aggregateValues,
-                                              container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow);
+                                extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,
+                                              aggregateValues, false);
                                 if yyerrmsgs <> nil then Exit;
                               end
                           end
                       end else break;
                   end;
+
                 index2 := fromTablesLen - 1;
                 flag := false;
                 repeat
@@ -7524,6 +7532,7 @@ begin
                     if index2 = 0 then found := true
                 until found;
               until container[0] = storageTables[fromTables[0].fromFields.storageTableIndex].tblstorage.lastRow + 1;
+              if flagAggregate then extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows, aggregateValues, true);
             end;
 
           Parser.yyacceptmessage('SELECT STATEMENT: ' + intToStr(ResultRows));

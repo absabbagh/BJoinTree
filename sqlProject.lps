@@ -29,24 +29,21 @@
       <Unit2>
         <Filename Value="execProgramUnit.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="2669"/>
-        <CursorPos Y="2689"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="3">
-          <Item0 Y="4590" ID="9"/>
-          <Item1 Y="2249" ID="8"/>
-          <Item2 X="31" Y="7417" ID="7"/>
+          <Item0 Y="4595" ID="9"/>
+          <Item1 Y="2254" ID="8"/>
+          <Item2 X="31" Y="7421" ID="7"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="sql.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="192"/>
-        <CursorPos X="6" Y="196"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="682"/>
+        <CursorPos X="53" Y="685"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -188,9 +185,9 @@
       </Unit21>
       <Unit22>
         <Filename Value="functionselectextractrow.inc"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="401"/>
-        <CursorPos X="25" Y="418"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="2395"/>
+        <CursorPos X="21" Y="2404"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit22>
@@ -593,18 +590,20 @@
       </Unit71>
       <Unit72>
         <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="374"/>
-        <CursorPos X="41" Y="380"/>
-        <UsageCount Value="61"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1614"/>
+        <CursorPos X="4" Y="1628"/>
+        <UsageCount Value="64"/>
         <Bookmarks Count="6">
-          <Item0 Y="1641" ID="6"/>
-          <Item1 X="51" Y="1957" ID="2"/>
-          <Item2 X="43" Y="1945" ID="5"/>
-          <Item3 X="2" Y="2003" ID="1"/>
-          <Item4 X="32" Y="500" ID="4"/>
-          <Item5 Y="1453" ID="3"/>
+          <Item0 Y="1640" ID="6"/>
+          <Item1 X="51" Y="1940" ID="2"/>
+          <Item2 X="43" Y="1928" ID="5"/>
+          <Item3 X="32" Y="499" ID="4"/>
+          <Item4 Y="1452" ID="3"/>
+          <Item5 X="17" Y="1741" ID="1"/>
         </Bookmarks>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit72>
       <Unit73>
@@ -827,47 +826,127 @@
         <UsageCount Value="10"/>
       </Unit101>
     </Units>
-    <JumpHistory Count="10" HistoryIndex="9">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="sql.pas"/>
-        <Caret Line="55" Column="29" TopLine="34"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="532" Column="32" TopLine="521"/>
       </Position1>
       <Position2>
-        <Filename Value="sql.pas"/>
-        <Caret Line="375" Column="11" TopLine="357"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1405" Column="113" TopLine="1387"/>
       </Position2>
       <Position3>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="250" Column="59" TopLine="236"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1421" Column="16" TopLine="1403"/>
       </Position3>
       <Position4>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2673" TopLine="2669"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1750" Column="66" TopLine="1735"/>
       </Position4>
       <Position5>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2676" TopLine="2669"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1752" Column="57" TopLine="1735"/>
       </Position5>
       <Position6>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2677" TopLine="2669"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="532" Column="32" TopLine="521"/>
       </Position6>
       <Position7>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2678" TopLine="2669"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1405" Column="113" TopLine="1387"/>
       </Position7>
       <Position8>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2315" TopLine="2305"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1421" Column="16" TopLine="1403"/>
       </Position8>
       <Position9>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2681" Column="27" TopLine="2664"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1740" Column="6" TopLine="1739"/>
       </Position9>
       <Position10>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="2676" TopLine="2664"/>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="478" TopLine="467"/>
       </Position10>
+      <Position11>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="7420" Column="38" TopLine="7410"/>
+      </Position11>
+      <Position12>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1811" Column="4" TopLine="1790"/>
+      </Position12>
+      <Position13>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="471" Column="35" TopLine="460"/>
+      </Position13>
+      <Position14>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="12" Column="19"/>
+      </Position14>
+      <Position15>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="5166" Column="24" TopLine="5153"/>
+      </Position15>
+      <Position16>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="5164" TopLine="5153"/>
+      </Position16>
+      <Position17>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="5165" Column="35" TopLine="5153"/>
+      </Position17>
+      <Position18>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="5166" Column="25" TopLine="5153"/>
+      </Position18>
+      <Position19>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="2253" Column="17" TopLine="2243"/>
+      </Position19>
+      <Position20>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="5165" Column="35" TopLine="5148"/>
+      </Position20>
+      <Position21>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="5166" Column="25" TopLine="5149"/>
+      </Position21>
+      <Position22>
+        <Filename Value="execProgramUnit.pas"/>
+        <Caret Line="2253" Column="17" TopLine="2243"/>
+      </Position22>
+      <Position23>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1875" TopLine="1868"/>
+      </Position23>
+      <Position24>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="89" TopLine="89"/>
+      </Position24>
+      <Position25>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="253" Column="16" TopLine="235"/>
+      </Position25>
+      <Position26>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1404" Column="87" TopLine="1386"/>
+      </Position26>
+      <Position27>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1634" Column="34" TopLine="1616"/>
+      </Position27>
+      <Position28>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1837" Column="83" TopLine="1817"/>
+      </Position28>
+      <Position29>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="1867" Column="69" TopLine="1849"/>
+      </Position29>
+      <Position30>
+        <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
+        <Caret Line="459" Column="39" TopLine="448"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -881,49 +960,49 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="7367"/>
+        <Line Value="7371"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="1527"/>
+        <Line Value="1532"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="1713"/>
+        <Line Value="1718"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="7194"/>
+        <Line Value="7198"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="1577"/>
+        <Line Value="1582"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="4917"/>
+        <Line Value="4922"/>
       </Item>
       <Item>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="execProgramUnit.pas"/>
-        <Line Value="6733"/>
+        <Line Value="6737"/>
       </Item>
     </BreakPoints>
     <Watches>
