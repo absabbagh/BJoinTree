@@ -2074,7 +2074,7 @@ function extractselect(dbUserId: string;
                        resultTable: resulttabletype;
                        var resultRows: Integer;
                        var AggregateValues: runstacktype;
-                       nomoreRows: Boolean): Boolean;
+                       aggregateValuesDone: Boolean): Boolean;
 var
   selectstk: runstacktype;
   index1, index2, index3: Integer;
@@ -2109,7 +2109,7 @@ begin
   aggregatePosition := 0;
   if selectColsInstructions <> nil then
     begin
-      if nomoreRows then
+      if AggregateValuesDone then
         begin
           for index2 := low(selectColsInstructions) to high(selectColsInstructions) do
             for index3 := low(selectColsInstructions[index2]) to high(selectColsInstructions[index2]) do
@@ -2148,13 +2148,13 @@ begin
         begin
           if (selectColsInstructions[index2,index3].mnemonic in
                [112..116]) then
-            if not nomorerows then
+            if not AggregateValuesDone then
               begin
                 startaggregate := true;
                 continue
               end;
           if flagAggregate then
-            if not nomorerows then
+            if not AggregateValuesDone then
               if not startaggregate then
                 begin
                   continue
@@ -2194,7 +2194,7 @@ begin
                       end;
                     aggregatePosition += 1
                   end;
-                if nomoreRows then
+                if AggregateValuesDone then
                  begin
                    with selectColsInstructions[index2,index3] do
                      begin
@@ -2215,290 +2215,333 @@ begin
                 case round(selectColsInstructions[index2,index3].value) of
                   ord(CountKind):
                     begin
-                      flagAggregate := true;
-                      if aggregateValues = nil then
+                      if not AggregateValuesDone then
                         begin
-                          setlength(aggregateValues,1);
-                          with aggregateValues[0] do
+                          if aggregateValues = nil then
                             begin
-                              caseValue := 4;
-                              extvalue := 0;
+                              setlength(aggregateValues,1);
+                              with aggregateValues[0] do
+                                begin
+                                  caseValue := 4;
+                                  extvalue := 0;
+                                end;
                             end;
-                        end;
-                      if aggregateValues <> nil then
+                          if aggregateValues <> nil then
+                            begin
+                              if length(aggregateValues) <= aggregatePosition then
+                                begin
+                                  setlength(aggregateValues,Length(aggregateValues)+1);
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    aggregateValues[High(aggregateValues)].extValue += 1;
+                                end else
+                                begin
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    aggregateValues[aggregatePosition].extValue += 1;
+                                end;
+                              aggregatePosition += 1
+                            end;
+                        end else
                         begin
-                          if length(aggregateValues) <= aggregatePosition then
+                          setlength(selectstk,length(selectstk)-1);
+                          with selectColsInstructions[index2,index3] do
                             begin
-                              setlength(aggregateValues,Length(aggregateValues)+1);
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                aggregateValues[High(aggregateValues)].extValue += 1;
-                            end else
-                            begin
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                aggregateValues[aggregatePosition].extValue += 1;
+                              mnemonic := 88;
+                              value := aggregateValues[aggregatePosition].extValue;
+                              boolvalue := false;
+                              stvalue := '';
+                              printInstruction := 'PUSH ' + floattostr(value)
                             end;
-                          aggregatePosition += 1
-                        end;
-                      if nomoreRows then
-                       begin
-                         setlength(selectstk,length(selectstk)-1);
-                         with selectColsInstructions[index2,index3] do
-                           begin
-                             mnemonic := 88;
-                             value := aggregateValues[aggregatePosition-1].extValue;
-                             boolvalue := false;
-                             stvalue := '';
-                             printInstruction := 'PUSH ' + floattostr(value)
-                           end;
-                         runstack(selectColsInstructions[index2,index3],selectstk);
-                         if yyerrmsgs <> nil then Exit;
+                          runstack(selectColsInstructions[index2,index3],selectstk);
+                          if yyerrmsgs <> nil then Exit;
                         end;
                     end;
                   ord(MaxKind):
                     begin
-                      if aggregateValues = nil then
+                      if not AggregateValuesDone then
                         begin
-                          setlength(aggregateValues,1);
-                          with aggregateValues[0] do
+                          if aggregateValues = nil then
                             begin
-                              aggregateValues[0].caseValue := selectstk[High(selectstk)].caseValue;
-                              case selectstk[High(selectstk)].caseValue of
-                                4:
-                                  aggregateValues[0].extValue := selectstk[High(selectstk)].extValue;
-                                6:
-                                  aggregateValues[0].strValue := selectstk[High(selectstk)].strValue;
-                              end;
-                            end;
-                          aggregatePosition := 1
-                        end else
-                        begin
-                          if length(aggregateValues) <= aggregatePosition then
-                            begin
-                              setlength(aggregateValues,Length(aggregateValues)+1);
-                              aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
-                              case selectstk[High(selectstk)].caseValue of
-                                4:
-                                  aggregateValues[High(aggregateValues)].extValue := selectstk[High(selectstk)].extValue;
-                                6:
-                                  aggregateValues[High(aggregateValues)].strValue := selectstk[High(selectstk)].strValue;
-                              end;
-                              aggregatePosition += 1
+                              setlength(aggregateValues,1);
+                              with aggregateValues[0] do
+                                begin
+                                  aggregateValues[0].caseValue := selectstk[High(selectstk)].caseValue;
+                                  case selectstk[High(selectstk)].caseValue of
+                                    4:
+                                      aggregateValues[0].extValue := selectstk[High(selectstk)].extValue;
+                                    6:
+                                      aggregateValues[0].strValue := selectstk[High(selectstk)].strValue;
+                                  end;
+                                end;
+                              aggregatePosition := 1
                             end else
                             begin
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                if aggregateValues[aggregatePosition].caseValue <> 7 then
-                                  begin
-                                    case aggregateValues[aggregatePosition].caseValue of
-                                      4:
-                                        if aggregateValues[aggregatePosition].extValue < selectstk[High(selectstk)].extValue then
-                                          aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue else
-                                          selectstk[High(selectstk)].extValue := aggregateValues[aggregatePosition].extValue;
-                                      6:
-                                        if aggregateValues[aggregatePosition].strValue < selectstk[High(selectstk)].strValue then
-                                          aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue else
-                                          selectstk[High(selectstk)].strValue := aggregateValues[aggregatePosition].strValue;
-                                    end
-                                  end else
-                                  begin
-                                    aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
-                                    case selectstk[High(selectstk)].caseValue of
-                                      4:
-                                        aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue;
-                                      6:
-                                        aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue;
-                                    end;
+                              if length(aggregateValues) <= aggregatePosition then
+                                begin
+                                  setlength(aggregateValues,Length(aggregateValues)+1);
+                                  aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                  case selectstk[High(selectstk)].caseValue of
+                                    4:
+                                      aggregateValues[High(aggregateValues)].extValue := selectstk[High(selectstk)].extValue;
+                                    6:
+                                      aggregateValues[High(aggregateValues)].strValue := selectstk[High(selectstk)].strValue;
                                   end;
-                              aggregatePosition += 1
-                            end
-                        end
+                                  aggregatePosition += 1
+                                end else
+                                begin
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    if aggregateValues[aggregatePosition].caseValue <> 7 then
+                                      begin
+                                        case aggregateValues[aggregatePosition].caseValue of
+                                          4:
+                                            if aggregateValues[aggregatePosition].extValue < selectstk[High(selectstk)].extValue then
+                                              aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue else
+                                              selectstk[High(selectstk)].extValue := aggregateValues[aggregatePosition].extValue;
+                                          6:
+                                            if aggregateValues[aggregatePosition].strValue < selectstk[High(selectstk)].strValue then
+                                              aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue else
+                                              selectstk[High(selectstk)].strValue := aggregateValues[aggregatePosition].strValue;
+                                        end
+                                      end else
+                                      begin
+                                        aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
+                                        case selectstk[High(selectstk)].caseValue of
+                                          4:
+                                            aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue;
+                                          6:
+                                            aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue;
+                                        end;
+                                      end;
+                                  aggregatePosition += 1
+                                end
+                            end;
+                        end else
+                        begin
+                          setlength(selectstk,length(selectstk)-1);
+                          with selectColsInstructions[index2,index3] do
+                            begin
+                              if aggregateValues[aggregatePosition].caseValue = 7 then
+                                mnemonic := 241 else
+                                mnemonic := 88;
+                              value := aggregateValues[aggregatePosition].extValue;
+                              boolvalue := false;
+                              stvalue := '';
+                              if aggregateValues[aggregatePosition].caseValue = 7 then
+                                printInstruction := 'PUSH NULL ' else
+                                printInstruction := 'PUSH ' + floattostr(value)
+                            end;
+                          runstack(selectColsInstructions[index2,index3],selectstk);
+                          if yyerrmsgs <> nil then Exit;
+                        end;
                     end;
                   ord(MinKind):
                     begin
-                      if aggregateValues = nil then
+                      if not AggregateValuesDone then
                         begin
-                          setlength(aggregateValues,1);
-                          with aggregateValues[0] do
+                          if aggregateValues = nil then
                             begin
-                              aggregateValues[0].caseValue := selectstk[High(selectstk)].caseValue;
-                              case selectstk[High(selectstk)].caseValue of
-                                4:
-                                  aggregateValues[0].extValue := selectstk[High(selectstk)].extValue;
-                                6:
-                                  aggregateValues[0].strValue := selectstk[High(selectstk)].strValue;
-                              end;
-                            end;
-                          aggregatePosition := 1
-                        end else
-                        begin
-                          if length(aggregateValues) <= aggregatePosition then
-                            begin
-                              setlength(aggregateValues,Length(aggregateValues)+1);
-                              aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
-                              case selectstk[High(selectstk)].caseValue of
-                                4:
-                                  aggregateValues[High(aggregateValues)].extValue := selectstk[High(selectstk)].extValue;
-                                6:
-                                  aggregateValues[High(aggregateValues)].strValue := selectstk[High(selectstk)].strValue;
-                              end;
-                              aggregatePosition += 1
+                              setlength(aggregateValues,1);
+                              with aggregateValues[0] do
+                                begin
+                                  aggregateValues[0].caseValue := selectstk[High(selectstk)].caseValue;
+                                  case selectstk[High(selectstk)].caseValue of
+                                    4:
+                                      aggregateValues[0].extValue := selectstk[High(selectstk)].extValue;
+                                    6:
+                                      aggregateValues[0].strValue := selectstk[High(selectstk)].strValue;
+                                  end;
+                                end;
+                              aggregatePosition := 1
                             end else
                             begin
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                if aggregateValues[aggregatePosition].caseValue <> 7 then
-                                  begin
-                                    case aggregateValues[aggregatePosition].caseValue of
-                                      4:
-                                        if aggregateValues[aggregatePosition].extValue > selectstk[High(selectstk)].extValue then
-                                          aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue else
-                                          selectstk[High(selectstk)].extValue := aggregateValues[aggregatePosition].extValue;
-                                      6:
-                                        if aggregateValues[aggregatePosition].strValue > selectstk[High(selectstk)].strValue then
-                                          aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue else
-                                          selectstk[High(selectstk)].strValue := aggregateValues[aggregatePosition].strValue;
-                                    end
-                                  end else
-                                  begin
-                                    aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
-                                    case selectstk[High(selectstk)].caseValue of
-                                      4:
-                                        aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue;
-                                      6:
-                                        aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue;
-                                    end;
+                              if length(aggregateValues) <= aggregatePosition then
+                                begin
+                                  setlength(aggregateValues,Length(aggregateValues)+1);
+                                  aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                  case selectstk[High(selectstk)].caseValue of
+                                    4:
+                                      aggregateValues[High(aggregateValues)].extValue := selectstk[High(selectstk)].extValue;
+                                    6:
+                                      aggregateValues[High(aggregateValues)].strValue := selectstk[High(selectstk)].strValue;
                                   end;
-                              aggregatePosition += 1
+                                  aggregatePosition += 1
+                                end else
+                                begin
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    if aggregateValues[aggregatePosition].caseValue <> 7 then
+                                      begin
+                                        case aggregateValues[aggregatePosition].caseValue of
+                                          4:
+                                            if aggregateValues[aggregatePosition].extValue > selectstk[High(selectstk)].extValue then
+                                              aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue else
+                                              selectstk[High(selectstk)].extValue := aggregateValues[aggregatePosition].extValue;
+                                          6:
+                                            if aggregateValues[aggregatePosition].strValue > selectstk[High(selectstk)].strValue then
+                                              aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue else
+                                              selectstk[High(selectstk)].strValue := aggregateValues[aggregatePosition].strValue;
+                                        end
+                                      end else
+                                      begin
+                                        aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
+                                        case selectstk[High(selectstk)].caseValue of
+                                          4:
+                                            aggregateValues[aggregatePosition].extValue := selectstk[High(selectstk)].extValue;
+                                          6:
+                                            aggregateValues[aggregatePosition].strValue := selectstk[High(selectstk)].strValue;
+                                        end;
+                                      end;
+                                  aggregatePosition += 1
+                                end
                             end
+                        end else
+                        begin
+                          setlength(selectstk,length(selectstk)-1);
+                          with selectColsInstructions[index2,index3] do
+                            begin
+                              if aggregateValues[aggregatePosition].caseValue = 7 then
+                                mnemonic := 241 else
+                                mnemonic := 88;
+                              value := aggregateValues[aggregatePosition].extValue;
+                              boolvalue := false;
+                              stvalue := '';
+                              if aggregateValues[aggregatePosition].caseValue = 7 then
+                                printInstruction := 'PUSH NULL ' else
+                                printInstruction := 'PUSH ' + floattostr(value)
+                            end;
+                          runstack(selectColsInstructions[index2,index3],selectstk);
+                          if yyerrmsgs <> nil then Exit;
                         end
                     end;
                   ord(SumKind):
                     begin
-                      flagAggregate := true;
-                      if aggregateValues = nil then
+                      if not AggregateValuesDone then
                         begin
-                          setlength(aggregateValues,1);
-                          with aggregateValues[0] do
+                          if aggregateValues = nil then
                             begin
-                              caseValue := 7;
-                              extValue := 0;
+                              setlength(aggregateValues,1);
+                              with aggregateValues[0] do
+                                begin
+                                  caseValue := 7;
+                                  extValue := 0;
+                                end;
                             end;
-                        end;
-                      if aggregateValues <> nil then
-                        begin
-                          if length(aggregateValues) <= aggregatePosition then
+                          if aggregateValues <> nil then
                             begin
-                              setlength(aggregateValues,Length(aggregateValues)+1);
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                if selectstk[High(selectstk)].caseValue = 4 then
-                                  begin
-                                    aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
-                                    aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
-                                  end;
-                              aggregatePosition += 1
-                            end else
-                            begin
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                if selectstk[High(selectstk)].caseValue = 4 then
-                                  begin
-                                    aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
-                                    aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
-                                  end;
-                              aggregatePosition += 1
+                              if length(aggregateValues) <= aggregatePosition then
+                                begin
+                                  setlength(aggregateValues,Length(aggregateValues)+1);
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    if selectstk[High(selectstk)].caseValue = 4 then
+                                      begin
+                                        aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                        aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
+                                      end;
+                                  aggregatePosition += 1
+                                end else
+                                begin
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    if selectstk[High(selectstk)].caseValue = 4 then
+                                      begin
+                                        aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
+                                        aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
+                                      end;
+                                  aggregatePosition += 1
+                                end
                             end
-                        end;
-                      if nomoreRows then
-                       begin
-                         setlength(selectstk,length(selectstk)-1);
-                         with selectColsInstructions[index2,index3] do
-                           begin
-                             if aggregateValues[aggregatePosition-1].caseValue = 7 then
-                               mnemonic := 241 else
-                               mnemonic := 88;
-                             value := aggregateValues[aggregatePosition-1].extValue;
-                             boolvalue := false;
-                             stvalue := '';
-                             if aggregateValues[aggregatePosition-1].caseValue = 7 then
-                               printInstruction := 'PUSH NULL ' else
-                               printInstruction := 'PUSH ' + floattostr(value)
-                           end;
-                         runstack(selectColsInstructions[index2,index3],selectstk);
-                         if yyerrmsgs <> nil then Exit;
+                        end else
+                        begin
+                          setlength(selectstk,length(selectstk)-1);
+                          with selectColsInstructions[index2,index3] do
+                            begin
+                              if aggregateValues[aggregatePosition].caseValue = 7 then
+                                mnemonic := 241 else
+                                mnemonic := 88;
+                              value := aggregateValues[aggregatePosition].extValue;
+                              boolvalue := false;
+                              stvalue := '';
+                              if aggregateValues[aggregatePosition].caseValue = 7 then
+                                printInstruction := 'PUSH NULL ' else
+                                printInstruction := 'PUSH ' + floattostr(value)
+                            end;
+                          runstack(selectColsInstructions[index2,index3],selectstk);
+                          if yyerrmsgs <> nil then Exit;
                         end;
                     end;
                   ord(avgKind):
                     begin
-                      flagAggregate := true;
-                      if aggregateValues = nil then
+                      if not AggregateValuesDone then
                         begin
-                          setlength(aggregateValues,1);
-                          with aggregateValues[0] do
+                          if aggregateValues = nil then
                             begin
-                              caseValue := 4;
-                              extvalue := 0;
-                            end;
-                        end;
-                      if aggregateValues <> nil then
-                        begin
-                          if length(aggregateValues) <= aggregatePosition then
-                            begin
-                              setlength(aggregateValues,Length(aggregateValues)+1);
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                aggregateValues[High(aggregateValues)].extValue += 1;
-                            end else
-                            begin
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                aggregateValues[aggregatePosition].extValue += 1;
-                            end;
-                          aggregatePosition += 1
-                        end;
-                      if aggregateValues <> nil then
-                        begin
-                          if length(aggregateValues) <= aggregatePosition then
-                            begin
-                              setlength(aggregateValues,Length(aggregateValues)+1);
-                              if selectstk[High(selectstk)].caseValue <> 7 then
+                              setlength(aggregateValues,1);
+                              with aggregateValues[0] do
                                 begin
-                                  if selectstk[High(selectstk)].caseValue = 4 then
-                                    begin
-                                      aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
-                                      aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
-                                    end
-                                  end else
-                                  begin
-                                    aggregateValues[High(aggregateValues)].caseValue := 7;
-                                    aggregateValues[High(aggregateValues)].extValue := 0;
-                                  end;
-                            end else
-                            begin
-                              if selectstk[High(selectstk)].caseValue <> 7 then
-                                if selectstk[High(selectstk)].caseValue = 4 then
-                                  begin
-                                    aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
-                                    aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
-                                  end;
+                                  caseValue := 4;
+                                  extvalue := 0;
+                                end;
                             end;
-                          aggregatePosition += 1
-                        end;
-                      if nomoreRows then
-                       begin
-                         tmpSum := aggregateValues[aggregatePosition-1].extValue;
-                         tmpCount := aggregateValues[aggregatePosition-2].extValue;
-                         isNullAvg := aggregateValues[aggregatePosition-1].caseValue = 7;
-                         selectstk := nil;
-                         with selectColsInstructions[index2,index3] do
-                           begin
-                             if IsNullAvg then
-                               mnemonic := 241 else
-                               mnemonic := 88;
-                             if not IsNullAvg then
-                               value := tmpSum / tmpCount;
-                             boolvalue := false;
-                             stvalue := '';
-                             if IsNullAvg then
-                               printInstruction := 'PUSH NULL ' else
-                               printInstruction := 'PUSH ' + floattostr(value)
-                           end;
-                         runstack(selectColsInstructions[index2,index3],selectstk);
-                         if yyerrmsgs <> nil then Exit;
+                          if aggregateValues <> nil then
+                            begin
+                              if length(aggregateValues) <= aggregatePosition then
+                                begin
+                                  setlength(aggregateValues,Length(aggregateValues)+1);
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    aggregateValues[High(aggregateValues)].extValue += 1;
+                                end else
+                                begin
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    aggregateValues[aggregatePosition].extValue += 1;
+                                end;
+                              aggregatePosition += 1
+                            end;
+                          if aggregateValues <> nil then
+                            begin
+                              if length(aggregateValues) <= aggregatePosition then
+                                begin
+                                  setlength(aggregateValues,Length(aggregateValues)+1);
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    begin
+                                      if selectstk[High(selectstk)].caseValue = 4 then
+                                        begin
+                                          aggregateValues[High(aggregateValues)].caseValue := selectstk[High(selectstk)].caseValue;
+                                          aggregateValues[High(aggregateValues)].extValue += selectstk[High(selectstk)].extValue;
+                                        end
+                                      end else
+                                      begin
+                                        aggregateValues[High(aggregateValues)].caseValue := 7;
+                                        aggregateValues[High(aggregateValues)].extValue := 0;
+                                      end;
+                                end else
+                                begin
+                                  if selectstk[High(selectstk)].caseValue <> 7 then
+                                    if selectstk[High(selectstk)].caseValue = 4 then
+                                      begin
+                                        aggregateValues[aggregatePosition].caseValue := selectstk[High(selectstk)].caseValue;
+                                        aggregateValues[aggregatePosition].extValue += selectstk[High(selectstk)].extValue;
+                                      end;
+                                end;
+                              aggregatePosition += 1
+                            end
+                        end else
+                        begin
+                          tmpSum := aggregateValues[aggregatePosition+1].extValue;
+                          tmpCount := aggregateValues[aggregatePosition].extValue;
+                          isNullAvg := aggregateValues[aggregatePosition+1].caseValue = 7;
+                          selectstk := nil;
+                          with selectColsInstructions[index2,index3] do
+                            begin
+                              if IsNullAvg then
+                                mnemonic := 241 else
+                                mnemonic := 88;
+                              if not IsNullAvg then
+                                value := tmpSum / tmpCount;
+                              boolvalue := false;
+                              stvalue := '';
+                              if IsNullAvg then
+                                printInstruction := 'PUSH NULL ' else
+                                printInstruction := 'PUSH ' + floattostr(value)
+                            end;
+                          runstack(selectColsInstructions[index2,index3],selectstk);
+                          if yyerrmsgs <> nil then Exit;
                         end;
                       end;
                 end
