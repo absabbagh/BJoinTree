@@ -61,26 +61,33 @@ begin
   Result := True;
 end;
 
+procedure TParser.yydebug(msg: string);
+begin
+  msg := 'DEBUG: '+ msg;
+  setLength(yydbgmsgs,length(yydbgmsgs) + 1);
+  yyerrmsgs[High(yydbgmsgs)] := msg;
+end (* yydebugmsg *);
+
 procedure TParser.yyerror(msg: string);
 begin
   msg := 'ERROR: '+ msg;
   setLength(yyerrmsgs,length(yyerrmsgs) + 1);
   yyerrmsgs[High(yyerrmsgs)] := msg;
-end (* yyerrmsg *);
+end (* yyerror *);
 
 procedure TParser.yyacceptmessage(msg: string);
 begin
   msg := 'ACCEPT: '+ msg;
   setLength(yymiscmsgs,length(yymiscmsgs) + 1);
   yymiscmsgs[High(yymiscmsgs)] := msg;
-end(*yyacceptmsg*);
+end (*yyacceptmsg *);
 
 procedure TParser.yywarningmessage(msg: string);
 begin
   msg := 'WARNING: '+ msg;
   setLength(yywarningmsgs,length(yywarningmsgs) + 1);
   yywarningmsgs[High(yywarningmsgs)] := msg;
-end(*yywarningmsg*);
+end (* yywarningmsg *);
 
 function con(value: extended): NodePointer;
 begin
@@ -284,7 +291,7 @@ next:
       yychar := lexer.parse(); if yychar<0 then yychar := 0;
     end;
 
-  {$IFDEF YYDEBUG}writeln('state ', yystate, yycharsym(yychar));{$ENDIF}
+  {$IFDEF YYDEBUG}yydebug('state ', yystate, yycharsym(yychar));{$ENDIF}
 
   (* determine parse action: *)
 
@@ -317,10 +324,10 @@ errlab:
         begin
           {$IFDEF YYDEBUG}
             if yysp>1 then
-              writeln('error recovery pops state ', yys[yysp], ', uncovers ',
+              yydebug('error recovery pops state ', yys[yysp], ', uncovers ',
                       yys[yysp-1])
             else
-              writeln('error recovery fails ... abort');
+              yydebug('error recovery fails ... abort');
           {$ENDIF}
           dec(yysp);
         end;
@@ -330,7 +337,7 @@ errlab:
     end
   else                                  (* no shift yet; discard symbol *)
     begin
-      {$IFDEF YYDEBUG}writeln('error recovery discards ' + yycharsym(yychar));{$ENDIF}
+      {$IFDEF YYDEBUG}yydebug('error recovery discards ' + yycharsym(yychar));{$ENDIF}
       if yychar=0 then goto abort; (* end of input; abort *)
       yychar := -1; goto next;     (* clear lookahead char and try again *)
     end;
@@ -348,7 +355,7 @@ reduce:
 
   (* execute action, pop rule from stack, and go to next state: *)
 
-  {$IFDEF YYDEBUG}writeln('reduce ' + IntToStr(-yyn) {$IFDEF YYEXTRADEBUG} + ' rule ' + yyr[-yyn].symname {$ENDIF});{$ENDIF}
+  {$IFDEF YYDEBUG}yydebug('reduce ' + IntToStr(-yyn) {$IFDEF YYEXTRADEBUG} + ' rule ' + yyr[-yyn].symname {$ENDIF});{$ENDIF}
 
   yyflag := yyfnone; yyaction(-yyn);
   dec(yysp, yyr[-yyn].len);

@@ -76,13 +76,16 @@ type
     lexer : TLexer;
 
     procedure yyacceptmessage(msg: string);
-    (* accept message printing routine used by the parser *)
+    (* accept message printing routine *)
 
     procedure yywarningmessage(msg: string);
-    (* warning message printing routine used by the parser *)
+    (* warning message printing routine *)
 
     procedure yyerror(msg: string); reintroduce;
-    (* error message printing routine used by the parser *)
+    (* error message printing routine *)
+
+    procedure yydebug(msg: string); reintroduce;
+    (* debug message printing routine *)
 
     function parse() : integer; override;
   end;
@@ -92,51 +95,51 @@ const
     ('REPEAT', 'CREATE DATABASE', 'DATABASE NAME', 'CREATE TABLE', 'TABLE NAME',
      'NEW COLUMN', 'COLUMN NAME', 'CHAR', 'VARCHAR', 'CHAR VARYING',                                //   9
      'CHARACTER', 'CHARACTER VARYING', 'CLOB', 'DATE', 'NUMBER',
-     'FLOAT', 'REAL', 'DOUBLE PRECISION', 'NUMBER2','DECIMAL',                                      //  19
+     'FLOAT', 'REAL', 'DOUBLE PRECISION', 'NUMBER2','DECIMAL',
      'DEC', 'NUMERIC', 'NUMBER1','INTEGER', 'INT',
      'SMALLINT', 'CONSTRAINT NAME','NULL','NOT NULL', 'UNIQUE',                                     //  29
      'PRIMARY KEY', 'REFERENCES', 'ON DELETE CASCADE', 'TABLE CONSTRAINT', 'SELECT',
-     'ALL', 'DISTINCT', 'ALL COLUMNS', 'TRIM', 'COLUMNS WITHIN EXPRESSION',                         //  39
+     'ALL', 'DISTINCT', 'ALL COLUMNS', 'TRIM', 'COLUMNS WITHIN EXPRESSION',
      'FROM ALIAS NAME','WHERE', 'NOT', 'OR', 'AND',
      'IN', 'LIKE', 'PARAMETER', 'IS NULL', 'IS NOT NULL',                                           //  49
      'EQ', 'LT', 'GT', 'NE', 'LE',
-     'GE', 'EQ ALL', 'LT ALL', 'GT ALL', 'NE ALL',                                                  //  59
+     'GE', 'EQ ALL', 'LT ALL', 'GT ALL', 'NE ALL',
      'LE ALL', 'GE ALL', 'EQ ANY', 'LT ANY', 'GT ANY',
      'NE ANY', 'LE ANY', 'GE ANY', 'EXISTS', 'GROUP BY',                                            //  69
      'ORDER BY', 'HAVING', 'UNION ALL', 'INTERSECT', 'MINUS',
-     'ASC', 'DESC', 'INSERT INTO', 'VALUES', 'UMINUS',                                              //  79
+     'ASC', 'DESC', 'INSERT INTO', 'VALUES', 'UMINUS',
      'UPDATE', 'SET', 'DELETE FROM', 'ADD', 'SUB',
      'MUL', 'DIV', 'FROM', 'PUSH', 'PUSH LITERAL',                                                  //  89
      'DEFAULT', 'COLUMN CONSTRAINT', 'ABS', 'CEIL', 'FLOOR',
-     'MOD', 'POWER', 'ROUND', 'SIGN', 'SQRT',                                                       //  99
+     'MOD', 'POWER', 'ROUND', 'SIGN', 'SQRT',
      'TRUNC', 'CHR', 'LPAD', 'LTRIM', 'RPAD',
      'RTRIM', 'SOUNDEX', 'SUBSTR', 'LENGTH', 'TO_CHAR',                                             // 109
      'TO_DATE', 'TO_NUMBER', 'AVG', 'COUNT', 'MAX',
-     'MIN', 'SUM', 'STDDEV', 'VARIANCE', 'PUSH NAME',                                               // 119
+     'MIN', 'SUM', 'STDDEV', 'VARIANCE', 'PUSH NAME',
      'CREATE INDEX', 'INDEX NAME', 'ASC', 'DESC','INDEX COLUMN',
      'TABLE COMMENT', 'COLUMN COMMENT', 'COMMENT', 'PUSH COMMENT', 'VOID',                          // 129
      'CHECK', 'BIGINT', 'TIME', 'TIMESTAMP', 'WITH TIME ZONE',
-     'WITHOUT TIME ZONE', 'BOOLEAN', 'FOREIGN KEY', 'CREATE TRIGGER', 'TRIGGER NAME',               // 139
+     'WITHOUT TIME ZONE', 'BOOLEAN', 'FOREIGN KEY', 'CREATE TRIGGER', 'TRIGGER NAME',
      'TRIGGER SYNC', 'BEFORE', 'AFTER', 'TRIGGER DELETE', 'TRIGGER INSERT',
      'TRIGGER UPDATE', 'FOR EACH ROW', 'WHEN CONDITION','TRIGGER STEP', 'BLOCK',                    // 149
      'COLUMNS PROJECTION', 'PUSH COLUMN NAME', 'CREATE JOIN INDEX', 'BASE TABLE', 'JOIN TABLES CONDITION',
-     'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE',  // 159
+     'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE',
      'SHOW ALL TABLES', 'SHOW ALL COLUMNS', 'SHOW ALL JOIN INDEXES', 'SHOW ALL INDEXES', 'SHOW INDEXES',
      'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT',                // 169
      'MODIFY', 'UCASE', 'LCASE', 'MID', 'NOW',
-     'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS',             // 179
+     'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS',
      'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'AGGREGATE COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
      'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',                                    // 189
      'DROP TABLE', 'DROP INDEX', 'DROP JOIN INDEX', 'COLUMNS SPECIFIED', 'TABLES COLUMNS SPECIFIED',
-     'UPLOAD CSV', 'EMPTY JSON OBJECT', 'MEMBERS OBJECT', 'EMPTY JSON ARRAY', 'ELEMENTS ARRAY',     // 199
+     'UPLOAD CSV', 'EMPTY JSON OBJECT', 'MEMBERS OBJECT', 'EMPTY JSON ARRAY', 'ELEMENTS ARRAY',
      'JSON MEMBER', 'JSON ELEMENT', 'JSON PAIR', 'JSON STRING VALUE', 'JSON OBJECT VALUE',
      'JSON ARRAY VALUE', 'JSON STRING', 'START TRANSACTION', 'ROLLBACK TRANSACTION', 'ROLLBACK TO', // 209
      'COMMIT TRANSACTION', 'TRANSACTION NAME', 'HOLD SAVEPOINT', 'SAVEPOINT NAME', 'RELEASE SAVEPOINT',
-     'CURSOR_NAME', 'START CURSOR DECLARATION', 'OPEN CURSOR', 'FETCH CURSOR', 'CLOSE CURSOR',      // 219
+     'CURSOR_NAME', 'START CURSOR DECLARATION', 'OPEN CURSOR', 'FETCH CURSOR', 'CLOSE CURSOR',
      'END CURSOR DECLARATION', 'PUSH BOOLEAN', 'UNION', 'DATETIME', 'COLUMN FROM SUBQUERY',
      'TABLE FROM SUBQUERY', 'CREATE VIEW', 'VIEW NAME', 'CREATE USER', 'DOT',                       // 229
      'PASSWORD', 'GRANT', 'REVOKE', 'PRIVILEGE', 'PUSH OPTION',
-     'DROP VIEW', 'RENAME USER', 'DROP USER', 'DROP TRIGGER', 'RENAME TABLE',                       // 239
+     'DROP VIEW', 'RENAME USER', 'DROP USER', 'DROP TRIGGER', 'RENAME TABLE',
      'DATABASE OBJECT', 'PUSH NULL', 'ADD CONSTRAINT', 'ESCAPE', 'START EXISTS',
      'SHOW ALL CONSTRAINTS', 'CREATE ROLE', 'ROLE_NAME', 'ALTER USER', 'NEW PASSWORD',              // 249
      'USER_ID OR ROLE_NAME', 'LOCK TABLES', 'READ', 'WRITE', 'UNLOCK TABLES',
@@ -168,12 +171,6 @@ var
   sqlMemProg: progInstrunctionsType;
 
   sqlResults: array of string = nil;
-
-  resParams: array of string = nil;
-
-  sqlpopulation: integer;
-
-  sqlerror: integer;
 
   procedure ex(p: NodePointer);
 
@@ -344,7 +341,7 @@ type YYSType = record
 %token tknCOMMIT                        /* keyword */
 %token tknSAVEPOINT                     /* keyword */
 %token tknLOCK                          /* keyword */
-%token tknUNLOCK                          /* keyword */
+%token tknUNLOCK                        /* keyword */
 %token tknREAD                          /* keyword */
 %token tknWRITE                         /* keyword */
 %token tknTO                            /* keyword */
@@ -572,19 +569,19 @@ type YYSType = record
 
 /*
   Operators	        Precedence
-  postfix	                expr++ expr--                            ()   []   ->   .   ::	Function call, scope, array/member access
+  postfix	        expr++ expr--                            ()   []   ->   .   ::	Function call, scope, array/member access
   unary	                ++expr --expr +expr -expr ~ !            !   ~   -   +   *   &   sizeof   type cast   ++   --  	(most) unary operators, sizeof and type casts (right to left)
-  multiplicative	        * / % MOD
+  multiplicative	* / % MOD
   additive	        + -
   shift	                << >> >>>  Bitwise shift left and right
   relational      	< > <= >= instanceof
   equality	        == !=
   bitwise AND	        &
-  bitwise exclusive       OR (XOR)	^
-  bitwise inclusive       OR (normal) 	|
+  bitwise exclusive     OR (XOR)	^
+  bitwise inclusive     OR (normal) 	|
   logical AND	        &&
   logical OR	        ||
-  ternary	? :             Conditional expression
+  ternary	        ? :             Conditional expression
   assignment	        = += -= *= /= %= &= ^= |= <<= >>= >>>=  Assignment operators (right to left)
   ,	                Comma operator
 */
@@ -597,10 +594,10 @@ type YYSType = record
 input	: /* empty */
 	| input '\n'
                 { yyaccept; }
-
+        /*
         | input json_format '\n'
                 { ex($2); yyaccept; }
-
+        */
         | input sql_transcations_statement ';' '\n'
                 { ex($2); yyaccept; }
 
@@ -609,15 +606,15 @@ input	: /* empty */
 
         | input sql_command ';' '\n'
                 { ex($2); yyaccept; }
-
+        /*
         | input expr ';' '\n'
                 { ex($2); yyaccept; }
-
+        */
 	| error '\n'
                 { yyerrok; }
 	;
 
-
+/*
 json_format : json_object
                 { $$ := $1; }
             | json_array
@@ -659,14 +656,14 @@ json_value : json_string
                 { $$ := opr(204,'JSON OBJECT VALUE',[$1]); }
            | json_array
                 { $$ := opr(205,'JSON ARRAY VALUE',[$1]); }
-           /*
-           | 'null' to implement a call to NULLCON()
-           */
+           | tknNULL
+                { $$ := nullcon(); }
            ;
 
 json_string : number_quoted_string
                 { $$ := opr(206,'JSON STRING',[$1]); }
             ;
+*/
 /*
 json_chars : json_char
            | json_char json_chars
@@ -782,11 +779,6 @@ sql_command : to_define_data
                 { $$ := $1; }
             */
             ;
-
-/* User Name --> Directory
-   DataBase  --> Sub-Directory
-   Use Database command
-*/
 
 /*
 to_parse_data: tknPARSE comment
@@ -1741,9 +1733,9 @@ quantified_factor : expr comparaison_op subquery
 group_order_clause : tknGROUP tknBY expr_list option_having option_order_by
                 { $$ := opr(69,'GROUP BY',[$4,$5,$3]); }
                    | tknHAVING condition option_order_by
-                { $$ := opr(71,'HAVING',[$2,$3]); }
+                { $$ := opr(0,'',[opr(71,'HAVING',[$2,$3])]); }
                    |  option_order_by
-                { $$ := opr(70,'ORDER BY',[$1]); }
+                { $$ := $1; }
              ;
 
 expr_list : expr
@@ -1790,7 +1782,7 @@ sorted_def : column_name
            | column_name tknDESC
                 { $$ := opr(76,'DESC',[$1]); }
            | table_name '.' column_name tknDESC
-                { $$ := opr(76,'ASC',[$1,$3]); }
+                { $$ := opr(76,'DESC',[$1,$3]); }
            ;
 
 insert_command : tknINSERT tknINTO  table_name '(' column_list ')' value_list
