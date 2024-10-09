@@ -2664,7 +2664,7 @@ begin
           stk[High(stk)].strValue := FloatToStr(sqlMemProg[i].Value);
         end;
 
-        89: // PUSH: literal
+        89: // PUSH LITERAL
         begin
           setLength(expr, length(expr) + 1);
           expr[high(expr)] := sqlMemProg[i];
@@ -2673,7 +2673,7 @@ begin
           stk[High(stk)].strValue := sqlMemProg[i].stvalue;
         end;
 
-        221: // PUSH: boolean
+        221: // PUSH BOOLEAN
         begin
           setLength(expr, length(expr) + 1);
           expr[high(expr)] := sqlMemProg[i];
@@ -2683,7 +2683,7 @@ begin
           stk[High(stk)].strValue  := BoolToStr(sqlMemProg[i].Boolvalue,True);
         end;
 
-        241: // PUSH: null
+        241: // PUSH NULL
         begin
           setLength(expr, length(expr) + 1);
           expr[high(expr)] := sqlMemProg[i];
@@ -2692,7 +2692,7 @@ begin
           stk[High(stk)].strValue  := 'Null';
         end;
 
-        234: // PUSH: option
+        234: // PUSH OPTION
         begin
           setLength(stk, Length(stk) + 1);
           stk[High(stk)].caseValue := 9;
@@ -5164,6 +5164,7 @@ begin
           colsName := nil;
         end;
 
+        { #todo : After getting the info from group by, having and order by have to process them }
         69: // group by
         begin
           setLength(groupByColumns,length(colsName));
@@ -5174,6 +5175,8 @@ begin
         70: // order by
         begin
           flagOrderClause := true;
+          colsName := nil;
+          setlength(expr,length(expr)-length(ordercolumnlist));
         end;
 
         71:  // having
@@ -7090,7 +7093,7 @@ begin
           expr := nil;
         end;
 
-        184: // SHOW HEADER SELECT STATEMENT
+        184: // SHOW SELECT STATEMENT HEADER
         begin
 
           for fromIndex := low(fromTables) to high(fromTables) do
