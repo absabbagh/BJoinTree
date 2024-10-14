@@ -153,7 +153,7 @@ begin
                                   if Uppercase(yytext) = 'HAVING' then return( tknHAVING );
                                   if Uppercase(yytext) = 'UNION' then return( tknUNION );
                                   if Uppercase(yytext) = 'INTERSECT' then return( tknINTERSECT );
-                                  if Uppercase(yytext) = 'MINUS' then return( tknMINUS );
+                                  if Uppercase(yytext) = 'EXCEPT' then return( tknEXCEPT );
                                   if Uppercase(yytext) = 'ORDER' then return( tknORDER );
                                   if Uppercase(yytext) = 'INSERT' then return( tknINSERT );
                                   if Uppercase(yytext) = 'INTO' then return( tknINTO );
