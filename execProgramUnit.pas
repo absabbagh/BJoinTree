@@ -11,10 +11,10 @@ interface
           Group by
             Check index on the column of Group by, read the index and calculate aggregate functions
           Having
-            No column acceptable, only aggregate function of numeric expression with no columns
+            No column acceptable, only aggregate function or numeric expression with no columns
           Ordered by
-            Check index on the column of Group by, read the index
-          }
+            Check for an index, if not create the index
+}
 
 { #done : Aggregate functions on columns not group by
 }
@@ -213,15 +213,15 @@ uses
   msgslib,
   binU,
   SDFUnit,
-  regexpr{,
-  lockmanager},
+  regexpr,
+  {lockmanager,}
   MATH;
 
   var
     Lexer: TLexer;
     parser: TParser;
 
-    //locks: LockClass; ////
+    // locks: LockClass; ////
 
 const
   tableColumnSeperator: char = '_';
@@ -252,8 +252,7 @@ var
   outText: TextFile;
   logfile: TextFile;
 
-  { #todo : check all the fields in BSON, if someone is missing put it as default or yyerror }
-  { #done : To put boolean values as a new kind in sqlLex and sql.y }
+  { #todo : check all the fields in new columns, if someone is missing put it default, if no default and null put it null, if not 0 for intgers, '' for strings  }
 
 procedure closeSchemaTables;
 var
@@ -2133,6 +2132,7 @@ var
   row: array of variant;
   dimSize: integer;
   index: integer;
+  response: boolean = false;
   hasDefault: boolean = false;
   hasAutoincrement: boolean = false;
   colsType: array of string = nil;
@@ -2228,6 +2228,11 @@ var
   membersCounter: Integer = 0;
   JElements: array of array of JSONValueType = nil;
   elementsCounter: Integer = 0;
+  lCoupleJason: array of record
+    keyName: string;
+    value: variant
+  end = nil;
+
   flagDistinctClause: boolean = false;
 
   flagOrderClause: boolean = false;
@@ -2291,6 +2296,7 @@ var
   colsTxt: string = '';
   JoinGraph: GraphStructure;
   idxJoinGraph: GraphStructure;
+  rescolname: string = '';
 begin
   if sqlMemProg = nil then exit;
   if not ((sqlMemProg[high(sqlMemProg)].mnemonic = 1) or
@@ -4991,10 +4997,12 @@ begin
           cnstrType := 'ON DELETE CASCADE';
         end;
 
-        // A check constraint can NOT be defined on a SQL View.
-        // The check constraint defined on a table must refer to only columns in that table. It can not refer to columns in other tables.
-        // A check constraint can NOT include a SQL Subquery.
-        // A check constraint can be defined in either a SQL CREATE TABLE statement or a SQL ALTER TABLE statement.
+        { #note : A check constraint can NOT be defined on a SQL View.
+                  The check constraint defined on a table must refer to only columns in that table.
+                    It can not refer to columns in other tables.
+                  A check constraint can NOT include a SQL Subquery.
+                  A check constraint can be defined in either a SQL CREATE TABLE statement or
+                    a SQL ALTER TABLE statement. }
 
         130: // cnstrType Check condition to check on insert and update
         begin
@@ -5026,15 +5034,16 @@ begin
             end
             else
             begin
-          (*  Constraint type	            Abbreviation
-              references (foreign key)          fk
-              unique                        	un
-              primary key                       pk
-              check	                        ck
-              not null	                        nn
-          *)
+              { #note :       Constraint type	            Abbreviation
+                              ---------------               ------------
+                           references (foreign key)             fk
+                               unique                        	un
+                             primary key                        pk
+                               check	                        ck
+                             not null	                        nn
+              }
 
-              // if there is no name the system will give it a name
+              { #note : if there is no name the system will give it a name }
               cnstrName :=
                 'sys_CONSTRAINT' + cnstrType + colsname[0] + IntToStr((DDconstraints.lastRow+1));
 
@@ -5081,10 +5090,10 @@ begin
         33: // Opr TABLE CONSTRAINT: Save Constraint in the List
         begin
 
-          //  Check if the same constraint exist
+          { #note :  Check if the same constraint exist }
 
-          (* Check if the constraint name exist could be done by a linear scan into
-             datadictionaty, next would be faster by using the b-join tree *)
+          { #note : Check if the constraint name exist could be done by a linear scan into
+                    datadictionaty, next would be faster by using the b-join tree }
 
           (* cheking Data Dictionary *)
 
@@ -5105,7 +5114,7 @@ begin
               cnstrName :=
                 'sys_CONSTRAINT' + cnstrType + colsname[0] + IntToStr((DDconstraints.lastRow+1));
 
-              // if there is no name the system will give it a name
+              // if there is no name, the system will give it a name
 
               cnstrName := 'sys_CONSTRAINT' + cnstrType;
               for index1 := 0 to high(colsname) do
@@ -5164,7 +5173,9 @@ begin
           colsName := nil;
         end;
 
-        { #todo : After getting the info from group by, having and order by have to process them }
+        { #todo : Check for an index on the groupByColumns or create a temporary one.
+                  Read the index and calculate the aggregate function for similar values
+                  on Rows with the same groupByColumns. }
         69: // group by
         begin
           setLength(groupByColumns,length(colsName));
@@ -5172,6 +5183,10 @@ begin
           colsname := nil;
         end;
 
+        { #todo : check for an index on the ordercolumnlist or create a temporary one.
+                  If group by exist and groupByColumns is the same as ordercolumnlist,
+                  so they are alreadi in order. If different, make an index on the temperory
+                  table result from group by }
         70: // order by
         begin
           flagOrderClause := true;
@@ -5179,6 +5194,8 @@ begin
           setlength(expr,length(expr)-length(ordercolumnlist));
         end;
 
+        { #todo : if an aggregate field not exist in the select clause, calculate it when
+                  scanning the table. Having work on Aggregate functions opposite of where clause. }
         71:  // having
         begin
           setlength(havingconditionInstructions, length(expr));
@@ -5916,6 +5933,7 @@ begin
          fromTablesLen := length(fromTables);
          colsname := nil;
         end;
+
         166: // ALTER TABLE
         begin
           if ladd_column then
@@ -5935,10 +5953,13 @@ begin
                       exit;
                     end;
 
-              // ALTER TABLE only allows columns to be added that can contain nulls,
-              // or have a DEFAULT definition specified, or the column being added
-              // is an identity (autoincrement or timestamp) column, or alternatively if none of the
-              // previous conditions are satisfied the table must be empty to allow addition of these columns
+              { #note : ALTER TABLE only allows columns to be added that can contain nulls,
+                        or have a DEFAULT definition specified, or the column being added
+                        is an identity (autoincrement or timestamp) column, or alternatively if none of the
+                        previous conditions are satisfied the table must be empty to allow addition of these columns
+                        Noted later: alternatively could be added with 0 for intger, '' for strings, now for timestamp , ...
+              }
+
 
               for index1 := 0 to high(constraintList) do
                 begin
@@ -6063,11 +6084,12 @@ begin
                           end
                         else
                         begin
-                          (* If you specify NULL as the default value for a column, you cannot
-                             specify a NOT NULL constraint as part of the column definition.
-                             NULL is not a valid default value for a column that is part of a
-                             primary key.
-                          *)
+                          { #note :  If you specify NULL as the default value for a column,
+                                     you cannot specify a NOT NULL constraint as part of the
+                                     column definition.
+                                     NULL is not a valid default value for a column that is part
+                                     of a primary key.
+                          }
                           row[7] := -1; // default not specify
                         end;
                       end;
@@ -6361,8 +6383,8 @@ begin
             end;
           if lrename_table then
             begin
-              // fromTables[0] old name
-              // fromTables[1] new name
+              { #note : fromTables[0] reference old name
+                        fromTables[1] reference new name }
               for index3 := 0 to high(workingSchema.tables) do
                 if workingSchema.tables[index3].tblName = fromTables[1].Name then
                   begin
@@ -6379,12 +6401,13 @@ begin
                   end;
               if not found then
                 begin
-                  Parser.yyerror('Table name ' + fromTables[0].Name + ' not exists');
+                  Parser.yyerror('Table name ' + fromTables[0].Name + ' doesn''t exists');
                   exit;
                 end;
 
               workingSchema.tables[index3].tblName := tblName;
               // No need to check for table name in constraints as cols are referenced by position in the table
+              // check if the table is referenced
               for index2 := 0 to high(workingSchema.tables[index3].constraints) do
                 begin
                   case workingSchema.tables[index3].constraints[index2].cnstrtype of
@@ -6414,9 +6437,11 @@ begin
             end;
           if lrename_column then
             begin
-              // change all column_name
-              // change constraints
-              // change indexes
+              { #note :  change all column_name in Data Dictionary
+                         in constraints
+                         in indexes
+                         in reference if exists
+              }
 
               if not TableExists(tblName) then
                 begin
@@ -6434,7 +6459,7 @@ begin
                   end;
               if not found then
                 begin
-                  Parser.yyerror('column ' + colsName[0] + ' not exists');
+                  Parser.yyerror('Unknow column ' + colsName[0] + ' in table ' + tblName);
                   exit;
                 end;
 
@@ -6442,13 +6467,15 @@ begin
               for index2 := 0 to high(tblFields.columns) do
                 if colsName[1] = tblFields.columns[index2].colname then
                   begin
-                    Parser.yyerror('column ' + colsName[1] + ' already exists');
+                    Parser.yyerror('Duplicate column name' + colsName[1]);
                     exit;
                   end;
 
-
-
-
+              { #todo :  change all column_name in Data Dictionary
+                         in constraints
+                         in indexes
+                         in reference if exists
+              }
 
               lrename_column := false;
             end
@@ -6464,16 +6491,29 @@ begin
           ldrop_Column := true;
         end;
 
-        239: // ALTER TABLE RENAME TABLE
+        242: // ADD CONSTRAINT
         begin
-          lrename_table := true;
+
+        end;
+
+        169: // DROP CONSTRAINT
+        begin
+
+        end;
+
+        170: // MODIFY
+        begin
+
         end;
 
         155: // ALTER TABLE RENAME COLUMN
         begin
-
           lrename_column := true;
+        end;
 
+        239: // ALTER TABLE RENAME TABLE
+        begin
+          lrename_table := true;
         end;
 
         195:  //UPLOAD CSV
@@ -7504,7 +7544,9 @@ begin
                           end;
                         if index = fromTableslen -1 then
                           begin
-                            if rowcondition(conditionInstructions,resultTable) then
+                            response := rowcondition(conditionInstructions,resultTable);
+                            if yyerrmsgs <> nil then exit;
+                            if response then
                               begin
                                 resultRows := ResultRows + 1;
                                 extractselect(dbUserId, selectColsInstructions, outText, resultTable, resultRows,

@@ -132,9 +132,10 @@ begin
 
       46: // LIKE
          begin
-           // runstk[0] is the value
-           // runstk[1] is the pattern
-           // runstk[2] is the escape
+           { #note : runstk[0] is the value
+                     runstk[1] is the pattern
+                     runstk[2] is the escape
+           }
            if length(runstk) = 3 then
              if runstk[2].strValue[1] <> '' then
                chEscape := runstk[2].strValue[1];
@@ -227,67 +228,23 @@ begin
 
   result := false;
   if length(runstk) = 1 then
-    if (runstk[High(runstk)].caseValue = 0) then
-      if runstk[High(runstk)].boolValue then
+    begin
+      if (runstk[High(runstk)].caseValue = 0) then
         begin
-          result := true;
-        end;
+          if runstk[High(runstk)].boolValue then
+            begin
+              result := true;
+            end;
+        end else Parser.yyerror('syntax error ');
+    end else Parser.yyerror('syntax error ');
   runstk := nil;
 
 end;
 
-(*
-  Analyze query make the condition postfix as in this case
-  no index always true
-  index should be verified
-
-  (3 = 3) OR NOT ((5 = 3) OR (2 = 2) AND (6 = 6))
-
-  Stack:
-
-  PUSH 3 - PUSH 3 - EQ - PUSH 5 - PUSH 3 - EQ - PUSH 2 - PUSH 2 - EQ - PUSH 6 - PUSH 6 - EQ - AND - OR - NOT - OR
-
-  Run the Stack:
-
-  PUSH 3 - PUSH 3 - EQ --> [(3 = 3)]
-  PUSH 5 - PUSH 3 - EQ - PUSH 2 - PUSH 2 - EQ - PUSH 6 - PUSH 6 - EQ - AND - OR - NOT - OR
-
-  [(3 = 3)]
-  PUSH 5 - PUSH 3 - EQ --> [(5 = 3)]
-  PUSH 2 - PUSH 2 - EQ - PUSH 6 - PUSH 6 - EQ - AND - OR - NOT - OR
-
-  [(3 = 3)]
-  [(5 = 3)]
-  PUSH 2 - PUSH 2 - EQ --> [(2 = 2)]
-  PUSH 6 - PUSH 6 - EQ - AND - OR - NOT - OR
-
-  [(3 = 3)]
-  [(5 = 3)]
-  [(2 = 2)]
-  PUSH 6 - PUSH 6 - EQ --> [(6 = 6)]
-  AND - OR - NOT - OR
-
-  [(3 = 3)]
-  [(5 = 3)]
-  [(2 = 2)] - [(6 = 6)] - AND --> [(2 = 2) And (6 = 6)]
-  OR - NOT - OR
-
-  [(3 = 3)]
-  [(5 = 3)] - [(2 = 2) And (6 = 6)] - OR --> [(5 = 3) OR (2 = 2) And (6 = 6)]
-  NOT - OR
-
-  [(3 = 3)]
-  [(5 = 3) OR (2 = 2) And (6 = 6)] - NOT --> [NOT (5 = 3) AND NOT (2 = 2) OR NOT (6=6)] -->
-  [(5 != 3) AND (2 != 2) OR (6 != 6)]
-  OR
-
-  [(3 = 3)] - [(5 != 3) AND (2 != 2) OR (6 != 6)] - OR --> [(3 = 3) OR (5 != 3) AND (2 != 2) OR (6 != 6)]
-
-  Finally:
- (3 = 13) OR NOT ((5 = 3) OR (2 = 12) AND (6 = 6)) is equivalent to:
- (3 = 13) OR (5 != 3) AND (2 != 12) OR (6 != 6)
-
-*)
+{ #note : Analyze query make the condition postfix as in this case
+          no index always true
+          index should be verified
+}
 
 function analyzeQuery(conditionInstructions: array of singleInstructionType;
                       var executePlan: executePlanType): boolean;
@@ -318,10 +275,6 @@ begin
       if lconditionInstructions[index2].mnemonic in [42..44,50..55,79,83..86,88,89,221] then
         begin
           runStack(lconditionInstructions[index2],startFrom,runstk,executePlan);
-        end;
-      if lconditionInstructions[index2].mnemonic in [42..44,50..55,79] then
-        begin
-          //runstk := nil
         end;
 
       case lconditionInstructions[index2].mnemonic of
@@ -375,9 +328,10 @@ begin
 
       46: // LIKE
          begin
-           // runstk[0] is the value
-           // runstk[1] is the pattern
-           // runstk[2] is the escape
+           { #note : runstk[0] is the value
+                     runstk[1] is the pattern
+                     runstk[2] is the escape
+           }
            if length(runstk) = 3 then
              if runstk[2].strValue[1] <> '' then
                chEscape := runstk[2].strValue[1];

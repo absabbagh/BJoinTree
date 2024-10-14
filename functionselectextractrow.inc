@@ -23,19 +23,11 @@ begin
   rightexpr := nil;
   tmpstk2 := nil;
 
-
-
-
   for i := startFrom to length(runstk) - 1 do
     begin
       setlength(tmpstk2, length(tmpstk2)+1);
       tmpstk2[High(tmpstk2)] := runstk[i]
     end;
-  //setLength(runstk,length(runstk)-startFrom);
-
-
-
-
 
   i := startFrom;
   while i < length(runstk) do
@@ -102,12 +94,10 @@ begin
               break
             end;
 
-  (*
-  leftexpr versus rightexpr
-  All column names from letside
-  All values from the other side
-  *)
-
+  { #note : leftexpr versus rightexpr
+            All column names from letside
+            All values from the other side
+  }
 
   if rightexpr = nil then
     begin
@@ -155,7 +145,7 @@ if not found then
         end;
     end;
 
-  //executePlan.useIndex := false;
+  // executePlan.useIndex := false;
   executePlan.joinFlag := false;
   if leftexpr <> nil then
     if length(leftexpr) = 1 then
@@ -173,7 +163,7 @@ if not found then
                     tblFields := loadTableFields(executePlan.Index[high(executePlan.Index)].tblName);
                     executePlan.Index[high(executePlan.Index)].Name := tblFields.idxdata[executePlan.Index[high(executePlan.Index)].Number].idxname;
                     executePlan.Index[high(executePlan.Index)].colName := copy(leftexpr[0].strvalue,pos('.',leftexpr[0].strvalue)+1,length(leftexpr[0].strvalue));
-                    //executePlan.Index[high(executePlan.Index)].mnemonic := 50; // EQ
+                    // executePlan.Index[high(executePlan.Index)].mnemonic := 50; // EQ
                     executePlan.Index[0].Value := -leftexpr[0].extValue;
                   end;
                 { expr := leftexpr;
@@ -201,9 +191,6 @@ if not found then
                 end;
           end
       end;
-
-  //startFrom := length(runstk);
-  //i := i;
 
 end;
 
@@ -829,9 +816,10 @@ begin
                       runstk[High(runstk)-1].caseValue := 7;
                       setLength(runstk,Length(runstk)-1);
                     end;
-                  8: // You can subtract two DATE values, and the result is a FLOAT 
-                     // which is the number of days between the two DATE values.
-                     // In general, the result may contain a fraction because DATE also has a time component.
+                  8: { #note : You can subtract two DATE values, and the result is a FLOAT 
+                                 which is the number of days between the two DATE values.
+                               In general, the result may contain a fraction because DATE also has a time component.
+                     }
                     begin
                       Parser.yyerror('Type error in select clause ');
                       runstk[High(runstk)-1].caseValue := 7;
@@ -1279,10 +1267,11 @@ begin
         runstk[High(runstk)].int64Value := 0;
       end;
 
-   // if in the expression there is caseValue = 10
-   // check to put all in the right side while moving values to the left side
-   // scan runstk till find next = false --> sub-expressions separation
-   // left expression with highest value of runstk not a column name is moved to the end of the right expression
+   { #note : if in the expression there is caseValue = 10
+             check to put all in the right side while moving values to the left side
+             scan runstk till find next = false --> sub-expressions separation
+             left expression with highest value of runstk not a column name is moved to the end of the right expression
+   }
    50, 51, 52, 53, 54, 55: // EQ, LT, GT, NE, LE, GE
       begin
         case runstk[high(runstk)].caseValue of
@@ -2049,9 +2038,7 @@ begin
     50: // EQ
        begin
 
-
          // runstk[high(runstk)-1].int64Value := 1;
-
 
          reduceExpression(runstk,startFrom,executePlan);
          if ExecutePlan.Index <> nil then
