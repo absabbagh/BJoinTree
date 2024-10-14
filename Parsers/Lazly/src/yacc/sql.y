@@ -106,7 +106,7 @@ const
      'GE', 'EQ ALL', 'LT ALL', 'GT ALL', 'NE ALL',
      'LE ALL', 'GE ALL', 'EQ ANY', 'LT ANY', 'GT ANY',
      'NE ANY', 'LE ANY', 'GE ANY', 'EXISTS', 'GROUP BY',                                            //  69
-     'ORDER BY', 'HAVING', 'UNION ALL', 'INTERSECT', 'MINUS',
+     'ORDER BY', 'HAVING', 'UNION ALL', 'INTERSECT', 'EXCEPT',
      'ASC', 'DESC', 'INSERT INTO', 'VALUES', 'UMINUS',
      'UPDATE', 'SET', 'DELETE FROM', 'ADD', 'SUB',
      'MUL', 'DIV', 'FROM', 'PUSH', 'PUSH LITERAL',                                                  //  89
@@ -146,6 +146,7 @@ const
      'LOCK TABLE ALIAS NAME');
 
 type
+
   singleInstructionType = record
     mnemonic: Integer;
     boolvalue: boolean;
@@ -153,26 +154,22 @@ type
     stvalue: string;
     printInstruction: string // just for printing
   end;
+
   progInstrunctionsType = array of singleInstructionType;
 
   selectColsInstructionstype = array of array of singleInstructionType;
 
 var
+
   selectColsInstructions: selectColsInstructionstype = nil;
 
   lQueryId: string = '';
-  rescolname: string = '';
-
-  lCoupleJason: array of record
-    keyName: string;
-    value: variant
-  end = nil;
 
   sqlMemProg: progInstrunctionsType;
 
   sqlResults: array of string = nil;
 
-  procedure ex(p: NodePointer);
+procedure ex(p: NodePointer);
 
 %}
 
@@ -261,7 +258,7 @@ type YYSType = record
 %token tknHAVING                        /* keyword */
 %token tknUNION                         /* keyword */
 %token tknINTERSECT                     /* keyword */
-%token tknMINUS                         /* keyword */
+%token tknEXCEPT                        /* keyword */
 %token tknORDER                         /* keyword */
 %token tknASC                           /* keyword */
 %token tknDESC                          /* keyword */
@@ -366,8 +363,6 @@ type YYSType = record
 %token tknESCAPE                        /* keyword */
 %token tknROLE                          /* keyword */
 %token tknPRIVILEGES                    /* keyword */
-
-
 
 %token tknEQ
 %token tknLT
@@ -552,12 +547,13 @@ type YYSType = record
 %type <Pointer> option_tknCOLUMN
 %type <Pointer> drop_column_list
 %type <Pointer> drop_column
+%type <Pointer> option_tknTO
 
 %left tknOR
 %left tknAND
 %left tknEQ tknNE
 %left tknLT tknGT tknLE tknGE tknBETWEEN URELATIONAL
-%left '-' '+'  tknUNION tknMINUS           /* operators */
+%left '-' '+'  tknUNION tknEXCEPT        /* operators */
 %left '*' '/' '%' tknINTERSECT
 %left '(' ')'
 %left  tknABS tknCEIL tknFLOOR tknMOD tknPOWER tknROUND tknSIGN tknSQRT tknTRUNCATE
@@ -664,6 +660,7 @@ json_string : number_quoted_string
                 { $$ := opr(206,'JSON STRING',[$1]); }
             ;
 */
+
 /*
 json_chars : json_char
            | json_char json_chars
@@ -816,11 +813,11 @@ alter_table  : tknALTER tknTABLE table_name add_column_list
               { $$ := opr(166,'ALTER TABLE',[$3,opr(242,'ADD CONSTRAINT',[$5])]); }
              | tknALTER tknTABLE table_name tknDROP tknCONSTRAINT constraint_name
               { $$ := opr(166,'ALTER TABLE',[$3,opr(169,'DROP CONSTRAINT',[$6])]); }
-             | tknALTER tknTABLE table_name tknMODIFY new_column option_new_constraint_list
+             | tknALTER tknTABLE table_name tknMODIFY column_name option_new_constraint_list
               { $$ := opr(166,'ALTER TABLE',[$3,opr(170,'MODIFY',[$5,$6])]); }
              | tknALTER tknTABLE table_name tknRENAME tknCOLUMN column_name tknTO column_name
               { $$ := opr(166,'ALTER TABLE',[$3,opr(155,'RENAME COLUMN',[$6,$8])]); }
-             | tknALTER tknTABLE table_name tknRENAME tknTO table_name
+             | tknALTER tknTABLE table_name tknRENAME option_tknTO table_name
               { $$ := opr(166,'ALTER TABLE',[$3,opr(239,'RENAME TABLE',[$6])]); }
              ;
 
@@ -838,6 +835,7 @@ option_tknCOLUMN :  /* empty */
                  | tknCOLUMN
                  { $$ := nil; }
                  ;
+
 drop_column_list :  drop_column
                  { $$ := opr(168,'DROP COLUMN',[$1]); }
                  |   drop_column_list ',' drop_column
@@ -845,6 +843,12 @@ drop_column_list :  drop_column
                  ;
 drop_column      : tknDROP option_tknCOLUMN column_name
                  { $$ := $3; }
+                 ;
+
+option_tknTO :  /* empty */
+                 { $$ := nil; }
+                 | tknTO
+                 { $$ := nil; }
                  ;
 
 create_command : create_database
@@ -1761,8 +1765,8 @@ set_clause : tknSELECT option_duplicate option_columns
                 { $$ := opr(72,'UNION ALL',[$1,$4]); }
              | set_clause tknINTERSECT set_clause
                 { $$ := opr(73,'INTERSECT',[$1,$3]); }
-             | set_clause tknMINUS set_clause
-                { $$ := opr(74,'MINUS',[$1,$3]); }
+             | set_clause tknEXCEPT set_clause
+                { $$ := opr(74,'EXCEPT',[$1,$3]); }
            ;
 
 rptsorted_def : sorted_def
