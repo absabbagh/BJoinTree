@@ -126,7 +126,7 @@ const
      'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE',
      'SHOW ALL TABLES', 'SHOW ALL COLUMNS', 'SHOW ALL JOIN INDEXES', 'SHOW ALL INDEXES', 'SHOW INDEXES',
      'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT',                // 169
-     'MODIFY', 'UCASE', 'LCASE', 'MID', 'NOW',
+     'MODIFY', 'UCASE', 'LCASE', 'NOT USED', 'NOW',
      'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS',
      'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'AGGREGATE COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
      'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',                                    // 189
@@ -542,11 +542,9 @@ type YYSType = record
 %type <Pointer> close_cursor
 %type <Pointer> cursor_name
 %type <Pointer> cursor_deallocation
-%type <Pointer> add_column_list
-%type <Pointer> add_column
+%type <Pointer> rptalter_specification
+%type <Pointer> alter_specification
 %type <Pointer> option_tknCOLUMN
-%type <Pointer> drop_column_list
-%type <Pointer> drop_column
 %type <Pointer> option_tknTO
 
 %left tknOR
@@ -783,7 +781,7 @@ to_parse_data: tknPARSE comment
               ;
 should be:
 to_parse_data: tknPARSE comment tknAS datatype
-                { $$ := opr(189,'PARSE',[$2]); }
+                { $$ := opr(189,'PARSE',[$2,$4]); }
               ;
 */
 
@@ -805,44 +803,36 @@ alter_command : alter_table
                { $$ := $1; }
               ;
 
-alter_table  : tknALTER tknTABLE table_name add_column_list
+alter_table  : tknALTER tknTABLE table_name rptalter_specification
               { $$ := opr(166,'ALTER TABLE',[$3,$4]); }
-             | tknALTER tknTABLE table_name drop_column_list
-              { $$ := opr(166,'ALTER TABLE',[$3,$4]); }
-             | tknALTER tknTABLE table_name tknADD new_constraint_list
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(242,'ADD CONSTRAINT',[$5])]); }
-             | tknALTER tknTABLE table_name tknDROP tknCONSTRAINT constraint_name
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(169,'DROP CONSTRAINT',[$6])]); }
-             | tknALTER tknTABLE table_name tknMODIFY column_name option_new_constraint_list
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(170,'MODIFY',[$5,$6])]); }
-             | tknALTER tknTABLE table_name tknRENAME tknCOLUMN column_name tknTO column_name
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(155,'RENAME COLUMN',[$6,$8])]); }
-             | tknALTER tknTABLE table_name tknRENAME option_tknTO table_name
-              { $$ := opr(166,'ALTER TABLE',[$3,opr(239,'RENAME TABLE',[$6])]); }
              ;
 
-add_column_list :  add_column
-                 { $$ := opr(167,'ADD COLUMN',[$1]); }
-                 |   add_column_list ',' add_column
-                 { $$ := opr(0,'REPEAT',[$1,opr(167,'ADD COLUMN',[$3])]); }
-                 ;
-add_column      : tknADD option_tknCOLUMN new_column
-                 { $$ := opr(129,'VOID',[$3]); }
-                 ;
+rptalter_specification : alter_specification
+                { $$ := $1; }
+                       | rptalter_specification ',' alter_specification
+                { $$ := opr(0,'REPEAT',[$1,$3]); }
+                       ;
+alter_specification : tknADD option_tknCOLUMN new_column
+                 { $$ := opr(167,'ADD COLUMN',[$3]); }
+                    | tknDROP option_tknCOLUMN column_name
+                 { $$ := opr(168,'DROP COLUMN',[$3]); }
+                    | tknADD new_constraint_list
+               { $$ := opr(242,'ADD CONSTRAINT',[$2]);}
+                    | tknDROP tknCONSTRAINT constraint_name
+               { $$ := opr(169,'DROP CONSTRAINT',[$3]); }
+                    | tknMODIFY new_column option_new_constraint_list
+               { $$ := opr(170,'MODIFY',[$2,$3]); }
+                    | tknRENAME tknCOLUMN column_name tknTO column_name
+               { $$ := opr(155,'RENAME COLUMN',[$3,$5]); }
+                    | tknRENAME option_tknTO table_name
+               { $$ := opr(239,'RENAME TABLE',[$3]); }
+                    ;
+
 
 option_tknCOLUMN :  /* empty */
                  { $$ := nil; }
                  | tknCOLUMN
                  { $$ := nil; }
-                 ;
-
-drop_column_list :  drop_column
-                 { $$ := opr(168,'DROP COLUMN',[$1]); }
-                 |   drop_column_list ',' drop_column
-                 { $$ := opr(0,'REPEAT',[$1,opr(168,'DROP COLUMN',[$3])]); }
-                 ;
-drop_column      : tknDROP option_tknCOLUMN column_name
-                 { $$ := $3; }
                  ;
 
 option_tknTO :  /* empty */
@@ -1161,8 +1151,8 @@ new_column_list :  new_column
                 { $$ := opr(0,'REPEAT',[$1,$3]); }
                 ;
 
-new_column : column_name datatype option_default_expression rpt_column_constraint
-                { $$ := opr(5,'NEW COLUMN',[$1,$2,$3,$4]); }
+new_column : column_name datatype rpt_column_constraint
+                { $$ := opr(5,'NEW COLUMN',[$1,$2,$3]); }
                 ;
 
 column_name : ID
@@ -1267,9 +1257,7 @@ integer_type : tknNUMBER
                 { $$ := opr(131,'BIGINT'); }
              ;
 
-option_default_expression : /* empty */
-                { $$ := nil; }
-                          | tknAUTOINCREMENT
+option_default_expression : tknAUTOINCREMENT
                 { $$ := opr(176,'AUTOINCREMENT'); }
                           | tknDEFAULT expr
                 { $$ := opr(90,'DEFAULT',[$2]); }
@@ -1283,6 +1271,8 @@ rpt_column_constraint : /* empty */
 
 column_constraint : option_constraint_name def_column_constraint
                 { $$ := opr(91,'CONSTRAINT',[$1,$2]); }
+                | option_default_expression
+                { $$ := $1; }
                   ;
 
 option_constraint_name : /* empty */
@@ -1588,7 +1578,6 @@ selected_tables : selected_table
 */
 
 /*
-
 FROM table1
 [ { INNER JOIN
   | LEFT [OUTER] JOIN
@@ -2035,7 +2024,11 @@ char_function : tknCHR '(' expr_parameter ')' /* CHR(N) N is a number */
               | tknLCASE '(' expr_parameter ')' /* LCASE or LOWER ( CharacterExpression ) */
                 { $$ := opr(172,'LCASE',[$3]); }
               | tknMID '(' expr_parameter ')' /* MID(str,pos,len) is a synonym for SUBSTRING(str,pos,len) */
-                { $$ := opr(173,'MID', [$3]); }
+                { $$ := opr(107,'SUBSTR',[$3]); }
+              | tknMID '(' expr tknFROM expr ')'
+                { $$ := opr(107,'SUBSTR',[$3,$5]); }
+              | tknMID '(' expr tknFROM expr tknFOR expr ')'
+                { $$ := opr(107,'SUBSTR',[OPR(47,'PARAMETER',[$3,$5,$7])]); }
               | tknNOW '(' ')'
                 { $$ := opr(174,'NOW'); }
               | tknFORMAT '(' expr_parameter ')' /* FORMAT(num, decimal_position[, locale]) */
@@ -2150,83 +2143,6 @@ rpt_trigger_step: trigger_step ';'
 %%
 
 {$I sqlLEX.pas}
-
-procedure ex(p: NodePointer);
-var
-  i: Integer;
-begin
-  if (p = nil) then exit;
-  case p^.Kind  of
-    0:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 88;
-        sqlMemProg[High(sqlMemProg)].value := p^.conNode^.value;
-        with sqlMemProg[High(sqlMemProg)] do
-          printInstruction := Mnemonics[mnemonic] + ' ' + FloatToStr(value)
-      end;
-    1:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 89;
-        sqlMemProg[High(sqlMemProg)].stvalue := p^.stNode^.value;
-        with sqlMemProg[High(sqlMemProg)] do
-          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
-      end;
-    3:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 119;
-        sqlMemProg[High(sqlMemProg)].stvalue := p^.dbNode^.value;
-        with sqlMemProg[High(sqlMemProg)] do
-          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
-      end;
-    4:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 128;
-        sqlMemProg[High(sqlMemProg)].stvalue := p^.dbNode^.value;
-        with sqlMemProg[High(sqlMemProg)] do
-          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
-      end;
-    2:
-      begin
-        for i := 0 to Length(p^.oprnode^.op) - 1 do ex(p^.oprNode^.op[i]);
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := p^.oprNode^.Mnemonic;
-        if (p^.oprNode^.Mnemonic <> 0) and (p^.oprNode^.Mnemonic <> 129) then
-          with sqlMemProg[High(sqlMemProg)] do
-            printInstruction := Mnemonics[mnemonic]
-      end;
-    5:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 221;
-        sqlMemProg[High(sqlMemProg)].boolvalue := p^.boolNode^.value;
-        with sqlMemProg[High(sqlMemProg)] do
-        if boolValue then
-          printInstruction := Mnemonics[mnemonic] + ' TRUE'
-         else
-          printInstruction := Mnemonics[mnemonic] + ' FALSE'
-      end;
-    6:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 234;
-        sqlMemProg[High(sqlMemProg)].stvalue := p^.stNode^.value;
-        with sqlMemProg[High(sqlMemProg)] do
-          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
-      end;
-    7:
-      begin
-        SetLength(sqlMemProg,length(sqlMemProg)+1);
-        sqlMemProg[High(sqlMemProg)].mnemonic := 241;
-        sqlMemProg[High(sqlMemProg)].stvalue := 'null';
-        with sqlMemProg[High(sqlMemProg)] do
-          printInstruction := Mnemonics[mnemonic]
-      end;
-  end
-end;
 
 begin
 

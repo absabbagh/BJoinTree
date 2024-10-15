@@ -89,6 +89,83 @@ begin
   yywarningmsgs[High(yywarningmsgs)] := msg;
 end (* yywarningmsg *);
 
+procedure ex(p: NodePointer);
+var
+  i: Integer;
+begin
+  if (p = nil) then exit;
+  case p^.Kind  of
+    0:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 88;
+        sqlMemProg[High(sqlMemProg)].value := p^.conNode^.value;
+        with sqlMemProg[High(sqlMemProg)] do
+          printInstruction := Mnemonics[mnemonic] + ' ' + FloatToStr(value)
+      end;
+    1:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 89;
+        sqlMemProg[High(sqlMemProg)].stvalue := p^.stNode^.value;
+        with sqlMemProg[High(sqlMemProg)] do
+          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
+      end;
+    3:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 119;
+        sqlMemProg[High(sqlMemProg)].stvalue := p^.dbNode^.value;
+        with sqlMemProg[High(sqlMemProg)] do
+          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
+      end;
+    4:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 128;
+        sqlMemProg[High(sqlMemProg)].stvalue := p^.dbNode^.value;
+        with sqlMemProg[High(sqlMemProg)] do
+          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
+      end;
+    2:
+      begin
+        for i := 0 to Length(p^.oprnode^.op) - 1 do ex(p^.oprNode^.op[i]);
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := p^.oprNode^.Mnemonic;
+        if (p^.oprNode^.Mnemonic <> 0) and (p^.oprNode^.Mnemonic <> 129) then
+          with sqlMemProg[High(sqlMemProg)] do
+            printInstruction := Mnemonics[mnemonic]
+      end;
+    5:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 221;
+        sqlMemProg[High(sqlMemProg)].boolvalue := p^.boolNode^.value;
+        with sqlMemProg[High(sqlMemProg)] do
+        if boolValue then
+          printInstruction := Mnemonics[mnemonic] + ' TRUE'
+         else
+          printInstruction := Mnemonics[mnemonic] + ' FALSE'
+      end;
+    6:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 234;
+        sqlMemProg[High(sqlMemProg)].stvalue := p^.stNode^.value;
+        with sqlMemProg[High(sqlMemProg)] do
+          printInstruction := Mnemonics[mnemonic] + ' ' + stvalue
+      end;
+    7:
+      begin
+        SetLength(sqlMemProg,length(sqlMemProg)+1);
+        sqlMemProg[High(sqlMemProg)].mnemonic := 241;
+        sqlMemProg[High(sqlMemProg)].stvalue := 'null';
+        with sqlMemProg[High(sqlMemProg)] do
+          printInstruction := Mnemonics[mnemonic]
+      end;
+  end
+end;
+
 function con(value: extended): NodePointer;
 begin
   new(result);
