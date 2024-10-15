@@ -2212,10 +2212,6 @@ var
   lcount: Integer;
   exprList: array of array of singleInstructionType = nil;
   index5, index6: integer;
-  ladd_column: boolean = false;
-  ldrop_column: boolean = false;
-  lrename_table: boolean = false;
-  lrename_column: boolean = false;
 
   JSONString: record
     kind: (kndObj, kndArr);
@@ -3685,21 +3681,21 @@ begin
         found := TableExists(tblName);
         if found then
           begin
-            Parser.yyerror('Table ' + tblName + ' already exist ');
+            Parser.yyerror('Table ' + tblName + ' already exists ');
             Exit;
           end;
 
         found := ViewExists(tblName);
         if found then
           begin
-            Parser.yyerror('View ' + tblName + ' already exist ');
+            Parser.yyerror('View ' + tblName + ' already exists ');
             Exit;
           end;
 
         found := DatabaseExists(dbName);
         if not found then
           begin
-            Parser.yyerror('Database ' + dbName + ' not found');
+            Parser.yyerror('Unknow database ' + dbName);
             Exit;
           end;
 
@@ -3844,11 +3840,11 @@ begin
                     end
                   else
                   begin
-                    (* If you specify NULL as the default value for a column, you cannot
-                       specify a NOT NULL constraint as part of the column definition.
-                       NULL is not a valid default value for a column that is part of a
-                       primary key.
-                    *)
+                    { #note : If you specify NULL as the default value for a column, you cannot
+                                specify a NOT NULL constraint as part of the column definition.
+                              NULL is not a valid default value for a column that is part of a
+                                primary key.
+                    }
                     row[7] := -1; // default not specify
                     row[8] := false;
                   end;
@@ -5936,559 +5932,451 @@ begin
 
         166: // ALTER TABLE
         begin
-          if ladd_column then
-            begin
-              if not TableExists(tblName) then
-                begin
-                  Parser.yyerror('Table ' + tblName + ' not found');
-                  exit;
-                end;
-
-              tblFields := loadTableFields(tblName);
-              for index1 := low(columnList) to high(columnList) do
-                for index2 := 0 to high(tblFields.columns) do
-                  if columnList[index1].columnName = tblFields.columns[index2].colname then
-                    begin
-                      Parser.yyerror('column ' + columnList[index1].columnName + ' already exists');
-                      exit;
-                    end;
-
-              { #note : ALTER TABLE only allows columns to be added that can contain nulls,
-                        or have a DEFAULT definition specified, or the column being added
-                        is an identity (autoincrement or timestamp) column, or alternatively if none of the
-                        previous conditions are satisfied the table must be empty to allow addition of these columns
-                        Noted later: alternatively could be added with 0 for intger, '' for strings, now for timestamp , ...
-              }
-
-
-              for index1 := 0 to high(constraintList) do
-                begin
-                  if (constraintList[index1].constraintType = 'NOT NULL') or
-                     (constraintList[index1].constraintType = 'PRIMARY KEY') then
-                       for index2 := 0 to high(constraintList[index1].columnsName) do
-                         begin
-                           colname := constraintList[index1].columnsName[index2];
-                           for index3 := 0 to high(columnList) do
-                             if columnList[index3].columnName = colname then
-                               if not ((columnList[index3].columnTypeName = 'TIMESTAMP') or
-                                  columnList[index3].hascolumnDefault or
-                                  columnList[index3].hascolumnAutoIncrement) then
-                                 begin
-                                   if not DDTables.emptyTable then
-                                     begin
-                                       Parser.yyerror('Table could be empty in a NOT NULL column');
-                                       exit;
-                                     end;
-                                 end;
-                         end;
-                 end;
-
-              colsName := nil;
-              colsType := nil;
-              allowcolsNull := nil;
-
-              for index1 := low(columnList) to high(columnList) do
-                begin
-                  // Column_metaData(column_name,table_name,database_name,position,type_name,Default)
-                  row := nil;
-                  setLength(row, 14);
-                  row[0] := columnlist[index1].columnName;
-                  setLength(colsName, length(colsName) + 1);
-                  colsName[high(colsName)] := columnlist[index1].columnName;
-                  row[1] := tblName;
-                  row[2] := workingSchema.dbName;
-                  row[3] := index1; // position
-                  row[4] := columnlist[index1].columnTypeName;
-                  setLength(colsType, length(colsType) + 1);
-                  colsType[high(colsType)] :=
-                    convertType(columnlist[index1].columnTypeName);
-                  with columnlist[index1] do
-                    if charTypeSize <> 0 then
-                    begin
-                      dimSize := charTypeSize;
-                      colsType[high(colsType)] :=
-                        colsType[high(colsType)] + '[' + IntToStr(charTypeSize) + ']';
-                    end
-                    else
-                      dimSize := numTypeSize[0];
-                  row[5] := dimSize; // 'dim1'
-                  row[6] := columnlist[index1].numTypeSize[1]; // 'dim2'
-
-                  row[8] := 0;
-                  row[9] := '';    // not valid
-                  row[10] := 0;
-                  row[11] := 0.0;
-                  row[12] := 0.0;
-                  row[13] := False;
-
-                  with columnlist[index1] do
-                    if hascolumnAutoIncrement then
-                      begin
-                        // could be used for Timestamp checking on data type
-                        row[7] := 8; // AUTOINCREMENT
-                      end
-                     else
-                      begin
-                        if hascolumnDefault then
-                          begin
-                            if (convertType(columnTypeName) = 'INTEGER') or
-                               (convertType(columnTypeName) = 'SMALLINT') then
-                              begin
-                                row[7] := 0;  // 0 for integer
-                                row[8] := columnlist[index1].columnDefaultValue;
-                              end;
-                    ////        if columnlist[index1].columnDefaultValue = null then
-                    ////          row[7] := 1; // null value
-                            if convertType(columnTypeName) = 'INT64' then
-                              begin
-                                row[7] := 2;  // 2 for int64
-                                row[10] := columnlist[index1].columnDefaultValue;
-                              end;
-                            if (convertType(columnTypeName) = 'SINGLE') or
-                               (convertType(columnTypeName) = 'DOUBLE') or
-                               (convertType(columnTypeName) = 'EXTENDED') then
-                              begin
-                                row[7] := 3;  // 3 for extended
-                                row[11] := columnlist[index1].columnDefaultValue;
-                              end;
-                            if convertType(columnTypeName) = 'CURRENCY' then
-                              begin
-                                row[7] := 4;  // 4 for currency
-                                row[12] := columnlist[index1].columnDefaultValue;
-                              end;
-                            if convertType(columnTypeName) = 'TDATETIME' then
-                              begin
-                                row[7] := 5;  // 5 for tdatetime
-                                row[11] := @columnlist[index1].columnDefaultValue;
-                              end;
-                            if convertType(columnTypeName) = 'TDATE' then
-                              begin
-                                row[7] := 5;  // 5 for tdatetime
-                                row[11] := @columnlist[index1].columnDefaultValue;
-                              end;
-                            if convertType(columnTypeName) = 'TTIME' then
-                              begin
-                                row[7] := 5;  // 5 for tdatetime
-                                row[11] := @columnlist[index1].columnDefaultValue;
-                              end;
-                            if convertType(columnTypeName) = 'BOOLEAN' then
-                              begin
-                                row[7] := 6;  // 6 for boolean
-                                row[13] := columnlist[index1].columnDefaultValue;
-                              end;
-                            if convertType(columnTypeName) = 'STRING' then
-                              begin
-                                row[7].VInteger := 7; // 7 for string
-                                row[9]:= columnlist[index1].columnDefaultValue;
-                              end;
-                          end
-                        else
-                        begin
-                          { #note :  If you specify NULL as the default value for a column,
-                                     you cannot specify a NOT NULL constraint as part of the
-                                     column definition.
-                                     NULL is not a valid default value for a column that is part
-                                     of a primary key.
-                          }
-                          row[7] := -1; // default not specify
-                        end;
-                      end;
-
-                  DDtablecolumns.insertRow(row);
-                end;
-
-              for index1 := Low(constraintList) to high(constraintList) do
-                  begin
-
-                    // Constraint_metaData(constraint_name,column_name,...,column_name,constraint_kind,constraint_type)
-                    // column_name,...,column_name is ColumnsConstrain_metaData(column_name,table_name,database_name,constraint_name)
-                    // constraint_kind: column / table
-                    // constraint_type: PRIMARY KEY, UNIQUE, CHECK, REFERENCES - FOREIGN KEY
-                    row := nil;
-                    setLength(row, 6);
-                    row[0] := constraintList[index1].constraintName;
-                    row[1] := tblName;
-                    row[2] := workingSchema.dbName;
-                    row[3] := constraintList[index1].constraintkind;
-                    // constraint_kind: column / table
-                    with constraintList[index1] do
-                      if (constraintType = 'NULL') then
-                        row[4] := 0
-                       else
-                        if (constraintType = 'NOT NULL') then
-                          row[4] := 1
-                         else
-                          if (constraintType = 'PRIMARY KEY') then
-                            row[4] := 3
-                           else
-                            if (constraintType = 'UNIQUE') then
-                              row[4] := 2
-                             else
-                              if (constraintType = 'CHECK') then
-                                row[4] := 5
-                               else
-                                if (constraintType = 'REFERENCES') then
-                                  row[4] := 4;
-                    if constraintList[index1].constraintType = 'REFERENCES' then
-                      row[5] := constraintList[index1].refTable
-                     else row[5] := '';
-                    DDconstraints.insertRow(row);
-
-                    for index2 :=
-                        Low(constraintList[index1].columnsName)
-                        to high(constraintList[index1].columnsName) do
-                      begin
-                        row := nil;
-                        setLength(row, 8);
-                        row[0] := constraintList[index1].constraintName;
-                        row[1] := constraintList[index1].columnsName[index2];
-                        row[2] := false;
-                        row[3] := false;
-                        row[4] := 0;
-                        row[5] := false;
-                        row[6] := 0;
-                        row[7] := '';
-                        DDcolumnsconstraint.insertRow(row);
-                      end;
-
-                    if constraintList[index1].constraintType = 'REFERENCES' then
-                      for index2 :=
-                          Low(constraintList[index1].refcolumnsName)
-                          to high(constraintList[index1].refcolumnsName) do
-                        begin
-                          row := nil;
-                          setLength(row, 8);
-                          row[0] := constraintList[index1].constraintName;
-                          row[1] := constraintList[index1].refcolumnsName[index2];
-                          row[2] := true;
-                          row[3] := false;
-                          row[4] := 0;
-                          row[5] := false;
-                          row[6] := 0;
-                          row[7] := '';
-                          DDcolumnsconstraint.insertRow(row);
-                        end;
-
-                    if constraintList[index1].constraintType = 'CHECK' then
-                      for index2 :=
-                          low(constraintList[index1].checkInstructions)
-                          to high(constraintList[index1].checkInstructions) do
-                        begin
-                          row := nil;
-                          setLength(row, 8);
-                          row[0] := constraintList[index1].constraintName;
-                          row[1] := constraintList[index1].checkInstructions[index2].printInstruction;
-                          row[2] := false;
-                          row[3] := true;
-                          row[4] := constraintList[index1].checkInstructions[Index2].mnemonic;
-                          row[5] := constraintList[index1].checkInstructions[Index2].boolvalue;
-                          row[6] := constraintList[index1].checkInstructions[Index2].value;
-                          row[7] :=constraintList[index1].checkInstructions[index2].stvalue;
-                          DDcolumnsconstraint.insertRow(row);
-                        end;
-                end;
-
-              (*** Loading into Working Schema ***)
-              setLength(allowcolsNull, length(colsName));
-              for index1 := low(allowcolsNull) to high(allowcolsNull) do
-                allowcolsNull[index1] := True; // Null values are allowable by default
-
-              for index3 := 0 to high(workingSchema.tables) do
-                if workingSchema.tables[index3].tblName = tblName then break;
-              with workingSchema.tables[index3] do
-                begin
-                  //numCols := numCols + length(columnList);
-                  setLength(columns, length(columns) + numCols);
-                  for index1 := low(columnList) to high(columnList) do
-                    with columnList[index1] do
-                      begin
-                        index2 := index1 + length(columnList);
-                        columns[index2].colname := columnName;
-                        columns[index2].colDefaultValue := columnDefaultValue;
-                        columns[index2].coltypescale.size := 0;
-                        columns[index2].colHasAutoIncrement := hasColumnAutoIncrement;
-                        columns[index2].colHasDefault := hasColumnDefault;
-                        if convertType(columnTypeName) = 'INTEGER' then
-                          columns[index2].coltype := intType;
-                        if convertType(columnTypeName) = 'SMALLINT' then
-                          columns[index2].coltype := smallintType;
-                        if convertType(columnTypeName) = 'INT64' then
-                          columns[index2].coltype := int64Type;
-                        if (convertType(columnTypeName) = 'SINGLE') or
-                           (convertType(columnTypeName) = 'DOUBLE') or
-                           (convertType(columnTypeName) = 'EXTENDED') then
-                          begin
-                            columns[index2].coltype := extendedType;
-                            columns[index2].coltypescale.precision := numTypeSize[0];
-                            columns[index2].coltypescale.scale := numTypeSize[1];
-                          end;
-                        if convertType(columnTypeName) = 'CURRENCY' then
-                          begin
-                            columns[index2].coltype := currencyType;
-                            columns[index2].coltypescale.precision := numTypeSize[0];
-                            columns[index2].coltypescale.scale := numTypeSize[1];
-                          end;
-                        if convertType(columnTypeName) = 'TDATETIME' then
-                          columns[index2].coltype := tdatetimeType;
-                        if convertType(columnTypeName) = 'TDATE' then
-                          columns[index2].coltype := tdateType;
-                        if convertType(columnTypeName) = 'TTIME' then
-                          columns[index2].coltype := ttimeType;
-                        if convertType(columnTypeName) = 'BOOLEAN' then
-                          columns[index2].coltype := booleanType;
-                        if convertType(columnTypeName) = 'STRING' then
-                          begin
-                            columns[index2].coltype := stringType;
-                            columns[index2].coltypescale.size := charTypeSize;
-                          end;
-                      end;
-
-                  numCols := numCols + length(columnList);
-
-
-                  for index := Low(constraintList) to high(constraintList) do
-                    with constraintList[index] do
-                      begin
-                        // UNIQUE COULD BE NULL
-                        // PRIMARY KEY IS NOT NULL COLUMN AND UNIQUE COLUMN
-                        setLength(constraints, length(constraints) + 1);
-                        with constraints[high(constraints)] do
-                          begin
-                            cnstrname := constraintName;
-                            if (constraintType = 'NULL') then
-                              begin
-                                cnstrtype := 0;
-                                for index2 := low(columnsName) to high(columnsName) do
-                                  for index1 := Low(columnList) to high(columnList) do
-                                    with columnList[index1] do
-                                      if columnsName[index2] = columnName then
-                                        begin
-                                          nullCol := Index1;
-                                          allowcolsNull[Index1] := True;
-                                        end;
-                              end;
-                            if (constraintType = 'NOT NULL') then
-                              with constraints[high(constraints)] do
-                                begin
-                                  cnstrtype := 1;
-                                  for index2 := low(columnsName) to high(columnsName) do
-                                    for index1 := Low(columnList) to high(columnList) do
-                                      with columnList[index1] do
-                                        if columnsName[index2] = columnName then
-                                          begin
-                                            nnullCol := Index1;
-                                            allowcolsNull[Index1] := False;
-                                          end;
-                                end;
-                            if (constraintType = 'UNIQUE') then
-                              begin
-                                cnstrtype := 2;
-                                for index2 := low(columnsName) to high(columnsName) do
-                                  for index1 := Low(columnList) to high(columnList) do
-                                    with columnList[index1] do
-                                      if columnsName[index2] = columnName then
-                                        begin
-                                          uqCols[0] := setbit(uqCols[0], Index1);
-                                          allowcolsNull[Index1] := False;
-                                        end;
-                              end;
-                            if (constraintType = 'PRIMARY KEY') then
-                              begin
-                                cnstrtype := 3;
-                                for index2 := low(columnsName) to high(columnsName) do
-                                  for index1 := Low(columnList) to high(columnList) do
-                                    with columnList[index1] do
-                                      if columnsName[index2] = columnName then
-                                        begin
-                                          pkCols[0] := setbit(pkCols[0], Index1);
-                                          allowcolsNull[Index1] := False;
-                                        end;
-                              end;
-                            if (constraintType = 'CHECK') then
-                              begin
-                                cnstrtype := 5;
-                                for index2 := low(columnsName) to high(columnsName) do
-                                  for index1 := Low(columnList) to high(columnList) do
-                                    with columnList[index1] do
-                                      if columnsName[index2] = columnName then
-                                      begin
-                                        ckCols[0] := setbit(ckCols[0], Index1);
-                                        checkCondition := constraintList[index].checkInstructions;
-                                      end;
-                              end;
-                            if (constraintType = 'REFERENCES') then
-                              begin
-                                cnstrtype := 4;
-                                for index2 := low(columnsName) to high(columnsName) do
-                                  for index1 := Low(columnList) to high(columnList) do
-                                    with columnList[index1] do
-                                      if columnsName[index2] = columnName then
-                                        Cols[0] := setbit(Cols[0], Index1);
-                                reftblName := refTable;
-                                for index2 := low(columnsName) to high(columnsName) do
-                                  for index1 := Low(columnList) to high(columnList) do
-                                    with columnList[index1] do
-                                      if refcolumnsName[index2] = columnName then
-                                        refCols[0] := setbit(refCols[0], Index1);
-                              end;
-                          end;
-                      end;
-                end;
-
-              for RowId1 := DDTables.firstRow to DDTables.lastRow do
-                begin
-                  table_name := DDTables.getValueByColumnName(RowId1,'table_name');
-                  if tblname = table_name then break;
-                end;
-              DDTables.returnRow(RowId1,Row);
-              lcount := DDTables.getValueByColumnName(RowId1,'numberofattributes');
-              lcount := lcount + Length(columnList);
-              Row[2] := lcount;
-              DDTables.putRow(RowId1,Row);
-
-              setlength(inscols, length(columnList));
-              for index1 := 0 to high(columnList) do
-                begin
-                  inscols[index1].name := columnList[index1].columnName;
-                  if columnList[index1].columnTypeName = 'TIMESTAMP' then
-                    inscols[index1].value := now else
-                    if columnList[index1].hascolumnAutoIncrement then
-                      inscols[index1].value := 1 else
-                      if columnList[index1].hascolumnDefault then
-                        with columnList[index1] do
-                          inscols[index1].value :=
-                            isCompatibleType(columnDefaultValue,columnTypeName,
-                              dim1,dim2) else
-                        inscols[index1].value := Null
-                end;
-
-
-              colsName := nil;
-              Parser.yyacceptmessage('Alter table succeed');
-              ladd_column := false
-
-            end;
-          if ldrop_column then
-            begin
-              // You cannot delete a column that has a CHECK constraint. You must first delete the constraint.
-              // You cannot delete a column that has PRIMARY KEY or FOREIGN KEY constraints or other dependencies.
-              // You must first remove all dependencies on the column.
-
-              // check all the constraint to see which one involve the column
-              // take away the constraint
-              // take away values from the columns
-              // take away the indexes on column
-
-              ldrop_column := false;
-            end;
-          if lrename_table then
-            begin
-              { #note : fromTables[0] reference old name
-                        fromTables[1] reference new name }
-              for index3 := 0 to high(workingSchema.tables) do
-                if workingSchema.tables[index3].tblName = fromTables[1].Name then
-                  begin
-                    Parser.yyerror('Table name ' +  fromTables[1].Name + ' already exists');
-                    exit;
-                  end;
-
-              found := false;
-              for index3 := 0 to high(workingSchema.tables) do
-                if workingSchema.tables[index3].tblName = fromTables[0].Name then
-                  begin
-                    found := true;
-                    break;
-                  end;
-              if not found then
-                begin
-                  Parser.yyerror('Table name ' + fromTables[0].Name + ' doesn''t exists');
-                  exit;
-                end;
-
-              workingSchema.tables[index3].tblName := tblName;
-              // No need to check for table name in constraints as cols are referenced by position in the table
-              // check if the table is referenced
-              for index2 := 0 to high(workingSchema.tables[index3].constraints) do
-                begin
-                  case workingSchema.tables[index3].constraints[index2].cnstrtype of
-                    4:
-                      begin
-                        if workingSchema.tables[index3].constraints[index2].reftblName = fromTables[0].Name then
-                          workingSchema.tables[index3].constraints[index2].reftblName := tblName
-                      end;
-                    5:
-                      begin
-                        for index1 := 0 to high(workingSchema.tables[index3].constraints[index2].checkCondition) do
-                          with workingSchema.tables[index3].constraints[index2].checkCondition[index1] do
-                            if mnemonic = 151 then
-                              begin
-                                table_name := copy(stValue,1,pos('.',stValue)-1);
-                                if table_name = fromTables[0].Name then
-                                  begin
-                                    column_name := copy(stValue,pos('.',stValue)+1,length(stValue));
-                                    stValue := tblName + '.' + column_name
-                                  end;
-                              end;
-                      end;
-                  end
-                end;
-
-              lrename_table := false;
-            end;
-          if lrename_column then
-            begin
-              { #note :  change all column_name in Data Dictionary
-                         in constraints
-                         in indexes
-                         in reference if exists
-              }
-
-              if not TableExists(tblName) then
-                begin
-                  Parser.yyerror('Table ' + tblName + ' not found');
-                  exit;
-                end;
-
-              found := false;
-              tblFields := loadTableFields(tblName);
-              for index2 := 0 to high(tblFields.columns) do
-                if colsName[0] = tblFields.columns[index2].colname then
-                  begin
-                    found := true;
-                    break;
-                  end;
-              if not found then
-                begin
-                  Parser.yyerror('Unknow column ' + colsName[0] + ' in table ' + tblName);
-                  exit;
-                end;
-
-              tblFields := loadTableFields(tblName);
-              for index2 := 0 to high(tblFields.columns) do
-                if colsName[1] = tblFields.columns[index2].colname then
-                  begin
-                    Parser.yyerror('Duplicate column name' + colsName[1]);
-                    exit;
-                  end;
-
-              { #todo :  change all column_name in Data Dictionary
-                         in constraints
-                         in indexes
-                         in reference if exists
-              }
-
-              lrename_column := false;
-            end
         end;
 
         167: // ALTER TABLE Add Column
         begin
-          ladd_Column := true;
+          if not TableExists(tblName) then
+            begin
+              Parser.yyerror('Table ' + tblName + ' not found');
+              exit;
+            end;
+
+          tblFields := loadTableFields(tblName);
+          for index1 := low(columnList) to high(columnList) do
+            for index2 := 0 to high(tblFields.columns) do
+              if columnList[index1].columnName = tblFields.columns[index2].colname then
+                begin
+                  Parser.yyerror('column ' + columnList[index1].columnName + ' already exists');
+                  exit;
+                end;
+
+          { #note : ALTER TABLE only allows columns to be added that can contain nulls,
+                    or have a DEFAULT definition specified, or the column being added
+                    is an identity (autoincrement or timestamp) column, or alternatively if none of the
+                    previous conditions are satisfied the table must be empty to allow addition of these columns
+                    Noted later: alternatively could be added with 0 for intger, '' for strings, now for timestamp , ...
+          }
+
+
+          for index1 := 0 to high(constraintList) do
+            begin
+              if (constraintList[index1].constraintType = 'NOT NULL') or
+                 (constraintList[index1].constraintType = 'PRIMARY KEY') then
+                   for index2 := 0 to high(constraintList[index1].columnsName) do
+                     begin
+                       colname := constraintList[index1].columnsName[index2];
+                       for index3 := 0 to high(columnList) do
+                         if columnList[index3].columnName = colname then
+                           if not ((columnList[index3].columnTypeName = 'TIMESTAMP') or
+                              columnList[index3].hascolumnDefault or
+                              columnList[index3].hascolumnAutoIncrement) then
+                             begin
+                               if not DDTables.emptyTable then
+                                 begin
+                                   Parser.yyerror('Table could be empty in a NOT NULL column');
+                                   exit;
+                                 end;
+                             end;
+                     end;
+             end;
+
+          colsName := nil;
+          colsType := nil;
+          allowcolsNull := nil;
+
+          for index1 := low(columnList) to high(columnList) do
+            begin
+              // Column_metaData(column_name,table_name,database_name,position,type_name,Default)
+              row := nil;
+              setLength(row, 14);
+              row[0] := columnlist[index1].columnName;
+              setLength(colsName, length(colsName) + 1);
+              colsName[high(colsName)] := columnlist[index1].columnName;
+              row[1] := tblName;
+              row[2] := workingSchema.dbName;
+              row[3] := index1; // position
+              row[4] := columnlist[index1].columnTypeName;
+              setLength(colsType, length(colsType) + 1);
+              colsType[high(colsType)] :=
+                convertType(columnlist[index1].columnTypeName);
+              with columnlist[index1] do
+                if charTypeSize <> 0 then
+                begin
+                  dimSize := charTypeSize;
+                  colsType[high(colsType)] :=
+                    colsType[high(colsType)] + '[' + IntToStr(charTypeSize) + ']';
+                end
+                else
+                  dimSize := numTypeSize[0];
+              row[5] := dimSize; // 'dim1'
+              row[6] := columnlist[index1].numTypeSize[1]; // 'dim2'
+
+              row[8] := 0;
+              row[9] := '';    // not valid
+              row[10] := 0;
+              row[11] := 0.0;
+              row[12] := 0.0;
+              row[13] := False;
+
+              with columnlist[index1] do
+                if hascolumnAutoIncrement then
+                  begin
+                    // could be used for Timestamp checking on data type
+                    row[7] := 8; // AUTOINCREMENT
+                  end
+                 else
+                  begin
+                    if hascolumnDefault then
+                      begin
+                        if (convertType(columnTypeName) = 'INTEGER') or
+                           (convertType(columnTypeName) = 'SMALLINT') then
+                          begin
+                            row[7] := 0;  // 0 for integer
+                            row[8] := columnlist[index1].columnDefaultValue;
+                          end;
+                ////        if columnlist[index1].columnDefaultValue = null then
+                ////          row[7] := 1; // null value
+                        if convertType(columnTypeName) = 'INT64' then
+                          begin
+                            row[7] := 2;  // 2 for int64
+                            row[10] := columnlist[index1].columnDefaultValue;
+                          end;
+                        if (convertType(columnTypeName) = 'SINGLE') or
+                           (convertType(columnTypeName) = 'DOUBLE') or
+                           (convertType(columnTypeName) = 'EXTENDED') then
+                          begin
+                            row[7] := 3;  // 3 for extended
+                            row[11] := columnlist[index1].columnDefaultValue;
+                          end;
+                        if convertType(columnTypeName) = 'CURRENCY' then
+                          begin
+                            row[7] := 4;  // 4 for currency
+                            row[12] := columnlist[index1].columnDefaultValue;
+                          end;
+                        if convertType(columnTypeName) = 'TDATETIME' then
+                          begin
+                            row[7] := 5;  // 5 for tdatetime
+                            row[11] := @columnlist[index1].columnDefaultValue;
+                          end;
+                        if convertType(columnTypeName) = 'TDATE' then
+                          begin
+                            row[7] := 5;  // 5 for tdatetime
+                            row[11] := @columnlist[index1].columnDefaultValue;
+                          end;
+                        if convertType(columnTypeName) = 'TTIME' then
+                          begin
+                            row[7] := 5;  // 5 for tdatetime
+                            row[11] := @columnlist[index1].columnDefaultValue;
+                          end;
+                        if convertType(columnTypeName) = 'BOOLEAN' then
+                          begin
+                            row[7] := 6;  // 6 for boolean
+                            row[13] := columnlist[index1].columnDefaultValue;
+                          end;
+                        if convertType(columnTypeName) = 'STRING' then
+                          begin
+                            row[7].VInteger := 7; // 7 for string
+                            row[9]:= columnlist[index1].columnDefaultValue;
+                          end;
+                      end
+                    else
+                    begin
+                      { #note :  If you specify NULL as the default value for a column,
+                                 you cannot specify a NOT NULL constraint as part of the
+                                 column definition.
+                                 NULL is not a valid default value for a column that is part
+                                 of a primary key.
+                      }
+                      row[7] := -1; // default not specify
+                    end;
+                  end;
+
+              DDtablecolumns.insertRow(row);
+            end;
+
+          for index1 := Low(constraintList) to high(constraintList) do
+              begin
+
+                // Constraint_metaData(constraint_name,column_name,...,column_name,constraint_kind,constraint_type)
+                // column_name,...,column_name is ColumnsConstrain_metaData(column_name,table_name,database_name,constraint_name)
+                // constraint_kind: column / table
+                // constraint_type: PRIMARY KEY, UNIQUE, CHECK, REFERENCES - FOREIGN KEY
+                row := nil;
+                setLength(row, 6);
+                row[0] := constraintList[index1].constraintName;
+                row[1] := tblName;
+                row[2] := workingSchema.dbName;
+                row[3] := constraintList[index1].constraintkind;
+                // constraint_kind: column / table
+                with constraintList[index1] do
+                  if (constraintType = 'NULL') then
+                    row[4] := 0
+                   else
+                    if (constraintType = 'NOT NULL') then
+                      row[4] := 1
+                     else
+                      if (constraintType = 'PRIMARY KEY') then
+                        row[4] := 3
+                       else
+                        if (constraintType = 'UNIQUE') then
+                          row[4] := 2
+                         else
+                          if (constraintType = 'CHECK') then
+                            row[4] := 5
+                           else
+                            if (constraintType = 'REFERENCES') then
+                              row[4] := 4;
+                if constraintList[index1].constraintType = 'REFERENCES' then
+                  row[5] := constraintList[index1].refTable
+                 else row[5] := '';
+                DDconstraints.insertRow(row);
+
+                for index2 :=
+                    Low(constraintList[index1].columnsName)
+                    to high(constraintList[index1].columnsName) do
+                  begin
+                    row := nil;
+                    setLength(row, 8);
+                    row[0] := constraintList[index1].constraintName;
+                    row[1] := constraintList[index1].columnsName[index2];
+                    row[2] := false;
+                    row[3] := false;
+                    row[4] := 0;
+                    row[5] := false;
+                    row[6] := 0;
+                    row[7] := '';
+                    DDcolumnsconstraint.insertRow(row);
+                  end;
+
+                if constraintList[index1].constraintType = 'REFERENCES' then
+                  for index2 :=
+                      Low(constraintList[index1].refcolumnsName)
+                      to high(constraintList[index1].refcolumnsName) do
+                    begin
+                      row := nil;
+                      setLength(row, 8);
+                      row[0] := constraintList[index1].constraintName;
+                      row[1] := constraintList[index1].refcolumnsName[index2];
+                      row[2] := true;
+                      row[3] := false;
+                      row[4] := 0;
+                      row[5] := false;
+                      row[6] := 0;
+                      row[7] := '';
+                      DDcolumnsconstraint.insertRow(row);
+                    end;
+
+                if constraintList[index1].constraintType = 'CHECK' then
+                  for index2 :=
+                      low(constraintList[index1].checkInstructions)
+                      to high(constraintList[index1].checkInstructions) do
+                    begin
+                      row := nil;
+                      setLength(row, 8);
+                      row[0] := constraintList[index1].constraintName;
+                      row[1] := constraintList[index1].checkInstructions[index2].printInstruction;
+                      row[2] := false;
+                      row[3] := true;
+                      row[4] := constraintList[index1].checkInstructions[Index2].mnemonic;
+                      row[5] := constraintList[index1].checkInstructions[Index2].boolvalue;
+                      row[6] := constraintList[index1].checkInstructions[Index2].value;
+                      row[7] :=constraintList[index1].checkInstructions[index2].stvalue;
+                      DDcolumnsconstraint.insertRow(row);
+                    end;
+            end;
+
+          (*** Loading into Working Schema ***)
+          setLength(allowcolsNull, length(colsName));
+          for index1 := low(allowcolsNull) to high(allowcolsNull) do
+            allowcolsNull[index1] := True; // Null values are allowable by default
+
+          for index3 := 0 to high(workingSchema.tables) do
+            if workingSchema.tables[index3].tblName = tblName then break;
+          with workingSchema.tables[index3] do
+            begin
+              //numCols := numCols + length(columnList);
+              setLength(columns, length(columns) + numCols);
+              for index1 := low(columnList) to high(columnList) do
+                with columnList[index1] do
+                  begin
+                    index2 := index1 + length(columnList);
+                    columns[index2].colname := columnName;
+                    columns[index2].colDefaultValue := columnDefaultValue;
+                    columns[index2].coltypescale.size := 0;
+                    columns[index2].colHasAutoIncrement := hasColumnAutoIncrement;
+                    columns[index2].colHasDefault := hasColumnDefault;
+                    if convertType(columnTypeName) = 'INTEGER' then
+                      columns[index2].coltype := intType;
+                    if convertType(columnTypeName) = 'SMALLINT' then
+                      columns[index2].coltype := smallintType;
+                    if convertType(columnTypeName) = 'INT64' then
+                      columns[index2].coltype := int64Type;
+                    if (convertType(columnTypeName) = 'SINGLE') or
+                       (convertType(columnTypeName) = 'DOUBLE') or
+                       (convertType(columnTypeName) = 'EXTENDED') then
+                      begin
+                        columns[index2].coltype := extendedType;
+                        columns[index2].coltypescale.precision := numTypeSize[0];
+                        columns[index2].coltypescale.scale := numTypeSize[1];
+                      end;
+                    if convertType(columnTypeName) = 'CURRENCY' then
+                      begin
+                        columns[index2].coltype := currencyType;
+                        columns[index2].coltypescale.precision := numTypeSize[0];
+                        columns[index2].coltypescale.scale := numTypeSize[1];
+                      end;
+                    if convertType(columnTypeName) = 'TDATETIME' then
+                      columns[index2].coltype := tdatetimeType;
+                    if convertType(columnTypeName) = 'TDATE' then
+                      columns[index2].coltype := tdateType;
+                    if convertType(columnTypeName) = 'TTIME' then
+                      columns[index2].coltype := ttimeType;
+                    if convertType(columnTypeName) = 'BOOLEAN' then
+                      columns[index2].coltype := booleanType;
+                    if convertType(columnTypeName) = 'STRING' then
+                      begin
+                        columns[index2].coltype := stringType;
+                        columns[index2].coltypescale.size := charTypeSize;
+                      end;
+                  end;
+
+              numCols := numCols + length(columnList);
+
+
+              for index := Low(constraintList) to high(constraintList) do
+                with constraintList[index] do
+                  begin
+                    // UNIQUE COULD BE NULL
+                    // PRIMARY KEY IS NOT NULL COLUMN AND UNIQUE COLUMN
+                    setLength(constraints, length(constraints) + 1);
+                    with constraints[high(constraints)] do
+                      begin
+                        cnstrname := constraintName;
+                        if (constraintType = 'NULL') then
+                          begin
+                            cnstrtype := 0;
+                            for index2 := low(columnsName) to high(columnsName) do
+                              for index1 := Low(columnList) to high(columnList) do
+                                with columnList[index1] do
+                                  if columnsName[index2] = columnName then
+                                    begin
+                                      nullCol := Index1;
+                                      allowcolsNull[Index1] := True;
+                                    end;
+                          end;
+                        if (constraintType = 'NOT NULL') then
+                          with constraints[high(constraints)] do
+                            begin
+                              cnstrtype := 1;
+                              for index2 := low(columnsName) to high(columnsName) do
+                                for index1 := Low(columnList) to high(columnList) do
+                                  with columnList[index1] do
+                                    if columnsName[index2] = columnName then
+                                      begin
+                                        nnullCol := Index1;
+                                        allowcolsNull[Index1] := False;
+                                      end;
+                            end;
+                        if (constraintType = 'UNIQUE') then
+                          begin
+                            cnstrtype := 2;
+                            for index2 := low(columnsName) to high(columnsName) do
+                              for index1 := Low(columnList) to high(columnList) do
+                                with columnList[index1] do
+                                  if columnsName[index2] = columnName then
+                                    begin
+                                      uqCols[0] := setbit(uqCols[0], Index1);
+                                      allowcolsNull[Index1] := False;
+                                    end;
+                          end;
+                        if (constraintType = 'PRIMARY KEY') then
+                          begin
+                            cnstrtype := 3;
+                            for index2 := low(columnsName) to high(columnsName) do
+                              for index1 := Low(columnList) to high(columnList) do
+                                with columnList[index1] do
+                                  if columnsName[index2] = columnName then
+                                    begin
+                                      pkCols[0] := setbit(pkCols[0], Index1);
+                                      allowcolsNull[Index1] := False;
+                                    end;
+                          end;
+                        if (constraintType = 'CHECK') then
+                          begin
+                            cnstrtype := 5;
+                            for index2 := low(columnsName) to high(columnsName) do
+                              for index1 := Low(columnList) to high(columnList) do
+                                with columnList[index1] do
+                                  if columnsName[index2] = columnName then
+                                  begin
+                                    ckCols[0] := setbit(ckCols[0], Index1);
+                                    checkCondition := constraintList[index].checkInstructions;
+                                  end;
+                          end;
+                        if (constraintType = 'REFERENCES') then
+                          begin
+                            cnstrtype := 4;
+                            for index2 := low(columnsName) to high(columnsName) do
+                              for index1 := Low(columnList) to high(columnList) do
+                                with columnList[index1] do
+                                  if columnsName[index2] = columnName then
+                                    Cols[0] := setbit(Cols[0], Index1);
+                            reftblName := refTable;
+                            for index2 := low(columnsName) to high(columnsName) do
+                              for index1 := Low(columnList) to high(columnList) do
+                                with columnList[index1] do
+                                  if refcolumnsName[index2] = columnName then
+                                    refCols[0] := setbit(refCols[0], Index1);
+                          end;
+                      end;
+                  end;
+            end;
+
+          for RowId1 := DDTables.firstRow to DDTables.lastRow do
+            begin
+              table_name := DDTables.getValueByColumnName(RowId1,'table_name');
+              if tblname = table_name then break;
+            end;
+          DDTables.returnRow(RowId1,Row);
+          lcount := DDTables.getValueByColumnName(RowId1,'numberofattributes');
+          lcount := lcount + Length(columnList);
+          Row[2] := lcount;
+          DDTables.putRow(RowId1,Row);
+
+          setlength(inscols, length(columnList));
+          for index1 := 0 to high(columnList) do
+            begin
+              inscols[index1].name := columnList[index1].columnName;
+              if columnList[index1].columnTypeName = 'TIMESTAMP' then
+                inscols[index1].value := now else
+                if columnList[index1].hascolumnAutoIncrement then
+                  inscols[index1].value := 1 else
+                  if columnList[index1].hascolumnDefault then
+                    with columnList[index1] do
+                      inscols[index1].value :=
+                        isCompatibleType(columnDefaultValue,columnTypeName,
+                          dim1,dim2) else
+                    inscols[index1].value := Null
+            end;
+
+
+          colsName := nil;
+          Parser.yyacceptmessage('Alter table succeed');
         end;
 
         168: // ALTER TABLE  DROP COLUMN
         begin
-          ldrop_Column := true;
+          { #note : You cannot delete a column that has a CHECK constraint.
+                      You must first delete the constraint.
+                    You cannot delete a column that has PRIMARY KEY or FOREIGN KEY constraints
+                      or other dependencies. You must first remove all dependencies on the column.
+
+                    Check all the constraint to see which one involve the column
+                      take away the constraint
+                      take away values from the columns
+                      take away the indexes on column
+          }
         end;
 
         242: // ADD CONSTRAINT
@@ -6508,12 +6396,108 @@ begin
 
         155: // ALTER TABLE RENAME COLUMN
         begin
-          lrename_column := true;
+          { #note : fromTables[0] reference old name
+                    fromTables[1] reference new name }
+          for index3 := 0 to high(workingSchema.tables) do
+            if workingSchema.tables[index3].tblName = fromTables[1].Name then
+              begin
+                Parser.yyerror('Table name ' +  fromTables[1].Name + ' already exists');
+                exit;
+              end;
+
+          found := false;
+          for index3 := 0 to high(workingSchema.tables) do
+            if workingSchema.tables[index3].tblName = fromTables[0].Name then
+              begin
+                found := true;
+                break;
+              end;
+          if not found then
+            begin
+              Parser.yyerror('Table name ' + fromTables[0].Name + ' doesn''t exists');
+              exit;
+            end;
+
+          workingSchema.tables[index3].tblName := tblName;
+          // No need to check for table name in constraints as cols are referenced by position in the table
+          // check if the table is referenced
+          for index2 := 0 to high(workingSchema.tables[index3].constraints) do
+            begin
+              case workingSchema.tables[index3].constraints[index2].cnstrtype of
+                4:
+                  begin
+                    if workingSchema.tables[index3].constraints[index2].reftblName = fromTables[0].Name then
+                      workingSchema.tables[index3].constraints[index2].reftblName := tblName
+                  end;
+                5:
+                  begin
+                    for index1 := 0 to high(workingSchema.tables[index3].constraints[index2].checkCondition) do
+                      with workingSchema.tables[index3].constraints[index2].checkCondition[index1] do
+                        if mnemonic = 151 then
+                          begin
+                            table_name := copy(stValue,1,pos('.',stValue)-1);
+                            if table_name = fromTables[0].Name then
+                              begin
+                                column_name := copy(stValue,pos('.',stValue)+1,length(stValue));
+                                stValue := tblName + '.' + column_name
+                              end;
+                          end;
+                  end;
+              end
+            end
         end;
 
         239: // ALTER TABLE RENAME TABLE
         begin
-          lrename_table := true;
+          { #note : fromTables[0] reference old name
+                    fromTables[1] reference new name }
+          for index3 := 0 to high(workingSchema.tables) do
+            if workingSchema.tables[index3].tblName = fromTables[1].Name then
+              begin
+                Parser.yyerror('Table name ' +  fromTables[1].Name + ' already exists');
+                exit;
+              end;
+
+          found := false;
+          for index3 := 0 to high(workingSchema.tables) do
+            if workingSchema.tables[index3].tblName = fromTables[0].Name then
+              begin
+                found := true;
+                break;
+              end;
+          if not found then
+            begin
+              Parser.yyerror('Table name ' + fromTables[0].Name + ' doesn''t exists');
+              exit;
+            end;
+
+          workingSchema.tables[index3].tblName := tblName;
+          // No need to check for table name in constraints as cols are referenced by position in the table
+          // check if the table is referenced
+          for index2 := 0 to high(workingSchema.tables[index3].constraints) do
+            begin
+              case workingSchema.tables[index3].constraints[index2].cnstrtype of
+                4:
+                  begin
+                    if workingSchema.tables[index3].constraints[index2].reftblName = fromTables[0].Name then
+                      workingSchema.tables[index3].constraints[index2].reftblName := tblName
+                  end;
+                5:
+                  begin
+                    for index1 := 0 to high(workingSchema.tables[index3].constraints[index2].checkCondition) do
+                      with workingSchema.tables[index3].constraints[index2].checkCondition[index1] do
+                        if mnemonic = 151 then
+                          begin
+                            table_name := copy(stValue,1,pos('.',stValue)-1);
+                            if table_name = fromTables[0].Name then
+                              begin
+                                column_name := copy(stValue,pos('.',stValue)+1,length(stValue));
+                                stValue := tblName + '.' + column_name
+                              end;
+                          end;
+                  end;
+              end
+            end;
         end;
 
         195:  //UPLOAD CSV
