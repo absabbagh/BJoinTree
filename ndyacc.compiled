@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="/usr/bin/fpc" Date="1649687632"/>
-  <Params Value=" -Mfpc -Scghi -CX -Cg -O1 -XX -l -vewnhibq -Fu/home/alan/Documents/Parsers/Lazly/src/lib/x86_64-linux -Fu/home/alan/Documents/Parsers/Lazly/src/yacc/ -o/home/alan/Documents/Parsers/Lazly/src/yacc/ndyacc ndyacc.dpr"/>
-</CONFIG>
