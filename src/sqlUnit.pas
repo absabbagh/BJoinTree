@@ -318,6 +318,10 @@ begin
           Label9.Caption := copy(yymiscmsgs[I],29,length(yymiscmsgs[I]));
       end;
 
+  if yywarningmsgs <> nil then
+    for I := 0 to length(yywarningmsgs) - 1 do
+      Memo4.Lines.Add(yywarningmsgs[I]);
+
   StQuery := '';
   if length(sqlResults) <> 0 then
     stQuery := stQuery + sqlResults[0];
@@ -325,6 +329,7 @@ begin
   memo4.lines.Add(stElapsedTime);
   yyerrmsgs := nil;
   yymiscmsgs := nil;
+  yywarningmsgs := nil;
 
 end;
 
@@ -904,7 +909,10 @@ end;
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if Button8.Caption = 'DISCONNECT' then
-    Button8Click(self);
+    begin
+      disconnectFromDB;
+      sleep(100);
+    end;
   closeAction := caFree;
 end;
 

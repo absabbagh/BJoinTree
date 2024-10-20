@@ -68,25 +68,26 @@ type
       coltypescale: record
         case byte of
           0: (size: int64);
-          1: (fltprecision: byte);
-          2: (precision, scale: byte);
+          1: (precision, scale: byte);
       end;
     end;
 
     constraints: array of record
       cnstrname: string;
       checkCondition: progInstrunctionsType;
-      // when the check condition is over one column then every operator refer to the column
-      // stack instructions
-      // Instructions are on columns and opeartors and return true or false
+      { #note : when the check condition is over one column then every operator refer to the column
+                stack instructions
+                Instructions are on columns and opeartors and return true or false
 
-      // A check constraint is a type of integrity constraint in SQL which specifies a requirement that must be met by each row in a database table.
-      // The constraint must be a predicate. It can refer to a single column, or multiple columns of the table.
-      // The result of the predicate can be either TRUE, FALSE, or UNKNOWN, depending on the presence of NULLs.
-      // If the predicate evaluates to UNKNOWN, then the constraint is not violated and the row can be inserted or updated in the table.
-      // This is contrary to predicates in WHERE clauses in SELECT or UPDATE statements.
+                A check constraint is a type of integrity constraint in SQL which specifies a requirement
+                  that must be met by each row in a database table.
+                The constraint must be a predicate. It can refer to a single column, or multiple columns of the table.
+                The result of the predicate can be either TRUE, FALSE, or UNKNOWN, depending on the presence of NULLs.
+                If the predicate evaluates to UNKNOWN, then the constraint is not violated and the row can be inserted
+                  or updated in the table.
+                This is contrary to predicates in WHERE clauses in SELECT or UPDATE statements.
+      }
 
-      // trgdelete, trgupdate: trgStructure;// use triggers for on delte or on update cascade
       case cnstrtype: byte of
         // 4 for references, 5 for check condition and 6 for triggers
         0: (nullCol: byte);
@@ -106,6 +107,7 @@ type
         5: (ckCols: array [0..0] of longword);
     end;
 
+    // trgdelete, trgupdate: trgStructure;// use triggers for on delte or on update cascade
     trgdata: array of record
       trgname: string;
       sync: (before, after); // false for before true for after
@@ -155,10 +157,8 @@ type
       tblname: string;
       colname: string;
       aliasname: string;
-   end;
-
+    end;
     idxname: string;
-
   end;
 
 
@@ -175,8 +175,6 @@ var
   storageTables: array of storageTableRecord = nil;
   storageIndexes: array of storageIndexRecord = nil;
   storageJoinIndexes: array of storageJoinIndexRecord = nil;
-
-  outputst: string;
 
 procedure createTables;
 
@@ -1460,11 +1458,12 @@ begin
           begin
             stVar := IntToStr(varVar);
             if dim1 <> 0 then
-              if length(stVar) > dim1 then stVar := copy(stVar,1,dim1)
-             else
-              if (sqltype_name = 'CHARACTER') then
-                for i := length(stVar) + 1 to dim1 do
-                  stVar := stVar + ' ';
+              if length(stVar) > dim1 then
+                stVar := copy(stVar,1,dim1)
+               else
+                if (sqltype_name = 'CHARACTER') then
+                  for i := length(stVar) + 1 to dim1 do
+                    stVar := stVar + ' ';
             result := stVar;
           end;
         if (sqltype_name = 'BOOLEAN') then
@@ -1480,7 +1479,7 @@ begin
             if (varVar > high(smallint)) or (varVar < low(smallint)) then
               begin
                 result := Null;
-                Parser.yyerror('Value is not in the range of SMALLINT');
+                Parser.yyerror(' Out of range value for column ');
                 exit
               end;
           end;
@@ -1499,11 +1498,12 @@ begin
           begin
             stVar := IntToStr(varVar);
             if dim1 <> 0 then
-              if length(stVar) > dim1 then stVar := copy(stVar,1,dim1)
-             else
-              if (sqltype_name = 'CHARACTER') then
-                for i := length(stVar) + 1 to dim1 do
-                  stVar := stVar + ' ';
+              if length(stVar) > dim1 then
+                stVar := copy(stVar,1,dim1)
+               else
+                if (sqltype_name = 'CHARACTER') then
+                  for i := length(stVar) + 1 to dim1 do
+                    stVar := stVar + ' ';
             result := stVar;
           end;
         if (sqltype_name = 'BOOLEAN') then
@@ -1519,7 +1519,7 @@ begin
             if (varVar > high(smallint)) or (varVar < low(smallint)) then
               begin
                 result := Null;
-                Parser.yyerror('Value is not in the range of SMALLINT');
+                Parser.yyerror(' Out of range value for column ');
                 exit
               end;
           end;
@@ -1528,7 +1528,7 @@ begin
             if (varVar > high(integer)) or (varVar < low(integer)) then
               begin
                 result := Null;
-                Parser.yyerror('Value is not in the range of INTEGER');
+                Parser.yyerror(' Out of range value for column ');
                 exit
               end;
           end;
@@ -1547,10 +1547,10 @@ begin
             stVar := IntToStr(varVar);
             if dim1 <> 0 then
               if length(stVar) > dim1 then stVar := copy(stVar,1,dim1)
-             else
-              if (sqltype_name = 'CHARACTER') then
-                for i := length(stVar) + 1 to dim1 do
-                  stVar := stVar + ' ';
+               else
+                if (sqltype_name = 'CHARACTER') then
+                  for i := length(stVar) + 1 to dim1 do
+                    stVar := stVar + ' ';
             result := stVar;
           end;
         if (sqltype_name = 'BOOLEAN') then
@@ -1568,7 +1568,7 @@ begin
             if (intvalue > High(smallint)) or (intvalue < Low(smallint)) then
               begin
                 result := Null;
-                Parser.yyerror('Value is not in the range of SMALLINT');
+                Parser.yyerror(' Out of range value for column ');
                 exit
               end;
             result := intValue
@@ -1578,7 +1578,7 @@ begin
             if (intvalue > High(integer)) or (intvalue < Low(integer)) then
               begin
                 result := Null;
-                Parser.yyerror('Value is not in the range of INTEGER');
+                Parser.yyerror(' Out of range value for column ');
                 exit
               end;
             result := intValue
@@ -1588,7 +1588,7 @@ begin
             if (intvalue > High(int64)) or (intvalue < Low(int64)) then
               begin
                 result := Null;
-                Parser.yyerror('Value is not in the range of INT64');
+                Parser.yyerror(' Out of range value for column ');
                 exit
               end;
             result := intValue
@@ -1603,18 +1603,14 @@ begin
                 if length(stVar) > dim1 - dim2 then
                   begin
                     result := Null;
-                    Parser.yyerror('Value to big for dimension: ' + intToStr(dim1));
+                    Parser.yyerror(' Out of range value for column ');
                     exit
                   end;
               end;
             if dim2 <> 0 then
               begin
-                stVar := floatToStr(fracValue);
-                if length(stVar) > dim2 then
-                  begin
-                    stVar := copy(stVar,1, dim2);
-                    result := intValue + strToFloat('0.'+stVar);
-                  end;
+                varVar := varVar * Power(10,dim2);
+                result := Round(VarVar) / Power(10,dim2);
               end;
           end;
         if (sqltype_name = 'DATE') or
@@ -1628,10 +1624,10 @@ begin
             stVar := floatToStr(varVar);
             if dim1 <> 0 then
               if length(stVar) > dim1 then stVar := copy(stVar,1,dim1)
-             else
-              if (sqltype_name = 'CHARACTER') then
-                for i := length(stVar) + 1 to dim1 do
-                  stVar := stVar + ' ';
+               else
+                if (sqltype_name = 'CHARACTER') then
+                  for i := length(stVar) + 1 to dim1 do
+                    stVar := stVar + ' ';
             result := stVar;
           end;
         if (sqltype_name = 'BOOLEAN') then
@@ -1648,7 +1644,7 @@ begin
     varError:
       begin
         result := Null;
-        Parser.yyerror(' Type Error ');
+        Parser.yyerror(' Type Error in column ');
         exit;
       end;
     varBoolean:
@@ -1667,7 +1663,7 @@ begin
            (sqltype_name = 'TIMESTAMP') then
           begin
             result := Null;
-            Parser.yyerror(' Type Error ');
+            Parser.yyerror(' Type Error in column ');
             exit;
           end;
         if (sqltype_name = 'CHARACTER') or
@@ -1676,10 +1672,10 @@ begin
             if varVar then stVar := 'True' else stVar := 'False';
             if dim1 <> 0 then
               if length(stVar) > dim1 then stVar := copy(stVar,1,dim1)
-             else
-              if (sqltype_name = 'CHARACTER') then
-                for i := length(stVar) + 1 to dim1 do
-                  stVar := stVar + ' ';
+               else
+                if (sqltype_name = 'CHARACTER') then
+                  for i := length(stVar) + 1 to dim1 do
+                    stVar := stVar + ' ';
             result := stVar;
           end;
         if (sqltype_name = 'BOOLEAN') then exit;
@@ -1695,13 +1691,13 @@ begin
                else
                 begin
                   result := Null;
-                  Parser.yyerror('Value is not in the range of SMALLINT');
+                  Parser.yyerror(' Out of range value for column ');
                   Exit;
                 end
              else
               begin
                 result := Null;
-                Parser.yyerror('Type Error ');
+                Parser.yyerror('Type Error in column ');
                 Exit;
               end;
           end;
@@ -1714,13 +1710,13 @@ begin
                else
                 begin
                   result := Null;
-                  Parser.yyerror('Value is not in the range of INTEGER');
+                  Parser.yyerror(' Out of range value for column ');
                   Exit;
                 end
              else
               begin
                 result := Null;
-                Parser.yyerror('Type Error ');
+                Parser.yyerror('Type Error in column ');
                 Exit;
               end;
           end;
@@ -1733,13 +1729,13 @@ begin
                else
                 begin
                   result := Null;
-                  Parser.yyerror('Value is not in the range of INT64');
+                  Parser.yyerror(' Out of range value for column ');
                   Exit;
                 end
              else
               begin
                 result := Null;
-                Parser.yyerror('Type Error ');
+                Parser.yyerror('Type Error in column ');
                 Exit;
               end;
           end;
@@ -1754,7 +1750,7 @@ begin
              else
               begin
                 result := Null;
-                Parser.yyerror('Type Error ');
+                Parser.yyerror('Type Error in column ');
                 Exit;
               end;
           end;
@@ -1954,10 +1950,10 @@ begin
             stVar := varVar;
             if dim1 <> 0 then
               if length(stVar) > dim1 then stVar := copy(stVar,1,dim1)
-             else
-              if (sqltype_name = 'CHARACTER') then
-                for i := length(stVar) + 1 to dim1 do
-                  stVar := stVar + ' ';
+               else
+                if (sqltype_name = 'CHARACTER') then
+                  for i := length(stVar) + 1 to dim1 do
+                    stVar := stVar + ' ';
             result := stVar;
           end;
       end;
@@ -1969,6 +1965,8 @@ begin
   yyerrmsgs := nil;
   yymiscmsgs := nil;
   sqlMemProg := nil;
+  yywarningmsgs := nil;
+  yydbgmsgs := nil;
   if pos('//',sqlStatement) <> 0 then
     sqlStatement := copy(sqlStatement,1,pos('//',sqlStatement)-1)
    else
@@ -2095,6 +2093,15 @@ type
 
 const
    nullDataValue = -1; //'';
+
+const
+  decDataType: array [0..23] of string =
+    ('CHAR', 'VARCHAR', 'CHAR VARYING', 'CHARACTER', 'CHARACTER VARYING',
+     'BLOB', 'DATE', 'NUMBER', 'FLOAT', 'REAL',
+     'DOUBLE', 'NUMBER', 'DECIMAL', 'DEC', 'NUMERIC',
+     'NUMBER', 'INTEGER', 'INT', 'SMALLINT', 'BIGINT',
+     'BOOLEAN', 'DATETIME', 'TIME', 'TIMESTAMP');
+
 var
   fromtables: array of record
     Name: string;
@@ -2107,6 +2114,7 @@ var
   lUserId: string = '';
   lRoleName: string = '';
   stk: runstacktype = nil;
+  valuestk: runstacktype = nil;
   i: integer;
   tblName: string = '';
   aliasName: string = '';
@@ -2293,8 +2301,10 @@ var
   JoinGraph: GraphStructure;
   idxJoinGraph: GraphStructure;
   rescolname: string = '';
+  //st: string;
 begin
   if sqlMemProg = nil then exit;
+  //st := lexer.yyInputText ;
   if not ((sqlMemProg[high(sqlMemProg)].mnemonic = 1) or
           (sqlMemProg[high(sqlMemProg)].mnemonic = 157) or
           (sqlMemProg[high(sqlMemProg)].mnemonic = 159) or
@@ -2973,8 +2983,10 @@ begin
             Parser.yyerror('No table found');
         end;
 
+        { #todo : show the constraints for every column }
         161: // SHOW ALL COLUMNS
         begin
+          dbCounter := 0;
           found := TableExists(tblName);
           if not found then
             begin
@@ -2998,145 +3010,56 @@ begin
               Exit;
             end;
 
-          rowId1 := DDtablecolumns.firstRow;
-          repeat
-            if DDtablecolumns.existRow(rowId1) then
-              begin
-                database_Name :=
-                  DDtablecolumns.getValueByColumnName(rowId1, 'database_name');
-                table_name :=
-                  DDtablecolumns.getValueByColumnName(rowId1, 'table_name');
-
-                if ((dbName = database_Name) and
-                    (tblName = table_Name)) then
-                  begin
-                    if not found then
-                      begin
-                        sqlResults := nil;
-                        setLength(sqlResults, length(sqlResults) + 1);
-                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'ROW ID',True);
-                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'COLUMN NAME',True);
-                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'TYPE',True);
-                        sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'DEFAULT',True);
-                      end;
-
-                    column_Name :=
-                      DDtablecolumns.getValueByColumnName(rowId1, 'column_name');
-
-                    type_name :=
-                      DDtablecolumns.getValueByColumnName(rowId1, 'type_name');
-                    dim1 :=
-                      StrToInt(DDtablecolumns.getValueByColumnName(rowId1, 'dim1'));
-                    dim2 :=
-                      StrToInt(DDtablecolumns.getValueByColumnName(rowId1, 'dim2'));
-                    if dim1 <> 0 then
-                      begin
-                        type_name := type_name + '(' + intToStr(dim1);
-                        if dim2 <> 0 then
-                          type_name := type_name + ',' + intToStr(dim2);
-                        type_name := type_name + ')'
-                      end;
-
-                    defaultType :=
-                      strToIntDef(DDtablecolumns.getValueByColumnName(rowId1, 'kinddefault'), -1);
-                    case defaultType of
-                      0: colDefaultValue :=
-                          StrToInt(DDtablecolumns.getValueByColumnName(rowId1, 'intdefault'));
-                      2: colDefaultValue :=
-                          DDtablecolumns.getValueByColumnName(rowId1, 'int64default');
-                      3, 5: colDefaultValue :=
-                          DDtablecolumns.getValueByColumnName(rowId1, 'extdefault');
-                      4: colDefaultValue :=
-                          DDtablecolumns.getValueByColumnName(rowId1, 'currencydefault');
-                      6: colDefaultValue :=
-                          DDtablecolumns.getValueByColumnName(rowId1, 'booleandefault');
-                      7: colDefaultValue :=
-                          DDtablecolumns.getValueByColumnName(rowId1, 'stdefault');
-                      8: colDefaultValue := 'AUTOINCREMENT';
-                     -1: colDefaultValue := ''
-                    end;
-
-                    {
-                    column_constraint := '';
-                    rowId2 := DDconstraints.firstRow;
-                    repeat
-                      if DDconstraints.existRow(rowId2) then
-                        begin
-                          database_userId :=
-                            DDconstraints.getValueByColumnName(rowId2, 'userid');
-                          database_Name :=
-                            DDconstraints.getValueByColumnName(rowId2, 'database_name');
-                          table_name :=
-                            DDconstraints.getValueByColumnName(rowId2, 'table_name');
-                          constraint_kind :=
-                            StrToInt(DDconstraints.getValueByColumnName(rowId2,
-                            'constraint_kind'));
-                          if ((database_userId = dbuserId) and
-                            (UpperCase(dbName) = UpperCase(database_Name)) and
-                            (UpperCase(tblName) = UpperCase(table_name)) and
-                            (constraint_kind = 0)) then
-                            begin
-                              // check for the constraint column if column name =
-                              rowId3 := DDcolumnsconstraint.firstRow;
-                              repeat
-                                if DDcolumnsconstraint.existRow(rowId3) then
-                                  begin
-                                    if DDconstraints.getValueByColumnName(rowId2,
-                                      'constraint_name') = DDcolumnsconstraint.
-                                      getValueByColumnName(rowId3, 'constraint_name') then
-                                      begin
-
-                                        if column_name =
-                                          DDcolumnsconstraint.getValueByColumnName(rowId3,
-                                          'column_name') then
-                                          begin
-                                            constraint_Type :=
-                                              StrToInt(DDconstraints.getValueByColumnName(rowId2,
-                                              'constraint_type'));
-                                            case constraint_Type of
-                                              0: column_constraint := column_constraint + 'NULL ';
-                                              1: column_constraint := column_constraint + 'NOT NULL ';
-                                              2: column_constraint := column_constraint + 'UNIQUE ';
-                                              3: column_constraint :=
-                                                  column_constraint + 'PRIMARY KEY ';
-                                              4: column_constraint := column_constraint + 'REFERENCES ';
-                                              5: column_constraint := column_constraint + 'CHECK ';
-                                              6: column_constraint :=
-                                                  column_constraint + 'FOREIGN KEY ';
-                                            end;
-                                          end;
-                                      end;
-                                  end;
-                                rowId3 := rowId3 + 1;
-                              until rowId3 > DDcolumnsconstraint.lastRow;
-
-                            end;
-                        end;
-                      rowId2 := rowId2 + 1;
-                    until rowId2 > DDconstraints.lastRow;
-                    }
-
-                    resultRows := dbCounter + 1;
-                    setLength(sqlResults, length(sqlResults) + 1);
-                    sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],IntToStr(resultRows),True);
-                    sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],column_Name,True);
-                    sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],type_Name,True);
-                    sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],colDefaultValue,True);
-                    colsTxt := ''; //'sys_queryId: ' + lqueryId + ' ' + 'sys_user: ' + dbUserId + ' ';
-                    colsTxt := colsTxt + 'rowId: ' + intToStr(resultRows) + ' ' + 'COLUMN NAME: ' + column_name + ' ';
-                    colsTxt := colsTxt + 'TYPE: ' + type_name + ' ';
-                    if defaultType <> -1 then
-                      colsTxt := colsTxt + 'DEFAULT: ' + string(colDefaultValue);
-                    writeln(outText,colsTxt);
-                    dbCounter := dbCounter + 1;
-                    found := True;
-
-                  end;
+          if not found then
+            begin
+              setLength(sqlResults, length(sqlResults) + 1);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'ROW ID',True);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'COLUMN NAME',True);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'TYPE',True);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],'DEFAULT',True);
             end;
-            rowId1 := rowId1 + 1;
-          until rowId1 > DDtablecolumns.lastRow;
 
-          SDFInstance.Free;
+          tblFields := loadTableFields(tblname);
+          for index2 := 0 to tblFields.numCols - 1  do
+            begin
+              column_Name := tblFields.columns[index2].colname;
+              type_name := tblFields.columns[index2].colSQLtypename;
+              if (convertType(type_Name) = 'SINGLE') or
+                   (convertType(type_Name) = 'DOUBLE') or
+                   (convertType(type_Name) = 'EXTENDED') OR
+                   (convertType(type_Name) = 'CURRENCY')then
+                if tblFields.columns[index2].coltypescale.precision <> 0 then
+                  begin
+                    type_name := type_name + '(' + intToStr(tblFields.columns[index2].coltypescale.precision);
+                    if tblFields.columns[index2].coltypescale.scale <> 0 then
+                      type_name := type_name + ',' + intToStr(tblFields.columns[index2].coltypescale.scale);
+                    type_name := type_name + ')'
+                  end;
+              if convertType(type_Name) = 'STRING' then
+                if tblFields.columns[index2].coltypescale.size <> 0 then
+                  type_name := type_name + '(' + intToStr(tblFields.columns[index2].coltypescale.size) + ')';
+              if tblFields.columns[index2].colHasDefault then
+                colDefaultValue := tblFields.columns[index2].colDefaultValue else
+                if tblFields.columns[index2].colhasAutoIncrement then
+                  colDefaultValue := 'AUTOINCREMENT' else
+                  colDefaultValue := '';
+              resultRows := dbCounter + 1;
+              setLength(sqlResults, length(sqlResults) + 1);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],IntToStr(resultRows),True);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],column_Name,True);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],type_Name,True);
+              sqlResults[high(sqlResults)] := SDFInstance.AddString(sqlResults[high(sqlResults)],colDefaultValue,True);
+              colsTxt := ''; //'sys_queryId: ' + lqueryId + ' ' + 'sys_user: ' + dbUserId + ' ';
+              colsTxt := colsTxt + 'rowId: ' + intToStr(resultRows) + ' ' + 'COLUMN NAME: ' + column_name + ' ';
+              colsTxt := colsTxt + 'TYPE: ' + type_name + ' ';
+              if defaultType <> -1 then
+                colsTxt := colsTxt + 'DEFAULT: ' + string(colDefaultValue);
+              writeln(outText,colsTxt);
+              dbCounter := dbCounter + 1;
+
+              found := True;
+
+            end;
 
           if dbCounter <> 0 then
             Parser.yyacceptmessage(IntToStr(dbCounter) + ' columns have been found')
@@ -3315,11 +3238,6 @@ begin
            else
             Parser.yyerror('No index found');
 
-        end;
-
-        245: // SHOW ALL CONSTRAINTS
-        begin
-          tblName := tblName;
         end;
 
         190: // DROP TABLE
@@ -3737,7 +3655,11 @@ begin
                 dimSize := numTypeSize[0];
             row[5] := dimSize; // 'dim1'
             row[6] := columnlist[index1].numTypeSize[1]; // 'dim2'
-
+            if row[5] < row[6] then
+              begin
+                Parser.yyerror(' For float(M,D), double(M,D) or decimal(M,D), M must be >= D');
+              end;
+            // row[5]and row[6] > 0
             row[9] := 0;
             row[10] := '';
             row[11] := 0;
@@ -3861,6 +3783,8 @@ begin
             // column_name,...,column_name is ColumnsConstrain_metaData(column_name,table_name,database_name,constraint_name)
             // constraint_kind: column / table
             // constraint_type: PRIMARY KEY, UNIQUE, CHECK, REFERENCES - FOREIGN KEY
+            { #note :  In case constraintType = REFERENCES, row[5] refer to reference table
+                       In case constraintType = CHECK, row[5] refer to infix notation }
             row := nil;
             setLength(row, 6);
             row[0] := constraintList[index1].constraintName;
@@ -3907,7 +3831,7 @@ begin
                   row[1] := constraintList[index1].checkInstructions[Index2].mnemonic;
                   row[2] := constraintList[index1].checkInstructions[Index2].boolvalue;
                   row[3] := constraintList[index1].checkInstructions[Index2].value;
-                  row[4] :=constraintList[index1].checkInstructions[index2].stvalue;
+                  row[4] := constraintList[index1].checkInstructions[index2].stvalue;
                   row[5] := constraintList[index1].checkInstructions[index2].printInstruction;
                   DDcheckinstructions.insertRow(row);
                 end;
@@ -4078,14 +4002,6 @@ begin
             storage := TTableClass.Create(Path + tblName + '_' + dbName,
               True, colsName, colsType, allowcolsNull);
            ***)
-
-            {
-            IBSONInstance := TBSONObject.Create;
-
-            IBSONInstance.Put('sys_RowId',1);
-            IBSONInstance.Put('_id', TBSONObjectId.NewFrom);
-            Collection.CreateIndex(IBSONInstance);
-            }
 
           end;
 
@@ -4372,6 +4288,8 @@ begin
         tblColName := '';
       end;
 
+      // ('CHAR', 'VARCHAR', 'CHAR VARYING', 'CHARACTER', 'CHARACTER VARYING',
+
       7, 10: // Opr TYPE: POP colTypeSize and insert it with colTypeName into a structure
              // char(x): Where x is the number of characters to store. This data type is space padded to fill the number of characters specified.
       begin
@@ -4388,11 +4306,11 @@ begin
         setLength(stk, Length(stk) - 1);
       end;
 
-      12: // Opr TYPE CLOB: insert CLOB into a structure
+      12: // Opr TYPE BLOB: insert CLOB into a structure
       begin
-        Parser.yyerror('OOPS The CLOB TYPE is not yet implemented ');
+        Parser.yyerror('OOPS The BLOB TYPE is not yet implemented ');
         exit;
-        colTypeName := 'CLOB';
+        colTypeName := 'BLOB';
         charSize := trunc(stk[High(stk)].extValue);
         setLength(stk, Length(stk) - 1);
       end;
@@ -4401,8 +4319,8 @@ begin
       begin // Opr TYPE Date_Type: insert Date into a structure
         colTypeName := 'DATE';
         // The following code is added momentarily
-      {  colTypeName := 'CHARACTER';
-        charSize := 24;    }
+        {  colTypeName := 'CHARACTER';
+           charSize := 24;    }
       end;
 
       132:
@@ -6518,15 +6436,26 @@ begin
         begin
           setlength(valuesList,length(valuesList)+1);
           ValuesList[High(valuesList)] := nil;
-          SetLength(valuesList[High(valuesList)], Length(stk));
-          for j := low(stk) to high(stk) do
-            case stk[j].caseValue of
-              0: valuesList[High(valuesList),j] := stk[j].boolValue;
-              4,8: valuesList[High(valuesList),j] := stk[j].extValue;
-              6: valuesList[High(valuesList),j] := stk[j].strValue;
+          SetLength(valuesList[High(valuesList)], Length(valuestk));
+          for j := low(valuestk) to high(valuestk) do
+            case valuestk[j].caseValue of
+              0: valuesList[High(valuesList),j] := valuestk[j].boolValue;
+              4,8: valuesList[High(valuesList),j] := valuestk[j].extValue;
+              6: valuesList[High(valuesList),j] := valuestk[j].strValue;
               7: valuesList[High(valuesList),j] := Null;
             end;
           stk := nil;
+          valuestk := nil;
+          expr := nil;
+        end;
+
+        173:
+        begin
+          valuestk := nil;
+          for index := 0 to length(expr) - 1 do
+            begin
+              runstack(expr[index],valuestk);
+            end;
         end;
 
         { #done : check constraints before insert }
@@ -6561,7 +6490,11 @@ begin
                     inscols[index1].value :=
                       isCompatibleType(valuesList[index4,index1],colSQLtypename,
                         colTypeScale.precision,colTypeScale.scale);
-                  if yyerrmsgs <> nil then exit;
+                  if yyerrmsgs <> nil then
+                    begin
+                      yyerrmsgs[high(yyerrmsgs)] += inscols[index1].name;
+                      exit
+                    end;
                 end
             end else
             begin
@@ -6606,7 +6539,12 @@ begin
                         inscols[index1].value :=
                           isCompatibleType(valuesList[index4,index2],colSQLtypename,
                             colTypeScale.precision,colTypeScale.scale);
-                              { #todo : Check if there is autoincrement
+                      if yyerrmsgs <> nil then
+                        begin
+                          yyerrmsgs[high(yyerrmsgs)] += inscols[index1].name;
+                          exit
+                        end;
+                      { #done : Check if there is autoincrement
                                If the value is more than the one in sequence counter then put sequence counter equal to it
                                If not then error }
                       if tblFields.columns[index1].colhasAutoIncrement then
@@ -6634,7 +6572,7 @@ begin
                                                 DDTableColumns.putRow(rowId1,row)
                                               end else
                                               begin
-                                                Parser.yyerror('The autoincrement field has a bigger value ');
+                                                Parser.yyerror('The autoincrement field has a lower value than the sequence in column' + inscols[index1].name);
                                                 exit;
                                               end;
                                             break
@@ -6749,7 +6687,6 @@ begin
                         resultTable.columns[index1].coltype := tblFields.columns[index1].coltype;
 
                       end;
-                    //**resultTable.resultFields := tblFields;
 
                     with resultTable do
                       begin

@@ -97,7 +97,7 @@ begin
                                   if Uppercase(yytext) = 'VARCHAR' then return( tknVARCHAR );
                                   if Uppercase(yytext) = 'CHARACTER' then return( tknCHARACTER );
                                   if Uppercase(yytext) = 'VARYING' then return( tknVARYING );
-                                  if Uppercase(yytext) = 'CLOB' then return( tknCLOB );
+                                  if Uppercase(yytext) = 'BLOB' then return( tknBLOB );
                                   if Uppercase(yytext) = 'DATE' then return( tknDATE );
                                   if Uppercase(yytext) = 'TIME' then return( tknTIME );
                                   if Uppercase(yytext) = 'TIMESTAMP' then return( tknTIMESTAMP );
@@ -205,7 +205,6 @@ begin
                                   if Uppercase(yytext) = 'INDEXES' then return( tknINDEXES );
                                   if Uppercase(yytext) = 'JOININDEXES' then return( tknJOININDEXES );
                                   if Uppercase(yytext) = 'COLUMNS' then return( tknCOLUMNS );
-                                  if Uppercase(yytext) = 'CONSTRAINTS' then return( tknCONSTRAINTS );
                                   if Uppercase(yytext) = 'ALTER' then return( tknALTER );
                                   if Uppercase(yytext) = 'ADD' then return( tknADD );
                                   if Uppercase(yytext) = 'MODIFY' then return( tknMODIFY );

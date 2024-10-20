@@ -986,8 +986,7 @@ begin
                    begin
                      if (runstk[High(runstk)].extValue = 0.0) then
                        begin
-                         Parser.yyerror('Division by zero in select clause ');
-                         Exit;
+                         Parser.yywarningmessage('Division by zero ');
                          runstk[High(runstk)-1].caseValue := 7;
                          setLength(runstk,Length(runstk)-1);
                          result := false;
@@ -1341,6 +1340,7 @@ begin
                       runstk[High(runstk)-1].caseValue := 7;
                       setLength(runstk,Length(runstk)-1);
                       result := false;
+                      exit;
                     end;
                end;
              end;
@@ -2113,7 +2113,7 @@ begin
         end;
       // colsIdTxt := 'sys_queryId' + #8 + 'sys_user' + #8 + 'rowId' + #8;
       // colsValTxt := '"' + lqueryId + '"' + #8 + '"' + dbuserId + '"' + #8 + intToStr(resultRows) + #8;
-      colsTxt := 'sys_queryId: ' + lqueryId + ' ' + 'sys_user: ' + dbUserId + ' ' + 'rowId: ' + intToStr(resultRows) + ' ';
+      colsTxt := 'sys_user: ' + dbUserId + ' ' + 'rowId: ' + intToStr(resultRows) + ' ';
       flagShowColumn := false;
       flagAggregate := false;
       for index2 := low(selectColsInstructions) to high(selectColsInstructions) do

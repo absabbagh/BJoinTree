@@ -235,8 +235,8 @@ begin
             begin
               result := true;
             end;
-        end else Parser.yyerror('syntax error ');
-    end else Parser.yyerror('syntax error ');
+        end else Parser.yyerror('condition error ');
+    end else Parser.yyerror('condition error ');
   runstk := nil;
 
 end;
