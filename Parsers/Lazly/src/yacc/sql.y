@@ -94,7 +94,7 @@ const
   Mnemonics: array [0..255] of string =
     ('REPEAT', 'CREATE DATABASE', 'DATABASE NAME', 'CREATE TABLE', 'TABLE NAME',
      'NEW COLUMN', 'COLUMN NAME', 'CHAR', 'VARCHAR', 'CHAR VARYING',                                //   9
-     'CHARACTER', 'CHARACTER VARYING', 'CLOB', 'DATE', 'NUMBER',
+     'CHARACTER', 'CHARACTER VARYING', 'BLOB', 'DATE', 'NUMBER',
      'FLOAT', 'REAL', 'DOUBLE PRECISION', 'NUMBER2','DECIMAL',
      'DEC', 'NUMERIC', 'NUMBER1','INTEGER', 'INT',
      'SMALLINT', 'CONSTRAINT NAME','NULL','NOT NULL', 'UNIQUE',                                     //  29
@@ -126,7 +126,7 @@ const
      'RENAME COLUMN ', 'REFERENCE TABLE NAME', 'SHOW ALL DATABASES', 'USER_ID', 'SWITCH DATABASE',
      'SHOW ALL TABLES', 'SHOW ALL COLUMNS', 'SHOW ALL JOIN INDEXES', 'SHOW ALL INDEXES', 'SHOW INDEXES',
      'DROP DATABASE', 'ALTER TABLE', 'ADD COLUMN', 'DROP COLUMN', 'DROP CONSTRAINT',                // 169
-     'MODIFY', 'UCASE', 'LCASE', 'NOT USED', 'NOW',
+     'MODIFY', 'UCASE', 'LCASE', 'VALUE', 'NOW',
      'FORMAT', 'AUTOINCREMENT', 'SHOW COLUMN', 'COLUMN ALIAS NAME', 'EXPRESSION ALIAS',
      'ALL COLUMNS AGGREGATE', 'EXPRESSION AGGREGATE', 'DISTINCT AGGREGATE', 'AGGREGATE COLUMN NAME', 'SHOW SELECT STATEMENT HEADER',
      'SET COLUMN', 'LOAD CSV', 'LOAD SQL', 'FILE NAME', 'PARSE',                                    // 189
@@ -141,7 +141,7 @@ const
      'PASSWORD', 'GRANT', 'REVOKE', 'PRIVILEGE', 'PUSH OPTION',
      'DROP VIEW', 'RENAME USER', 'DROP USER', 'DROP TRIGGER', 'RENAME TABLE',
      'DATABASE OBJECT', 'PUSH NULL', 'ADD CONSTRAINT', 'ESCAPE', 'START EXISTS',
-     'SHOW ALL CONSTRAINTS', 'CREATE ROLE', 'ROLE_NAME', 'ALTER USER', 'NEW PASSWORD',              // 249
+     'NOT USED', 'CREATE ROLE', 'ROLE_NAME', 'ALTER USER', 'NEW PASSWORD',              // 249
      'USER_ID OR ROLE_NAME', 'LOCK TABLES', 'READ', 'WRITE', 'UNLOCK TABLES',
      'LOCK TABLE ALIAS NAME');
 
@@ -162,8 +162,6 @@ type
 var
 
   selectColsInstructions: selectColsInstructionstype = nil;
-
-  lQueryId: string = '';
 
   sqlMemProg: progInstrunctionsType;
 
@@ -201,7 +199,7 @@ type YYSType = record
 %token tknVARCHAR                       /* keyword */
 %token tknCHARACTER                     /* keyword */
 %token tknVARYING                       /* keyword */
-%token tknCLOB                          /* keyword */
+%token tknBLOB                          /* keyword */
 %token tknDATE                          /* keyword */
 %token tknTIME                          /* keyword */
 %token tknTIMESTAMP                     /* keyword */
@@ -312,7 +310,6 @@ type YYSType = record
 %token tknJOININDEXES                   /* keyword */
 %token tknINDEXES                       /* keyword */
 %token tknCOLUMNS                       /* keyword */
-%token tknCONSTRAINTS                   /* keyword */
 %token tknALTER                         /* keyword */
 %token tknADD                           /* keyword */
 %token tknDROP                          /* keyword */
@@ -1183,8 +1180,8 @@ character_type : tknCHAR '(' NUM ')'
                 { $$ := opr(10,'CHARACTER',[con($3)]); }
                | tknCHARACTER tknVARYING '(' NUM ')'
                 { $$ := opr(11,'CHARACTER VARYING',[con($4)]); }
-               | tknCLOB '(' NUM ')'
-                { $$ := opr(12,'CLOB',[con($3)]); }
+               | tknBLOB '(' NUM ')'
+                { $$ := opr(12,'BLOB',[con($3)]); }
                ;
 
 boolean_type : tknBOOLEAN
@@ -1496,8 +1493,6 @@ show_command :tknSHOW tknDATABASES
                     { $$ := opr(163,'SHOW ALL INDEXES FROM TABLE',[$4]); }
                     | tknSHOW tknINDEXES
                     { $$ := opr(164,'SHOW ALL INDEXES',[]); }
-                    | tknSHOW tknCONSTRAINTS tknFROM table_name
-                    { $$ := opr(245,'SHOW ALL CONSTRAINTS',[$4]); }
                     | tknSYSTEM tknLOAD_CSV tknFROM file_name
                     { $$ := opr(186,' LOAD CSV',[$4]); }
                     | tknSYSTEM tknUPLOAD_CSV tknFROM table_name
@@ -1791,9 +1786,9 @@ value_list : tknVALUES rptvalues_list
            ;
 
 rptvalues_list : '(' rptvalue ')'
-                { $$ := opr(78,'VALUE',[$2]); }
+                { $$ := opr(78,'VALUES',[$2]); }
                | rptvalues_list ',' '(' rptvalue ')'
-                { $$ := opr(78,'VALUE',[$1,$4]); }
+                { $$ := opr(78,'VALUES',[$1,$4]); }
                ;
 
 rptvalue : value
@@ -1803,7 +1798,7 @@ rptvalue : value
          ;
 
 value : expr
-                { opr(129,'VOID',[$1]) }
+                { $$ := opr(173,'VALUE',[$1]) }
       ;
 
 query : select_command
