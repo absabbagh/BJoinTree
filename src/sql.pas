@@ -174,10 +174,8 @@ procedure ex(p: NodePointer);
 type YYSType = record
                  yyBoolean: Boolean;
                  yyInteger : Integer;
-                 yyInt64 : Int64;
                  yyPointer : Pointer;
                  yyExtended : Extended;
-                 yyReal : Real;
                  yystring : string;
                end(*YYSType*);
 

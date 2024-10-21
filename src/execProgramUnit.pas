@@ -6449,7 +6449,7 @@ begin
           expr := nil;
         end;
 
-        173:
+        173: // VALUE
         begin
           valuestk := nil;
           for index := 0 to length(expr) - 1 do
