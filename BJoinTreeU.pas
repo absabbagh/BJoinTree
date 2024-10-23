@@ -551,98 +551,6 @@ begin
               end
           end
       end;
-
-
-  (* ///////////// not necessary
-  for i := 0 to length(FBaseTables) - 1 do
-    begin
-      for l := 0 to length(JoinPathList[i].adjacent.keys) - 1 do
-        begin
-          JoinPathList[i].adjacent.Keys[l].flagTA := true;
-          JoinPathList[i].adjacent.Keys[l].flagIK := false;
-          JoinPathList[i].adjacent.Keys[l].KeyIndex := l;
-        end;
-      for l := 0 to length(JoinPathList[i].adjacent.Inheritedkeys) - 1 do
-        begin
-          JoinPathList[i].adjacent.InheritedKeys[l].flagTA := true;
-          JoinPathList[i].adjacent.Keys[l].flagIK := true;
-          JoinPathList[i].adjacent.InheritedKeys[l].KeyIndex := l;
-        end;
-    end;
-  i := length(FBaseTables);
-  for l := 0 to length(JoinPathList[length(FBaseTables)].adjacent.keys) - 1 do
-    begin
-      if JoinPathList[length(FBaseTables)].adjacent.Keys[l].FromTable = JoinPathList[0].node[0] then
-        begin
-          JoinPathList[i].adjacent.InheritedKeys[l].flagTA := true;
-          JoinPathList[i].adjacent.Keys[l].flagIK := true;
-          JoinPathList[i].adjacent.InheritedKeys[l].KeyIndex := l;
-
-
-
-
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].TATable := 0;
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].KeyIndex := l;
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].flagKey := true;
-        end;
-      if JoinPathList[length(FBaseTables)].adjacent.Keys[l].FromTable = JoinPathList[1].node[0] then
-        begin
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].TATable := 1;
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].KeyIndex := l;
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].flagKey := true;
-        end;
-    end;
-
-  for l := 0 to length(JoinPathList[length(FBaseTables)].adjacent.Inheritedkeys) - 1 do
-    begin
-      if JoinPathList[length(FBaseTables)].adjacent.InheritedKeys[l].FromTable = JoinPathList[0].node[0] then
-        begin
-          JoinPathList[length(FBaseTables)].adjacent.InheritedKeys[l].TATable := 0;
-          JoinPathList[length(FBaseTables)].adjacent.InheritedKeys[l].KeyIndex := l;
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].flagKey := false;
-        end;
-      if JoinPathList[length(FBaseTables)].adjacent.InheritedKeys[l].FromTable = JoinPathList[1].node[0] then
-        begin
-          JoinPathList[length(FBaseTables)].adjacent.InheritedKeys[l].TATable := 1;
-          JoinPathList[length(FBaseTables)].adjacent.InheritedKeys[l].KeyIndex := l;
-          JoinPathList[length(FBaseTables)].adjacent.Keys[l].flagKey := false;
-        end;
-    end;
-
-  for i := length(FBaseTables) + 1 to length(JoinPathList) - 1  do
-    begin
-      for l := 0 to length(JoinPathList[i].adjacent.keys) - 1 do
-        begin
-          if JoinPathList[i].adjacent.Keys[l].FromTable =
-             JoinPathList[i-length(FBaseTables)+1].node[0] then
-             begin
-               JoinPathList[i].adjacent.Keys[l].TATable := 1;//i-length(FBaseTables)+1;
-               JoinPathList[i].adjacent.Keys[l].KeyIndex := l;
-               JoinPathList[i].adjacent.Keys[l].flagKey := true;
-             end else
-             begin
-               JoinPathList[i].adjacent.Keys[l].TATable := 0;//i-1;
-               JoinPathList[i].adjacent.Keys[l].KeyIndex := l;
-               JoinPathList[i].adjacent.Keys[l].flagKey := true;
-             end;
-        end;
-      for l := 0 to length(JoinPathList[i].adjacent.Inheritedkeys) - 1 do
-        begin
-          if JoinPathList[i].adjacent.InheritedKeys[l].FromTable =
-             JoinPathList[i-length(FBaseTables)+1].node[0] then
-             begin
-               JoinPathList[i].adjacent.InheritedKeys[l].TATable := 1;//i-length(FBaseTables)+1;
-               JoinPathList[i].adjacent.InheritedKeys[l].KeyIndex := l;
-               JoinPathList[i].adjacent.InheritedKeys[l].flagKey := false;
-             end else
-             begin
-               JoinPathList[i].adjacent.InheritedKeys[l].TATable := 0;//i-1;
-               JoinPathList[i].adjacent.InheritedKeys[l].KeyIndex := l;
-               JoinPathList[i].adjacent.InheritedKeys[l].flagKey := false;
-             end;
-        end;
-    end;
-*)
 end;
 
 procedure BJoinTreeClass.createBTrees(JoinBaseTables: array of string; IsOpen: Boolean;
@@ -685,7 +593,7 @@ begin
     end;
   *)
 
-  // if an index exists for base tables use it
+  { #note : if an index exists for base tables use it }
 
   for i := Low(FJoinPathList) to High(FJoinPathList) do
     begin
@@ -818,71 +726,6 @@ begin
           end;
       until (TNIndex = Length(TableName)) and (ATIndex = Length(AdjacentTable));
 
- {
-      ConcatenateTable := FJoinPathList[length(FBaseTables) + Length(TableName) + Length(AdjacentTable) - 2].node;
-
-      for i := 0 to length(AdjacentDataRef)- 1 do
-        concatenateDataRef[i] := AdjacentDataRef[i];
-
-      for i := 0 to length(DataRef) - 1 do
-        concatenateDataRef[i+length(AdjacentDataRef)] := DataRef[i];
-}
-
-{
-      BTreeConcatenateIndex := getIndexFromJoinPathList(FJoinPathList,ConcatenateTable);
-
-
-
-      for i := 0 to High(FJoinPathList[BTreeConcatenateIndex].adjacent.Keys) do
-        begin
-          setlength(concatenateKeys,length(concatenateKeys)+1);
-          if not FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].flagKey then
-            begin
-              if FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].TATable = 1 then
-                ConcatenateKeys[High(ConcatenateKeys)] :=
-                  Keys[FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].KeyIndex]
-               else
-                ConcatenateKeys[High(ConcatenateKeys)] :=
-                  AdjacentKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].KeyIndex]
-            end else
-            begin
-              if FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].TATable = 1 then
-                ConcatenateKeys[High(ConcatenateKeys)] :=
-                  InheritedKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].KeyIndex] else
-                ConcatenateKeys[High(ConcatenateKeys)] :=
-                  AdjacentInheritedKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.Keys[i].KeyIndex]
-            end;
-        end;
-
-      for i := 0 to High(FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys) do
-        begin
-
-
-          setlength(concatenateInheritedKeys,length(concatenateInheritedKeys)+1);
-          if not FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].flagKey then
-            begin
-              if FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].TATable = 1 then
-                ConcatenateInheritedKeys[High(ConcatenateKeys)] :=
-                  inheritedKeys[0FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].KeyIndex]
-               else
-                ConcatenateInheritedKeys[High(ConcatenateKeys)] :=
-                  AdjacentKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].KeyIndex]
-            end else
-            begin
-              if FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].TATable = 1 then
-                ConcatenateInheritedKeys[High(ConcatenateKeys)] :=
-                  InheritedKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].KeyIndex] else
-                ConcatenateInheritedKeys[High(ConcatenateKeys)] :=
-                  AdjacentInheritedKeys[FJoinPathList[BTreeConcatenateIndex].adjacent.InheritedKeys[i].KeyIndex]
-            end;
-
-        end;
-
-      concatenatekeys := nil;
-      concatenateInheritedKeys := nil;
-}
-
-
       BTreeConcatenateIndex := getIndexFromJoinPathList(FJoinPathList,ConcatenateTable);
 
       for i := Low(FJoinPathList[BTreeConcatenateIndex].adjacent.Keys) to High(FJoinPathList[BTreeConcatenateIndex].adjacent.Keys) do
@@ -970,10 +813,6 @@ begin
               end
         end;
 
-      //SetLength(ConcatenateDataRef,Length(DataRef)+Length(AdjacentDataRef));
-      //for i := Low(DataRef) to High(DataRef) do ConcatenateDataRef[i] := DataRef[i];
-      //for i := Low(AdjacentDataRef) to High(AdjacentDataRef) do ConcatenateDataRef[Length(DataRef)+i] := AdjacentDataRef[i];
-
       if BTreeConcatenateIndex = High(FBTrees) then
         begin
           setlength(FNewRows,length(FNewRows)+1);
@@ -981,8 +820,6 @@ begin
           for index := 0 to length(ConcatenateDataRef) - 1 do
             FNewRows[high(FNewRows),index] := ConcatenateDataRef[index]
         end;
-
-
 
       AddJoinKey (ConcatenateTable,ConcatenateKeys,ConcatenateInheritedKeys,ConcatenateDataRef);
       for i := Low(AdjacentKeys) to High(AdjacentKeys) do
@@ -1194,10 +1031,6 @@ begin
               end
         end;
 
-      //SetLength(ConcatenateDataRef,Length(DataRef)+Length(AdjacentDataRef));
-      //for i := Low(DataRef) to High(DataRef) do ConcatenateDataRef[i] := DataRef[i];
-      //for i := Low(AdjacentDataRef) to High(AdjacentDataRef) do ConcatenateDataRef[Length(DataRef)+i] := AdjacentDataRef[i];
-
       if BTreeConcatenateIndex = High(FBTrees) then
         begin
           setlength(FDeletedRows,length(FDeletedRows)+1);
@@ -1251,7 +1084,7 @@ begin
   FDeletedRows := nil;
   DeleteJoinKey(virtualTableName,Keys,InheritedKeys,[DataRef])
   (*
-  When a new row Rm from table Ti get inserted do the following:
+  When a row Rm from table Ti get deleted do the following:
     Locate the entry of Ti in the JoinPathList
     From its adjacent List, locate the definition of the keys and inherited keys
     From Row Rm get the columns constituting the keys and the inherited keys
@@ -1358,7 +1191,6 @@ begin
     begin
       idxName := name + intToStr(i) + '.idx';
       if fileExists(idxName) then DeleteFile(idxName);
-
     end;
 end;
 

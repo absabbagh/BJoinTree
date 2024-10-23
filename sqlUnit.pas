@@ -760,8 +760,8 @@ begin
       readLn(SQLTextFile, Line);
 
 
-      if pos('//',Line) <> 0 then
-       Line := copy(Line,1,pos('//',Line)-1);
+      if pos('--',Line) <> 0 then
+       Line := copy(Line,1,pos('--',Line)-1);
       if pos('/*',Line) <> 0 then
         begin
           if pos('*/',Line) <> 0 then
