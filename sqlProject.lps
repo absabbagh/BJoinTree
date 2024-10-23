@@ -20,8 +20,9 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="792"/>
-        <CursorPos X="17" Y="812"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="620"/>
+        <CursorPos Y="621"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -123,9 +124,8 @@
       </Unit13>
       <Unit14>
         <Filename Value="BJoinTreeU.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="88"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
       </Unit14>
       <Unit15>
@@ -595,7 +595,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="175"/>
         <CursorPos Y="179"/>
-        <UsageCount Value="93"/>
+        <UsageCount Value="94"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit72>
@@ -868,123 +868,122 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="709" Column="5" TopLine="691"/>
+        <Caret Line="75" Column="20" TopLine="57"/>
       </Position1>
       <Position2>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="713" Column="28" TopLine="695"/>
+        <Caret Line="344" Column="20" TopLine="326"/>
       </Position2>
       <Position3>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="763" Column="17" TopLine="746"/>
+        <Caret Line="369" Column="20" TopLine="352"/>
       </Position3>
       <Position4>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="773" Column="24" TopLine="772"/>
+        <Caret Line="68" Column="14" TopLine="56"/>
       </Position4>
       <Position5>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="281" Column="3" TopLine="270"/>
+        <Caret Line="69" Column="22" TopLine="56"/>
       </Position5>
       <Position6>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="39" Column="5" TopLine="29"/>
+        <Caret Line="203" Column="16" TopLine="188"/>
       </Position6>
       <Position7>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="281" Column="3" TopLine="269"/>
+        <Caret Line="328" Column="69" TopLine="308"/>
       </Position7>
       <Position8>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="306" Column="13" TopLine="294"/>
       </Position8>
       <Position9>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="55" Column="27" TopLine="45"/>
+        <Caret Line="68" Column="15" TopLine="50"/>
       </Position9>
       <Position10>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="11" Column="53"/>
+        <Caret Line="69" Column="22" TopLine="51"/>
       </Position10>
       <Position11>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="55" Column="27" TopLine="38"/>
+        <Caret Line="197" Column="16" TopLine="180"/>
       </Position11>
       <Position12>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="213" Column="16" TopLine="196"/>
+        <Caret Line="232" Column="16" TopLine="215"/>
       </Position12>
       <Position13>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="802" Column="19" TopLine="785"/>
+        <Caret Line="871" Column="25" TopLine="854"/>
       </Position13>
       <Position14>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="979" Column="21" TopLine="962"/>
+        <Caret Line="899" Column="21" TopLine="881"/>
       </Position14>
       <Position15>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="1124" Column="25" TopLine="1107"/>
+        <Caret Line="68" Column="15" TopLine="57"/>
       </Position15>
       <Position16>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="25" Column="10" TopLine="14"/>
+        <Filename Value="sqlUnit.pas"/>
+        <Caret Line="370" Column="33" TopLine="362"/>
       </Position16>
       <Position17>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="201" Column="25" TopLine="183"/>
+        <Filename Value="sqlUnit.pas"/>
+        <Caret Line="192" Column="18" TopLine="172"/>
       </Position17>
       <Position18>
-        <Filename Value="execProgramUnit.pas"/>
-        <Caret Line="304" Column="21" TopLine="287"/>
+        <Filename Value="sqlUnit.pas"/>
+        <Caret Line="504" TopLine="490"/>
       </Position18>
       <Position19>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="192" Column="13" TopLine="192"/>
+        <Caret Line="70" Column="11" TopLine="61"/>
       </Position19>
       <Position20>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="281" TopLine="275"/>
+        <Caret Line="598" Column="3" TopLine="578"/>
       </Position20>
       <Position21>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="306" TopLine="296"/>
+        <Caret Line="69" Column="10" TopLine="51"/>
       </Position21>
       <Position22>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="188" TopLine="178"/>
+        <Caret Line="506" Column="3" TopLine="496"/>
       </Position22>
       <Position23>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="175" TopLine="164"/>
+        <Caret Line="70" TopLine="55"/>
       </Position23>
       <Position24>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="189" TopLine="179"/>
+        <Caret Line="372" Column="22" TopLine="362"/>
       </Position24>
       <Position25>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="190" TopLine="179"/>
+        <Caret Line="375" Column="37" TopLine="362"/>
       </Position25>
       <Position26>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="191" TopLine="179"/>
+        <Caret Line="425" Column="37" TopLine="408"/>
       </Position26>
       <Position27>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="192" TopLine="179"/>
+        <Caret Line="504" Column="23" TopLine="487"/>
       </Position27>
       <Position28>
         <Filename Value="sqlUnit.pas"/>
-        <Caret Line="194" TopLine="179"/>
+        <Caret Line="506" Column="37" TopLine="489"/>
       </Position28>
       <Position29>
-        <Filename Value="BJoinTreeU.pas"/>
-        <Caret Line="640" Column="3" TopLine="629"/>
+        <Filename Value="sqlUnit.pas"/>
+        <Caret Line="534" Column="38" TopLine="534"/>
       </Position29>
       <Position30>
-        <Filename Value="BJoinTreeU.pas"/>
-        <Caret Line="1197" TopLine="1176"/>
+        <Filename Value="sqlUnit.pas"/>
+        <Caret Line="62" Column="31" TopLine="51"/>
       </Position30>
     </JumpHistory>
     <RunParams>

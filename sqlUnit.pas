@@ -369,9 +369,9 @@ begin
   {$IFDEF joinindex}
 
 
-  EraseBJoinTree('TS1\jdx_test',6);
+  EraseBJoinTree('jdx1_test',6);
 
-  jdx := BJoinTreeClass.Create('TS1\jdx_test',['EMPLOYEES', 'COUNTRIES', 'JOBS', 'JOB_HISTORY',
+  jdx := BJoinTreeClass.Create('jdx1_test',['EMPLOYEES', 'COUNTRIES', 'JOBS', 'JOB_HISTORY',
                                                 'DEPARTMENTS', 'LOCATIONS']);
 
   jdx.AddTableToDictionary('EMPLOYEES');
@@ -422,7 +422,7 @@ begin
 
 
 
-  jdx := BJoinTreeClass.Create('TS1\jdx_test',['EMPLOYEES', 'COUNTRIES', 'JOBS', 'JOB_HISTORY',
+  jdx := BJoinTreeClass.Create('jdx1_test',['EMPLOYEES', 'COUNTRIES', 'JOBS', 'JOB_HISTORY',
                                                 'DEPARTMENTS', 'LOCATIONS']);
 
   jdx.AddTableToDictionary('EMPLOYEES');
@@ -470,12 +470,12 @@ begin
   jdx.createBTrees(['EMPLOYEES','JOBS','JOB_HISTORY','DEPARTMENTS','COUNTRIES','LOCATIONS'],
                    true,['EMPLOYEES.NAME']);
 
-  jdx.AddKey('EMPLOYEES',[1016, 'ALAN', 1001, 'JANITOR', 'CLEANING'],1);
   jdx.AddKey('JOBS',['CLEANING','CLEANNER'],1);
   jdx.AddKey('JOB_HISTORY',[1016, 'JANITOR', 'CLEANING'],1);
+  jdx.AddKey('EMPLOYEES',[1016, 'ALAN', 1001, 'JANITOR', 'CLEANING'],1);
   jdx.AddKey('DEPARTMENTS',['JANITOR', 'JANITOR CLEANING', 1001, 1266],1);
-  jdx.AddKey('LOCATIONS',[1266, 'RICHMOND','CA'],1);
   jdx.AddKey('COUNTRIES',['CA', 'CANADA'],1);
+  jdx.AddKey('LOCATIONS',[1266, 'RICHMOND','CA'],1);
 
   setlength(Keys,1);
   setlength(DataRef,6);
@@ -499,12 +499,13 @@ begin
   until DataRef[0] = -1;
 
   jdx.Free;
-  Exit;
 
 
-  EraseBJoinTree('TS1\jdx_test',6);
+  EraseBJoinTree('jdx1_test',6);
 
-  jdx := BJoinTreeClass.Create('TS1\jdx_test',['t','s','u','v']);
+  EraseBJoinTree('jdx2_test',4);
+
+  jdx := BJoinTreeClass.Create('jdx2_test',['t','s','u','v']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
   jdx.AddColumnToDictionary('a2','INTEGER','t');
@@ -531,7 +532,7 @@ begin
   jdx.createBTrees(['s','u','t','v'],false,['t.a2','s.a3']);
   jdx.Free;
 
-  jdx := BJoinTreeClass.Create('TS1\jdx_test',['t','s','u','v']);
+  jdx := BJoinTreeClass.Create('jdx2_test',['t','s','u','v']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
   jdx.AddColumnToDictionary('a2','INTEGER','t');
@@ -588,6 +589,8 @@ begin
 
   jdx.Free;
 
+  EraseBJoinTree('jdx2_test',4);
+
   {$ELSE}
   thekeys := nil;
   theInheritedkeys := nil;
@@ -617,9 +620,6 @@ begin
   setLength(InheritedKeys,3);
   setlength(dataref,3);
 
-
-
-
   memo4.Clear;
   randomize;
 
@@ -635,16 +635,10 @@ begin
       keys[1] :=  intToStr(j+3);
       keys[2] :=  intToStr(j+4);
 
-      if i = 480 then begin
       InheritedKeys[0] := intToStr(j + 40);
       InheritedKeys[1] := intToStr(j + 60);
       InheritedKeys[2] :=  j + 90;
-      end else begin
-        InheritedKeys[0] := intToStr(j + 40);
-        InheritedKeys[1] := intToStr(j + 60);
-        InheritedKeys[2] :=  j + 90;
 
-      end;
       dataref[0] :=  j*2;
       dataref[1] :=  j;
       dataref[2] :=  j*3;
@@ -653,33 +647,39 @@ begin
 
     end;
 
-   count := 0;
-   idx.ClearKey;
-   j := 0;
-   st := '';
-   repeat
-     st := '';
-     idx.nextkey(keys,InheritedKeys,dataref);
-     inc(count);
-     if dataref[0] <> -1 then
-       begin
-         j := j +1;
-         st := st + 'K0: '   + inttostr(keys[0]);
-         st := st + '  K1: ' + keys[1];
-         st := st + '  K2: ' + keys[2];
-         memo4.Lines.Add(st);
-         st :=       '  IK0: ' + Inheritedkeys[0];
-         st := st +  '  IK1: ' + Inheritedkeys[1];
-         st := st +  '  IK2: ' + intToStr(Inheritedkeys[2]);
-         memo4.Lines.Add(st);
-         st :=       '  DR0: ' + intToStr(dataref[0]);
-         st := st +  '  DR1: ' + intToStr(dataref[1]);
-         st := st +  '  DR2: ' + intToStr(dataref[2]);
-         memo4.Lines.Add(st);
-         memo4.Lines.Add('');
-       end
-   until dataref[0] = -1;
-   idx.Free;
+  count := 0;
+  idx.ClearKey;
+  j := 0;
+  st := '';
+  repeat
+    st := '';
+    idx.nextkey(keys,InheritedKeys,dataref);
+    inc(count);
+    if dataref[0] <> -1 then
+      begin
+        j := j +1;
+        st := st + 'K0: '   + inttostr(keys[0]);
+        st := st + '  K1: ' + keys[1];
+        st := st + '  K2: ' + keys[2];
+        memo4.Lines.Add(st);
+        st :=       '  IK0: ' + Inheritedkeys[0];
+        st := st +  '  IK1: ' + Inheritedkeys[1];
+        st := st +  '  IK2: ' + intToStr(Inheritedkeys[2]);
+        memo4.Lines.Add(st);
+        st :=       '  DR0: ' + intToStr(dataref[0]);
+        st := st +  '  DR1: ' + intToStr(dataref[1]);
+        st := st +  '  DR2: ' + intToStr(dataref[2]);
+        memo4.Lines.Add(st);
+        memo4.Lines.Add('');
+      end
+  until dataref[0] = -1;
+  idx.Free;
+
+  if fileExists('p.Idx') then
+    begin
+      DeleteFile('p.Idx');
+    end;
+
   {$ENDIF}
 
    Diff := Now - StartTime;
@@ -847,7 +847,6 @@ begin
           edit7.Enabled := false;
           Memo1.Enabled := true;
           Button2.Enabled := true;
-          //label6.Visible := false;
           edit7.Visible := false;
           button5.Visible := false;
           button1.Visible := false;
@@ -868,7 +867,6 @@ begin
       edit4.Enabled := true;
       edit7.Enabled := true;
       Button2.Enabled := false;
-      //label6.Visible := true;
       edit7.Visible := true;
       {$IFDEF IndexDebug}
       Button5.Visible := true;
