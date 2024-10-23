@@ -1967,8 +1967,8 @@ begin
   sqlMemProg := nil;
   yywarningmsgs := nil;
   yydbgmsgs := nil;
-  if pos('//',sqlStatement) <> 0 then
-    sqlStatement := copy(sqlStatement,1,pos('//',sqlStatement)-1)
+  if pos('--',sqlStatement) <> 0 then
+    sqlStatement := copy(sqlStatement,1,pos('--',sqlStatement)-1)
    else
     while pos('/*',sqlStatement) <> 0 do
       sqlStatement := copy(sqlStatement,1,pos('/*',sqlStatement)-1) + copy(sqlStatement,pos('*/',sqlStatement)+2,length(sqlStatement));
@@ -2301,7 +2301,7 @@ var
   JoinGraph: GraphStructure;
   idxJoinGraph: GraphStructure;
   rescolname: string = '';
-  //st: string;
+  a: int64;st: string;
 begin
   if sqlMemProg = nil then exit;
   //st := lexer.yyInputText ;
@@ -6444,6 +6444,8 @@ begin
               6: valuesList[High(valuesList),j] := valuestk[j].strValue;
               7: valuesList[High(valuesList),j] := Null;
             end;
+          a:= round(valuestk[j].extValue);
+          st := inttostr(a);
           stk := nil;
           valuestk := nil;
           expr := nil;
