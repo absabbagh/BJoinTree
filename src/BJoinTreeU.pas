@@ -32,20 +32,10 @@ type
      adjacent: record
        link: virtualTableStructure;
        Keys: array of record
-         (*/////////// not necessary
-         flagTA: Boolean; // Table / Adjacent
-         flagIK: Boolean; // Key / Inherited key
-         KeyIndex: Integer; // Postion of the index in Table / Adjacent
-         *)
          FromTable: string;
          KeyName: string
        end;
        InheritedKeys: array of record
-       (*/////////// not necessary
-         flagTA: Boolean; // Table / Adjacent
-         flagIK: Boolean; // Key / Inherited key
-         KeyIndex: Integer; // Postion of the index in Table / Adjacent
-       *)
          FromTable: string;
          KeyName: string
        end
@@ -67,6 +57,7 @@ type
       FBTrees: array of BtrPlusClass;
       FNewRows: RowStructure;
       FDeletedRows: RowStructure;
+      FPath: array of string;
       function GetBaseTables: virtualTableStructure;
       function GetNewRows: RowStructure;
       function GetDeletedRows: RowStructure;
@@ -79,6 +70,7 @@ type
       procedure getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable, ToTable:  virtualTableStructure; out BaseTable: string; out key: string); overload; // should be array of string as return function for multi-columns key
       procedure getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable:  virtualTableStructure; ToTable: string; out BaseTable: string; out key: string); overload; // should be array of string as return function for multi-columns key
       procedure getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable: string; ToTable: virtualTableStructure; out BaseTable: string; out key: string); overload; // should be array of string as return function for multi-columns key
+      procedure getPath(JoinBaseTables: array of string; JoinGraph: GraphStructure);
       procedure generateJoinPathList(JoinBaseTables: array of string; JoinGraph: GraphStructure; out JoinPathList: JoinPathGraphStructure;
                                      TheKeys: array of string);
       function getTypeFromDataDictionary(TheColumnName: string; TheTableNameRef: string): string;
@@ -90,11 +82,11 @@ type
       constructor create(TheFileName: string; TheBaseTables: array of string);
       destructor destroy; override;
       procedure AddJoin(FromTheTable, ToTheTable: string; TheKey: string); virtual;
-      procedure createBTrees(JoinBaseTables: array of string; IsOpen: Boolean;
-                             TheKeys: array of string);
+      procedure createBTrees(IsOpen: Boolean; TheKeys: array of string);
       function GetnumberOfKeys(BTreeIndex: Integer): Integer;
       function GetnumberOfInheritedKeys(BTreeIndex: Integer): Integer;
       function GetnumberOfDataRef(BTreeIndex: Integer): Integer;
+      function GetDataRefByTableName(BaseTable: string; DataRef: array of DataPointerType): DataPointerType;
 
       procedure AddKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
       procedure DeleteKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
@@ -126,6 +118,10 @@ type
       procedure NextKey(var Keys: array of variant; out DataRef: array of DataPointerType); overload;
       procedure MinKey(var Keys: array of variant; out DataRef: array of DataPointerType); overload;
       procedure MaxKey(var Keys: array of variant; out DataRef: array of DataPointerType); overload;
+      { #note :  The property BaseTables is very important, it show how the last
+                 virtual table has the base tables in order and by consequence
+                 can tell how the data pointers are ordered
+      }
       property BaseTables: virtualTableStructure read GetBaseTables;
       property NewRows: RowStructure read GetNewRows;
       property DeletedRows: RowStructure read GetDeletedRows;
@@ -149,11 +145,12 @@ satisfy idx(t1.k1) = idx(t2.k2) + 1 and call addkey with t.k1, t2.k2 - 1
 }
 
 const
-  nullDataValue = -1;//'';
+  nullDataValue = -1;
 
 function BJoinTreeClass.GetBaseTables: virtualTableStructure;
 begin
-  result := FJoinPathList[High(FBTrees)].node;
+  if FJoinPathList <> nil then
+    result := FJoinPathList[High(FBTrees)].node;
 end;
 
 function BJoinTreeClass.GetNewRows: RowStructure;
@@ -307,9 +304,6 @@ var
   i: Integer;
   j, k ,l: Integer;
   position: Integer;
-  (* st: string;
-  stNode: string;
-  stAdjacents: string; *)
 begin
   SetLength(JoinGraph,Length(BaseTables));
   for i := Low(BaseTables) to High(BaseTables) do
@@ -344,20 +338,6 @@ begin
           adjacents[position].link  := ToTable;
           adjacents[position].CommonKey := Key
         end;
-  (*
-  for i := 0 to length(BaseTables) - 1 do
-    begin
-      st := '';
-      stnode := JoinGraph[i].node;
-      st := st + stNode + ' --> ';
-      for j :=  0 to length(JoinGraph[i].adjacents) - 1 do
-        begin
-          stadjacents := JoinGraph[i].adjacents[j].link + ':' + JoinGraph[i].adjacents[j].CommonKey + ' <--> ';
-          st := st + stAdjacents
-        end;
-      st := st + '<N>'
-    end;
-  *)
 end;
 
 procedure BJoinTreeClass.getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable, ToTable:  virtualTableStructure; out BaseTable: string; out key: string);
@@ -405,6 +385,55 @@ begin
             Exit
           end
 end;
+
+procedure BJoinTreeClass.getPath(JoinBaseTables: array of string; JoinGraph: GraphStructure);
+var
+  queue: array of string;
+  tableElement: string;
+  found: Boolean;
+  i, j: integer;
+begin
+  FPath := nil;
+  queue := nil;
+  SetLength(queue,Length(queue)+1);
+  queue[High(queue)] := JoinBaseTables[0];
+  Fpath := nil;
+  SetLength(FPath,Length(FPath)+1);
+  FPath[High(FPath)] := JoinBaseTables[0];
+  repeat
+    tableElement := queue[Low(queue)];
+    with JoinGraph[getIndexFromJoinGraph(JoinGraph,tableElement)] do
+    for j := Low(adjacents) to High(adjacents) do
+      begin
+        found := False;
+        for i := Low(JoinBaseTables) to High(JoinBaseTables) do
+          if adjacents[j].Link = JoinBaseTables[i] then
+            begin
+              found := True;
+              Break
+            end;
+        if found then
+          begin
+            found := False;
+            for i := low(FPath) to high(FPath) do
+              if adjacents[j].Link = FPath[i] then
+                begin
+                  found := True;
+                  Break
+                end;
+            if not found then
+              begin
+                SetLength(queue,Length(queue)+1);
+                queue[High(queue)] := adjacents[j].Link;
+                SetLength(FPath,Length(FPath)+1);
+                FPath[High(FPath)] := adjacents[j].Link
+              end
+          end
+      end;
+    queue := copy(queue,1,Length(queue))
+  until queue = nil;
+end;
+
 
 procedure BJoinTreeClass.generateJoinPathList(
                   JoinBaseTables: array of string;
@@ -464,8 +493,8 @@ begin
       end;
     queue := copy(queue,1,Length(queue))
   until queue = nil;
-
   if path = nil then Exit;
+
   SetLength(JoinPathList,Length(JoinBaseTables));
   for i := Low(JoinBaseTables) to High(JoinBaseTables) do
     with JoinPathList[i] do
@@ -553,47 +582,29 @@ begin
       end;
 end;
 
-procedure BJoinTreeClass.createBTrees(JoinBaseTables: array of string; IsOpen: Boolean;
-                                      TheKeys: array of string);
+procedure BJoinTreeClass.createBTrees(IsOpen: Boolean; TheKeys: array of string);
 var
   FBTreeName: string;
   i, j: Integer;
   FKeys: array of string;
   FInheritedKeys: array of string;
-  (*
-  st: string;
-  stnode: string;
-  stkeys: string;
-  stInheritedKeys: string;
-  *)
+  JoinBaseTables: array of string = nil;
 begin
   generateJoinGraph(FBaseTables,FJoinGraph);
-  generateJoinPathList(JoinBaseTables, FJoinGraph, FJoinPathList,TheKeys);
-  (*
-  stnode := '';
-  for i := Low(FJoinPathList) to High(FJoinPathList) do
+  setlength(JoinBaseTables,length(FJoinGraph));
+  for i := low(FJoinGraph) to High(FJoinGraph) do
+    JoinBaseTables[i] := FJoinGraph[i].node;
+  GetPath(JoinBaseTables,FJoinGraph);
+  for i := low(FJoinGraph) to High(FJoinGraph) do
     begin
-      stnode := 'node';
-      stKeys := '';
-      stInheritedKeys := '';
-      for j := Low(FJoinPathList[i].node) to high(FJoinPathList[i].node) do
-        stnode := stnode + inttostr(i) +  ': ' + FJoinPathList[i].node[j] + '--';
-      stnode := stnode + '> Adjacents: ';
-      for j := Low(FJoinPathList[i].adjacent.link) to high(FJoinPathList[i].adjacent.link) do
-        stnode := stnode + FJoinPathList[i].adjacent.link[j]  + '--';
-      stkeys := stkeys + '> Keys: ';
-      for j := Low(FJoinPathList[i].adjacent.keys) to high(FJoinPathList[i].adjacent.keys) do
-        stkeys := stkeys + 'From: ' + FJoinPathList[i].adjacent.keys[j].FromTable   + '--Key: ' + FJoinPathList[i].adjacent.keys[j].KeyName;
-
-      stInheritedKeys := stInheritedKeys + '> InheritedKeys: ';
-      for j := Low(FJoinPathList[i].adjacent.Inheritedkeys) to high(FJoinPathList[i].adjacent.Inheritedkeys) do
-        stInheritedKeys := stInheritedKeys + 'From: ' + FJoinPathList[i].adjacent.Inheritedkeys[j].FromTable   + '--Key: ' +
-                  FJoinPathList[i].adjacent.Inheritedkeys[j].KeyName;
-      st := stNode + ' <N> ' + stKeys + ' <N> ' +  stInheritedKeys + ' <N><N><N> '
+      FBaseTables[i] := FPath[i];
+      JoinBaseTables[i] := FPath[i];
     end;
-  *)
+{ #note :  generateJoinGraph should be called again after adjusting FBaseTables }
+  generateJoinGraph(FBaseTables,FJoinGraph);
+  generateJoinPathList(JoinBaseTables, FJoinGraph, FJoinPathList,TheKeys);
 
-  { #note : if an index exists for base tables use it }
+  { #note : if an index exists for base table use it }
 
   for i := Low(FJoinPathList) to High(FJoinPathList) do
     begin
@@ -633,6 +644,17 @@ end;
 function BJoinTreeClass.GetnumberOfDataRef(BTreeIndex: Integer): Integer;
 begin
   result := FBTrees[BTreeIndex].NumberOfDataRef
+end;
+
+function BJoinTreeClass.GetDataRefByTableName(BaseTable: string; DataRef: array of DataPointerType): DataPointerType;
+var
+  i:integer;
+begin
+  result := -1;
+  for i := low(BaseTables) to High(BaseTables) do
+    if lowerCase(BaseTables[i]) = lowerCase(BaseTable) then
+      break;
+  if length(DataRef) > i then result := DataRef[i]
 end;
 
 procedure BJoinTreeClass.AddJoinKey(TableName: virtualTableStructure; Keys: array of variant; InheritedKeys: array of variant; DataRef: array of DataPointerType);
@@ -831,7 +853,7 @@ begin
       for i := Low(AdjacentKeys) to High(AdjacentKeys) do
         found := found and (AdjacentKeys[i] = OldAdjacentKeys[i])
     end
-  (*
+  { #note :
   Call AddKey (B+Tree(T[i]), keys[i], InheritedKeys[i], [DPi]) for the index of table T[i]
   Locate the entry of T[i] in the JoinPathList
   From its adjacent List, locate the Table T[k] adjacent to it and do the following
@@ -844,7 +866,7 @@ begin
       From keys[i], inheritedkeys[i] , keys[k], inheritedkeys[k] get  the keys and inherited keys of T[ik]
       AddJoinKey (T[ik] , Keys[ik], InheritedKeys[ik], [DPik])
       NextKey(B+Tree(T[k]), Keys[i])
-  *)
+  }
 end;
 
 procedure BJoinTreeClass.AddKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
@@ -867,13 +889,13 @@ begin
   virtualTableName[0] := TableName;
   FNewRows := nil;
   AddJoinKey(virtualTableName,Keys,InheritedKeys,[DataRef])
-  (*
+  { #note :
   When a new row Rm from table Ti get inserted do the following:
     Locate the entry of Ti in the JoinPathList
     From its adjacent List, locate the definition of the keys and inherited keys
     From Row Rm get the columns constituting the keys and the inherited keys
     Call AddJoinKey (Ti, Keys, InheritedKeys, DPi) where DPi is the row id of row Rm.
-  *)
+  }
 end;
 
 procedure BJoinTreeClass.DeleteJoinKey(TableName: virtualTableStructure; Keys: array of variant; InheritedKeys: array of variant; DataRef: array of DataPointerType);
@@ -1047,7 +1069,7 @@ begin
       for i := Low(AdjacentKeys) to High(AdjacentKeys) do
         found := found and (AdjacentKeys[i] = OldAdjacentKeys[i])
     end
-  (*
+  { #note :
   Call DeleteKey (B+Tree(T[i]), keys[i], InheritedKeys[i], [DPi]) for the index of table T[i]
   Locate the entry of T[i] in the JoinPathList
   From its adjacent List, locate the Table T[k] adjacent to it and do the following
@@ -1060,7 +1082,7 @@ begin
       From keys[i], inheritedkeys[i] , keys[k], inheritedkeys[k] get  the keys and inherited keys of T[ik]
       DeleteJoinKey (T[ik] , Keys[ik], InheritedKeys[ik], [DPik])
       NextKey(B+Tree(T[k]), Keys[i])
-  *)
+  }
 end;
 
 procedure BJoinTreeClass.DeleteKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
@@ -1083,13 +1105,13 @@ begin
   virtualTableName[0] := TableName;
   FDeletedRows := nil;
   DeleteJoinKey(virtualTableName,Keys,InheritedKeys,[DataRef])
-  (*
+  { #note :
   When a row Rm from table Ti get deleted do the following:
     Locate the entry of Ti in the JoinPathList
     From its adjacent List, locate the definition of the keys and inherited keys
     From Row Rm get the columns constituting the keys and the inherited keys
     Call DeleteJoinKey (Ti, Keys, InheritedKeys, DPi) where DPi is the row id of row Rm.
-  *)
+  }
 end;
 
 procedure BJoinTreeClass.ClearKey(BtreeIndex: Integer);

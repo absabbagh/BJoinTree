@@ -66,7 +66,7 @@ implementation
 
 {$Define joinindex}
 {$DEFINE Debug}
-{$DEFINE NoIndexDebug}
+{$DEFINE IndexDebug}
 
 uses
   msgslib,
@@ -353,7 +353,9 @@ var
   {$ENDIF}
   keys: array of variant;
   dataref: array of datapointertype;
+  i: integer;
   st: string;
+  BT: array of string;
 
 
   StartTime: TDate;
@@ -368,11 +370,9 @@ begin
 
   {$IFDEF joinindex}
 
-
   EraseBJoinTree('jdx1_test',6);
 
-  jdx := BJoinTreeClass.Create('jdx1_test',['EMPLOYEES', 'COUNTRIES', 'JOBS', 'JOB_HISTORY',
-                                                'DEPARTMENTS', 'LOCATIONS']);
+  jdx := BJoinTreeClass.Create('jdx1_test', ['DEPARTMENTS','EMPLOYEES','COUNTRIES','JOBS','LOCATIONS','JOB_HISTORY']);
 
   jdx.AddTableToDictionary('EMPLOYEES');
   jdx.AddColumnToDictionary('EMPLOYEE_ID','INTEGER','EMPLOYEES');
@@ -416,66 +416,23 @@ begin
   jdx.AddJoin('LOCATIONS','COUNTRIES','COUNTRY_ID');
   jdx.AddJoin('COUNTRIES','LOCATIONS','COUNTRY_ID');
 
-  jdx.createBTrees(['EMPLOYEES','JOBS','JOB_HISTORY','COUNTRIES','DEPARTMENTS','LOCATIONS'],
-                   false,['EMPLOYEES.NAME']);
-  jdx.Free;
+  jdx.createBTrees(false,['EMPLOYEES.NAME']);
 
+  jdx.AddKey('JOBS',['CLEANING','CLEANNER'],21);
+  jdx.AddKey('JOB_HISTORY',[1016, 'JANITOR', 'CLEANING'],31);
+  jdx.AddKey('EMPLOYEES',[1016, 'ALAN', 1001, 'JANITOR', 'CLEANING'],11);
+  jdx.AddKey('DEPARTMENTS',['JANITOR', 'JANITOR CLEANING', 1001, 1266],41);
+  jdx.AddKey('COUNTRIES',['CA', 'CANADA'],61);
+  jdx.AddKey('LOCATIONS',[1266, 'RICHMOND','CA'],51);
 
-
-  jdx := BJoinTreeClass.Create('jdx1_test',['EMPLOYEES', 'COUNTRIES', 'JOBS', 'JOB_HISTORY',
-                                                'DEPARTMENTS', 'LOCATIONS']);
-
-  jdx.AddTableToDictionary('EMPLOYEES');
-  jdx.AddColumnToDictionary('EMPLOYEE_ID','INTEGER','EMPLOYEES');
-  jdx.AddColumnToDictionary('NAME','STRING[35]','EMPLOYEES');
-  jdx.AddColumnToDictionary('MANAGER_ID','INTEGER','EMPLOYEES');
-  jdx.AddColumnToDictionary('DEPARTMENT_ID','STRING[10]','EMPLOYEES');
-  jdx.AddColumnToDictionary('JOB_ID','STRING[10]','EMPLOYEES');
-
-  jdx.AddTableToDictionary('JOBS');
-  jdx.AddColumnToDictionary('JOB_ID','STRING[10]','JOBS');
-  jdx.AddColumnToDictionary('JOB_TITTLE','STRING[35]','JOBS');
-
-  jdx.AddTableToDictionary('JOB_HISTORY');
-  jdx.AddColumnToDictionary('EMPLOYEE_ID','INTEGER','JOB_HISTORY');
-  jdx.AddColumnToDictionary('DEPARTMENT_ID','STRING[10]','JOB_HISTORY');
-  jdx.AddColumnToDictionary('JOB_ID','STRING[10]','JOB_HISTORY');
-
-  jdx.AddTableToDictionary('DEPARTMENTS');
-  jdx.AddColumnToDictionary('DEPARTMENT_ID','STRING[10]','DEPARTMENTS');
-  jdx.AddColumnToDictionary('DEPARTMENT_NAME','STRING[35]','DEPARTMENTS');
-  jdx.AddColumnToDictionary('MANAGER_ID','INTEGER','DEPARTMENTS');
-  jdx.AddColumnToDictionary('LOCATION_ID','INTEGER','DEPARTMENTS');
-
-  jdx.AddTableToDictionary('LOCATIONS');
-  jdx.AddColumnToDictionary('LOCATION_ID','INTEGER','LOCATIONS');
-  jdx.AddColumnToDictionary('ADDRESS','STRING[40]','LOCATIONS');
-  jdx.AddColumnToDictionary('COUNTRY_ID','STRING[2]','LOCATIONS');
-
-  jdx.AddTableToDictionary('COUNTRIES');
-  jdx.AddColumnToDictionary('COUNTRY_ID','STRING[2]','COUNTRIES');
-  jdx.AddColumnToDictionary('COUNTRY_NAME','STRING[40]','COUNTRIES');
-
-  jdx.AddJoin('EMPLOYEES','JOB_HISTORY','EMPLOYEE_ID');
-  jdx.AddJoin('JOB_HISTORY','EMPLOYEES','EMPLOYEE_ID');
-  jdx.AddJoin('JOBS','JOB_HISTORY','JOB_ID');
-  jdx.AddJoin('JOB_HISTORY','JOBS','JOB_ID');
-  jdx.AddJoin('EMPLOYEES','DEPARTMENTS','DEPARTMENT_ID');
-  jdx.AddJoin('DEPARTMENTS','EMPLOYEES','DEPARTMENT_ID');
-  jdx.AddJoin('DEPARTMENTS','LOCATIONS','LOCATION_ID');
-  jdx.AddJoin('LOCATIONS','DEPARTMENTS','LOCATION_ID');
-  jdx.AddJoin('LOCATIONS','COUNTRIES','COUNTRY_ID');
-  jdx.AddJoin('COUNTRIES','LOCATIONS','COUNTRY_ID');
-
-  jdx.createBTrees(['EMPLOYEES','JOBS','JOB_HISTORY','DEPARTMENTS','COUNTRIES','LOCATIONS'],
-                   true,['EMPLOYEES.NAME']);
-
-  jdx.AddKey('JOBS',['CLEANING','CLEANNER'],1);
-  jdx.AddKey('JOB_HISTORY',[1016, 'JANITOR', 'CLEANING'],1);
-  jdx.AddKey('EMPLOYEES',[1016, 'ALAN', 1001, 'JANITOR', 'CLEANING'],1);
-  jdx.AddKey('DEPARTMENTS',['JANITOR', 'JANITOR CLEANING', 1001, 1266],1);
-  jdx.AddKey('COUNTRIES',['CA', 'CANADA'],1);
-  jdx.AddKey('LOCATIONS',[1266, 'RICHMOND','CA'],1);
+  BT := jdx.BaseTables;
+  st := '';
+  for i := low(BT) to High(BT) do
+    begin
+      st += BT[i] + ' '
+    end;
+  memo4.Lines.Add(st);
+  memo4.Lines.Add('');
 
   setlength(Keys,1);
   setlength(DataRef,6);
@@ -486,12 +443,13 @@ begin
       begin
         st := 'NAME: ' + keys[0];
         memo4.Lines.Add(st);
-        st :=       '  DR0: ' + intToStr(dataref[0]);
-        st := st +  '  DR1: ' + intToStr(dataref[1]);
-        st := st +  '  DR2: ' + intToStr(dataref[2]);
-        st := st +  '  DR3: ' + intToStr(dataref[3]);
-        st := st +  '  DR4: ' + intToStr(dataref[4]);
-        st := st +  '  DR5: ' + intToStr(dataref[5]);
+        st :=  'Departments: ' + intToStr(jdx.GetDataRefByTableName('Departments',dataref));
+        st += ' EMPLOYEES: ' + intToStr(jdx.GetDataRefByTableName('EMPLOYEES',dataref));
+        st += ' COUNTRIES: ' + intToStr(jdx.GetDataRefByTableName('COUNTRIES',dataref));
+        memo4.Lines.Add(st);
+        st := 'JOBS: ' + intToStr(jdx.GetDataRefByTableName('JOBS',dataref));
+        st += ' LOCATIONS: ' + intToStr(jdx.GetDataRefByTableName('LOCATIONS',dataref));
+        st += ' JOB_HISTORY: ' + intToStr(jdx.GetDataRefByTableName('JOB_HISTORY',dataref));
         memo4.Lines.Add(st);
         memo4.Lines.Add('--------------------------------');
       end
@@ -500,12 +458,12 @@ begin
 
   jdx.Free;
 
-
   EraseBJoinTree('jdx1_test',6);
+
 
   EraseBJoinTree('jdx2_test',4);
 
-  jdx := BJoinTreeClass.Create('jdx2_test',['t','s','u','v']);
+  jdx := BJoinTreeClass.Create('jdx2_test',['t','u','v','s']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
   jdx.AddColumnToDictionary('a2','INTEGER','t');
@@ -528,59 +486,41 @@ begin
   jdx.AddJoin('u','v','a4');
   jdx.AddJoin('s','t','a1');
 
+  jdx.createBTrees(false,['t.a2','s.a3']);
 
-  jdx.createBTrees(['s','u','t','v'],false,['t.a2','s.a3']);
-  jdx.Free;
-
-  jdx := BJoinTreeClass.Create('jdx2_test',['t','s','u','v']);
-  jdx.AddTableToDictionary('t');
-  jdx.AddColumnToDictionary('a1','INTEGER','t');
-  jdx.AddColumnToDictionary('a2','INTEGER','t');
-  jdx.AddTableToDictionary('s');
-  jdx.AddColumnToDictionary('a1','INTEGER','s');
-  jdx.AddColumnToDictionary('a3','INTEGER','s');
-  jdx.AddTableToDictionary('u');
-  jdx.AddColumnToDictionary('a1','INTEGER','u');
-  jdx.AddColumnToDictionary('a4','INTEGER','u');
-  jdx.AddTableToDictionary('v');
-  jdx.AddColumnToDictionary('a3','INTEGER','v');
-  jdx.AddColumnToDictionary('a4','INTEGER','v');
-
-  jdx.AddJoin('s','u','a1');
-  jdx.AddJoin('u','s','a1');
-  jdx.AddJoin('t','s','a1');
-  jdx.AddJoin('v','s','a3');
-  jdx.AddJoin('s','v','a3');
-  jdx.AddJoin('v','u','a4');
-  jdx.AddJoin('u','v','a4');
-  jdx.AddJoin('s','t','a1');
-
-
-  jdx.createBTrees(['s','u','t','v'],true,['t.a2','s.a3']);
-
-  jdx.AddKey('s',[12,22],2);
-  jdx.AddKey('u',[10,16],1);
-  jdx.AddKey('s',[10,14],1);
-  jdx.AddKey('t',[12,21],2);
-  jdx.AddKey('u',[12,19],2);
-  jdx.AddKey('t',[10,27],1);
-  jdx.AddKey('v',[14,16],1);
-  jdx.AddKey('v',[22,19],2);
+  jdx.AddKey('s',[12,22],22);
+  jdx.AddKey('u',[10,16],31);
+  jdx.AddKey('s',[10,14],21);
+  jdx.AddKey('t',[12,21],12);
+  jdx.AddKey('u',[12,19],32);
+  jdx.AddKey('t',[10,27],11);
+  jdx.AddKey('v',[14,16],41);
+  jdx.AddKey('v',[22,19],42);
 
   setlength(Keys,2);
   setlength(DataRef,4);
+
+  BT := jdx.BaseTables;
+  st := '';
+  for i := low(BT) to High(BT) do
+    begin
+      st += BT[i] + ' '
+    end;
+  memo4.Lines.Add(st);
+  memo4.Lines.Add('');
+
   jdx.ClearKey;
   repeat
     jdx.NextKey(Keys,DataRef);
     if dataref[0] <> -1 then
       begin
-        st :=      '  K0: ' + inttostr(keys[0]);
+        st :=        'K0: ' + inttostr(keys[0]);
         st := st + '  K1: ' + inttostr(keys[1]);
         memo4.Lines.Add(st);
-        st :=       '  DR0: ' + intToStr(dataref[0]);
-        st := st +  '  DR1: ' + intToStr(dataref[1]);
-        st := st +  '  DR2: ' + intToStr(dataref[2]);
-        st := st +  '  DR3: ' + intToStr(dataref[3]);
+        st :=  't: ' + intToStr(jdx.GetDataRefByTableName('t',dataref));
+        st += ' s: ' + intToStr(jdx.GetDataRefByTableName('s',dataref));
+        st += ' u: ' + intToStr(jdx.GetDataRefByTableName('u',dataref));
+        st += ' v: ' + intToStr(jdx.GetDataRefByTableName('v',dataref));
         memo4.Lines.Add(st);
         memo4.Lines.Add('');
       end
