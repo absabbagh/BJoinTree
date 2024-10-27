@@ -1264,7 +1264,7 @@ begin
                   for index1 := low(idxkeys) to high(idxkeys) do
                     TheKeys[index1] :=
                       idxkeys[index1].tblName + '.' + idxkeys[index1].colName;
-                  storageJoinIndexes[storageIndex].idxstorage.createBTrees(TheBaseTables, True, TheKeys);
+                  storageJoinIndexes[storageIndex].idxstorage.createBTrees(True, TheKeys);
                 end;
 
             end;
@@ -5610,7 +5610,7 @@ begin
               for index1 := low(idxkeys) to high(idxkeys) do
                 TheKeys[index1] :=
                   idxkeys[index1].tblName + '.' + idxkeys[index1].colName;
-              storageJoinIndexes[High(storageJoinIndexes)].idxstorage.createBTrees(TheBaseTables, False, TheKeys);
+              storageJoinIndexes[High(storageJoinIndexes)].idxstorage.createBTrees(False, TheKeys);
               storageJoinIndexes[High(storageJoinIndexes)].idxstorage.Free;
 
               TheBaseTables := nil;
@@ -5661,7 +5661,7 @@ begin
               for index1 := low(idxkeys) to high(idxkeys) do
                 TheKeys[index1] :=
                   idxkeys[index1].tblName + '.' + idxkeys[index1].colName;
-              storageJoinIndexes[High(storageJoinIndexes)].idxstorage.createBTrees(TheBaseTables, True, TheKeys);
+              storageJoinIndexes[High(storageJoinIndexes)].idxstorage.createBTrees(True, TheKeys);
               storageIndex := High(storageJoinIndexes)
             end;
 

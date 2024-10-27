@@ -20,10 +20,12 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="620"/>
-        <CursorPos Y="621"/>
+        <TopLine Value="496"/>
+        <CursorPos Y="503"/>
         <UsageCount Value="200"/>
+        <Bookmarks Count="1">
+          <Item0 X="17" Y="446" ID="1"/>
+        </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -31,18 +33,12 @@
         <Filename Value="execProgramUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="1966"/>
-        <CursorPos X="48" Y="1975"/>
+        <TopLine Value="6446"/>
+        <CursorPos Y="6456"/>
         <UsageCount Value="200"/>
-        <Bookmarks Count="8">
+        <Bookmarks Count="2">
           <Item0 X="15" Y="2099" ID="6"/>
-          <Item1 X="8" Y="4296" ID="7"/>
-          <Item2 Y="3013" ID="8"/>
-          <Item3 Y="3031" ID="9"/>
-          <Item4 Y="6500" ID="1"/>
-          <Item5 X="10" Y="322" ID="5"/>
-          <Item6 Y="6456" ID="2"/>
-          <Item7 X="41" Y="6439" ID="3"/>
+          <Item1 X="41" Y="6439" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit2>
@@ -57,10 +53,11 @@
       <Unit4>
         <Filename Value="BPlusTreeU.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="533"/>
-        <CursorPos Y="548"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="2775"/>
+        <CursorPos X="31" Y="2793"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="msgslib.pas"/>
@@ -124,8 +121,16 @@
       </Unit13>
       <Unit14>
         <Filename Value="BJoinTreeU.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="89"/>
+        <TopLine Value="78"/>
+        <CursorPos X="3" Y="97"/>
+        <UsageCount Value="97"/>
+        <Bookmarks Count="3">
+          <Item0 Y="496" ID="7"/>
+          <Item1 X="22" Y="526" ID="8"/>
+          <Item2 X="49" Y="349" ID="5"/>
+        </Bookmarks>
         <Loaded Value="True"/>
       </Unit14>
       <Unit15>
@@ -592,10 +597,10 @@
       </Unit71>
       <Unit72>
         <Filename Value="..\Parsers\Lazly\src\yacc\sql.y"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="175"/>
         <CursorPos Y="179"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="101"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit72>
@@ -867,123 +872,123 @@
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="75" Column="20" TopLine="57"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position1>
       <Position2>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="344" Column="20" TopLine="326"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position2>
       <Position3>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="369" Column="20" TopLine="352"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position3>
       <Position4>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="68" Column="14" TopLine="56"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position4>
       <Position5>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="69" Column="22" TopLine="56"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position5>
       <Position6>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="203" Column="16" TopLine="188"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position6>
       <Position7>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="328" Column="69" TopLine="308"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position7>
       <Position8>
-        <Filename Value="sqlUnit.pas"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position8>
       <Position9>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="68" Column="15" TopLine="50"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position9>
       <Position10>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="69" Column="22" TopLine="51"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position10>
       <Position11>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="197" Column="16" TopLine="180"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position11>
       <Position12>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="232" Column="16" TopLine="215"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="626" Column="3" TopLine="617"/>
       </Position12>
       <Position13>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="871" Column="25" TopLine="854"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position13>
       <Position14>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="899" Column="21" TopLine="881"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position14>
       <Position15>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="68" Column="15" TopLine="57"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position15>
       <Position16>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="370" Column="33" TopLine="362"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="626" Column="2" TopLine="617"/>
       </Position16>
       <Position17>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="192" Column="18" TopLine="172"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="610" TopLine="600"/>
       </Position17>
       <Position18>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="504" TopLine="490"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="627" TopLine="617"/>
       </Position18>
       <Position19>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="70" Column="11" TopLine="61"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="604" Column="38" TopLine="600"/>
       </Position19>
       <Position20>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="598" Column="3" TopLine="578"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="599" TopLine="595"/>
       </Position20>
       <Position21>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="69" Column="10" TopLine="51"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="594" Column="42" TopLine="583"/>
       </Position21>
       <Position22>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="506" Column="3" TopLine="496"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="649" Column="4" TopLine="628"/>
       </Position22>
       <Position23>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="70" TopLine="55"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="75" Column="37" TopLine="66"/>
       </Position23>
       <Position24>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="372" Column="22" TopLine="362"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="443" Column="6" TopLine="442"/>
       </Position24>
       <Position25>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="375" Column="37" TopLine="362"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="609" Column="4" TopLine="601"/>
       </Position25>
       <Position26>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="425" Column="37" TopLine="408"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="441" TopLine="431"/>
       </Position26>
       <Position27>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="504" Column="23" TopLine="487"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="602" Column="27" TopLine="595"/>
       </Position27>
       <Position28>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="506" Column="37" TopLine="489"/>
+        <Filename Value="BJoinTreeU.pas"/>
       </Position28>
       <Position29>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="534" Column="38" TopLine="534"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="49" Column="11" TopLine="31"/>
       </Position29>
       <Position30>
-        <Filename Value="sqlUnit.pas"/>
-        <Caret Line="62" Column="31" TopLine="51"/>
+        <Filename Value="BJoinTreeU.pas"/>
+        <Caret Line="216" TopLine="198"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -1039,6 +1044,9 @@
     <Watches>
       <Item>
         <Expression Value="fromtables"/>
+      </Item>
+      <Item>
+        <Expression Value="(FJoinGraph)^[2].ADJACENTS"/>
       </Item>
     </Watches>
   </Debugging>
