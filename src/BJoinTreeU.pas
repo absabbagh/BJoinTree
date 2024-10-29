@@ -57,7 +57,6 @@ type
       FBTrees: array of BtrPlusClass;
       FNewRows: RowStructure;
       FDeletedRows: RowStructure;
-      FPath: array of string;
       function GetBaseTables: virtualTableStructure;
       function GetNewRows: RowStructure;
       function GetDeletedRows: RowStructure;
@@ -70,7 +69,6 @@ type
       procedure getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable, ToTable:  virtualTableStructure; out BaseTable: string; out key: string); overload; // should be array of string as return function for multi-columns key
       procedure getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable:  virtualTableStructure; ToTable: string; out BaseTable: string; out key: string); overload; // should be array of string as return function for multi-columns key
       procedure getFirstAdjacentListKey(JoinGraph: GraphStructure; FromTable: string; ToTable: virtualTableStructure; out BaseTable: string; out key: string); overload; // should be array of string as return function for multi-columns key
-      procedure getPath(JoinBaseTables: array of string; JoinGraph: GraphStructure);
       procedure generateJoinPathList(JoinBaseTables: array of string; JoinGraph: GraphStructure; out JoinPathList: JoinPathGraphStructure;
                                      TheKeys: array of string);
       function getTypeFromDataDictionary(TheColumnName: string; TheTableNameRef: string): string;
@@ -303,15 +301,43 @@ procedure BJoinTreeClass.generateJoinGraph(BaseTables: array of string; out Join
 var
   i: Integer;
   j, k ,l: Integer;
+  counter: integer;
+  baseCounter:integer;
+  found: boolean;
   position: Integer;
 begin
+  JoinGraph := nil;
   SetLength(JoinGraph,Length(BaseTables));
-  for i := Low(BaseTables) to High(BaseTables) do
-    with JoinGraph[i] do
-      begin
-        node := BaseTables[i];
-        adjacents := nil
-      end;
+  JoinGraph[0].node := BaseTables[0];
+  JoinGraph[0].adjacents := nil;
+  counter := 1;
+  baseCounter := 1;
+  repeat
+    found := false;
+    for i := Low(DirectJoinList) to High(DirectJoinList) do
+      if DirectJoinList[i].FromTable = JoinGraph[counter-1].node then
+        begin
+          for k := 0 to baseCounter - 1 do
+            begin
+              if JoinGraph[k].node = DirectJoinList[i].ToTable then
+                begin
+                  found := true;
+                  if found then
+                    begin
+                      break
+                    end;
+                end
+            end;
+          if not found then
+            begin
+              JoinGraph[baseCounter].node := DirectJoinList[i].ToTable;
+              JoinGraph[baseCounter].adjacents := nil;
+              baseCounter += 1;
+            end else
+            found := false;
+        end;
+    counter += 1;
+  until counter = length(JoinGraph);
 
   for i := Low(DirectJoinList) to High(DirectJoinList) do
     with DirectJoinList[i] do
@@ -385,55 +411,6 @@ begin
             Exit
           end
 end;
-
-procedure BJoinTreeClass.getPath(JoinBaseTables: array of string; JoinGraph: GraphStructure);
-var
-  queue: array of string;
-  tableElement: string;
-  found: Boolean;
-  i, j: integer;
-begin
-  FPath := nil;
-  queue := nil;
-  SetLength(queue,Length(queue)+1);
-  queue[High(queue)] := JoinBaseTables[0];
-  Fpath := nil;
-  SetLength(FPath,Length(FPath)+1);
-  FPath[High(FPath)] := JoinBaseTables[0];
-  repeat
-    tableElement := queue[Low(queue)];
-    with JoinGraph[getIndexFromJoinGraph(JoinGraph,tableElement)] do
-    for j := Low(adjacents) to High(adjacents) do
-      begin
-        found := False;
-        for i := Low(JoinBaseTables) to High(JoinBaseTables) do
-          if adjacents[j].Link = JoinBaseTables[i] then
-            begin
-              found := True;
-              Break
-            end;
-        if found then
-          begin
-            found := False;
-            for i := low(FPath) to high(FPath) do
-              if adjacents[j].Link = FPath[i] then
-                begin
-                  found := True;
-                  Break
-                end;
-            if not found then
-              begin
-                SetLength(queue,Length(queue)+1);
-                queue[High(queue)] := adjacents[j].Link;
-                SetLength(FPath,Length(FPath)+1);
-                FPath[High(FPath)] := adjacents[j].Link
-              end
-          end
-      end;
-    queue := copy(queue,1,Length(queue))
-  until queue = nil;
-end;
-
 
 procedure BJoinTreeClass.generateJoinPathList(
                   JoinBaseTables: array of string;
@@ -594,14 +571,7 @@ begin
   setlength(JoinBaseTables,length(FJoinGraph));
   for i := low(FJoinGraph) to High(FJoinGraph) do
     JoinBaseTables[i] := FJoinGraph[i].node;
-  GetPath(JoinBaseTables,FJoinGraph);
-  for i := low(FJoinGraph) to High(FJoinGraph) do
-    begin
-      FBaseTables[i] := FPath[i];
-      JoinBaseTables[i] := FPath[i];
-    end;
-{ #note :  generateJoinGraph should be called again after adjusting FBaseTables }
-  generateJoinGraph(FBaseTables,FJoinGraph);
+
   generateJoinPathList(JoinBaseTables, FJoinGraph, FJoinPathList,TheKeys);
 
   { #note : if an index exists for base table use it }
