@@ -1610,7 +1610,7 @@ begin
             if dim2 <> 0 then
               begin
                 varVar := varVar * Power(10,dim2);
-                result := Round(VarVar) / Power(10,dim2);
+                result := Int(VarVar) / Power(10,dim2); //Round(VarVar) / Power(10,dim2);
               end;
           end;
         if (sqltype_name = 'DATE') or

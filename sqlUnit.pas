@@ -463,7 +463,7 @@ begin
 
   EraseBJoinTree('jdx2_test',4);
 
-  jdx := BJoinTreeClass.Create('jdx2_test',['t','u','v','s']);
+  jdx := BJoinTreeClass.Create('jdx2_test',['u','t','s','v']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
   jdx.AddColumnToDictionary('a2','INTEGER','t');
