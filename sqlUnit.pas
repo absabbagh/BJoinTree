@@ -362,7 +362,7 @@ var
   Diff: TTime;
   Hour, Min, Sec, MSec: word;
 
-
+  j, k, l: integer;
 begin
   StartTime := Now;
 
@@ -485,6 +485,7 @@ begin
   jdx.AddJoin('v','u','a4');
   jdx.AddJoin('u','v','a4');
   jdx.AddJoin('s','t','a1');
+
 
   jdx.createBTrees(false,['t.a2','s.a3']);
 
@@ -786,6 +787,9 @@ begin
           edit4.Enabled := false;
           edit7.Enabled := false;
           Memo1.Enabled := true;
+          Memo2.Clear;
+          Memo3.Clear;
+          Memo4.Clear;
           Button2.Enabled := true;
           edit7.Visible := false;
           button5.Visible := false;
