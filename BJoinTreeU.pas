@@ -6,14 +6,17 @@ uses BPlusTreeU;
 
 type
 
-  DataDictionaryStructure = array of record
+  { #note :  The DataDictionaryStructure is just for reference to extract the
+             keys and inherited keys when needed, not necessary to have all the
+             columns of a table. }
+  keysDataDictionaryStructure = array of record
     case byte of
       0: (TableName: string[60]);
       1: (ColumnName: string[60];
           ColumnType: string[60];
           TableNameRef: string[60]);
-      2: (AliasName: string[60];
-          TableRef: string[60]);
+      2: (TableRef: string[60];
+          AliasName: string[60]);
     end;
 
   GraphStructure = array of record
@@ -44,7 +47,7 @@ type
 
   BJoinTreeClass = class
     private
-      FDataDictionary: DataDictionaryStructure;
+      FDataDictionary: keysDataDictionaryStructure;
       FileName: string;
       FBaseTables: array of string;
       DirectJoinList: array of record
@@ -86,12 +89,13 @@ type
       function GetnumberOfDataRef(BTreeIndex: Integer): Integer;
       function GetDataRefByTableName(BaseTable: string; DataRef: array of DataPointerType): DataPointerType;
 
-      procedure AddKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
-      procedure DeleteKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
+      procedure AddAliasToDictionary(AliasName,TableName: string);
       procedure AddTableToDictionary(TableName: string);
       procedure AddColumnToDictionary(ColumnName, ColumnType: string; TableNameRef: string);
 
       procedure ClearKey(BtreeIndex: Integer); overload;
+      procedure AddKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
+      procedure DeleteKey(TableName: string; Row: array of variant; DataRef: DataPointerType);
       procedure PrevKey(BtreeIndex: Integer;
                         var Keys: array of variant;
                         var InheritedKeys: array of variant;
@@ -170,6 +174,8 @@ function BJoinTreeClass.getTypeFromDataDictionary(TheColumnName: string; TheTabl
 var
   i: Integer;
 begin
+  TheColumnName := LowerCase(TheColumnName);
+  TheTableNameRef := LowerCase(TheTableNameRef);
   result := '';
   for i := Low(FDataDictionary) to High(FDataDictionary) do
     with FDataDictionary[i]do
@@ -184,21 +190,43 @@ function BJoinTreeClass.getPositionFromDataDictionary(TheColumnName: string; The
 var
   i: Integer;
 begin
+  TheColumnName := LowerCase(TheColumnName);
+  TheTableNameRef := LowerCase(TheTableNameRef);
   result := 0;
   for i := Low(FDataDictionary) to High(FDataDictionary) do
-    with FDataDictionary[i]do
-      if (TableNameRef = TheTableNameRef) then
-        if (ColumnName = TheColumnName) then Exit else Inc(result);
+    with FDataDictionary[i] do
+      if (TheTableNameRef = AliasName) then
+        begin
+          TheTableNameRef := TableRef;
+          Break;
+        end;
+  for i := Low(FDataDictionary) to High(FDataDictionary) do
+    with FDataDictionary[i] do
+      if (TheTableNameRef = TableNameRef) then
+        if (TheColumnName = ColumnName) then Exit else Inc(result);
 end;
 
 procedure BJoinTreeClass.AddTableToDictionary(TableName: string);
 begin
+  TableName := lowercase(trim(TableName));
   SetLength(FDataDictionary,Length(FDataDictionary)+1);
   FDataDictionary[High(FDataDictionary)].TableName := TableName
 end;
 
+procedure BJoinTreeClass.AddAliasToDictionary(AliasName, TableName: string);
+begin
+  AliasName := lowercase(trim(AliasName));
+  TableName := lowercase(trim(TableName));
+  SetLength(FDataDictionary,Length(FDataDictionary)+1);
+  FDataDictionary[High(FDataDictionary)].AliasName := AliasName;
+  FDataDictionary[High(FDataDictionary)].TableRef := TableName
+end;
+
 procedure BJoinTreeClass.AddColumnToDictionary(ColumnName, ColumnType: string; TableNameRef: string);
 begin
+  ColumnName := lowercase(trim(ColumnName));
+  ColumnType := lowercase(trim(ColumnType));
+  TableNameRef := lowercase(trim(TableNameRef));
   SetLength(FDataDictionary,Length(FDataDictionary)+1);
   FDataDictionary[High(FDataDictionary)].ColumnName := ColumnName;
   FDataDictionary[High(FDataDictionary)].ColumnType := ColumnType;
@@ -209,6 +237,8 @@ constructor BJoinTreeClass.create(TheFileName: string; TheBaseTables: array of s
 var
   i: Integer;
 begin
+  for i := Low(TheBaseTables) to High(TheBaseTables) do
+    TheBaseTables[i] := Lowercase(TheBaseTables[i]);
   FileName := TheFileName;
   SetLength(FBaseTables,Length(TheBaseTables));
   for i := Low(TheBaseTables) to High(TheBaseTables) do
@@ -230,6 +260,9 @@ end;
 
 procedure BJoinTreeClass.AddJoin(FromTheTable, ToTheTable: string; TheKey: string);
 begin
+  FromTheTable := lowercase(trim(FromTheTable));
+  ToTheTable := lowercase(trim(ToTheTable));
+  TheKey := lowercase(TheKey);
   SetLength(DirectJoinList,Length(DirectJoinList)+1);
   with DirectJoinList[High(DirectJoinList)] do
     begin
@@ -244,6 +277,10 @@ var
   i, j: Integer;
   Control: Boolean;
 begin
+  for i := Low(Table1) to High(Table1) do
+    Table1[i] := LowerCase(Table1[i]);
+  for i := Low(Table2) to High(Table2) do
+    Table2[i] := LowerCase(Table2[i]);
   result := Length(Table1) = Length(Table2);
   for i := Low(Table1) to High(Table1) do
     begin
@@ -259,6 +296,7 @@ var
   i: Integer;
 begin
   result := 0;
+  FromTable := LowerCase(FromTable);
   for i := Low(JoinGraph) to High(JoinGraph) do
     begin
       if FromTable = JoinGraph[i].node then
@@ -274,6 +312,7 @@ var
   i: Integer;
 begin
   result := 0;
+  FromTable := LowerCase(FromTable);
   for i := Low(JoinPathList) to High(JoinPathList) do
     begin
       if FromTable = JoinPathList[i].node[0] then
@@ -289,6 +328,8 @@ var
   i: Integer;
 begin
   result := 0;
+  for i := Low(FromTable) to High(FromTable) do
+    FromTable[i] := LowerCase(FromTable[i]);
   for i := Low(JoinPathList) to High(JoinPathList) do
     if eqlVirtualTables(FromTable,JoinPathList[i].node) then
       begin
@@ -306,6 +347,8 @@ var
   found: boolean;
   position: Integer;
 begin
+  for i := Low(BaseTables) to High(BaseTables) do
+    BaseTables[i] := LowerCase(BaseTables[i]);
   JoinGraph := nil;
   SetLength(JoinGraph,Length(BaseTables));
   JoinGraph[0].node := BaseTables[0];
@@ -371,6 +414,10 @@ var
   i, j, k: Integer;
 begin
   for i := Low(FromTable) to High(FromTable) do
+    FromTable[i] := LowerCase(FromTable[i]);
+  for i := Low(ToTable) to High(ToTable) do
+    ToTable[i] := LowerCase(ToTable[i]);
+  for i := Low(FromTable) to High(FromTable) do
     with JoinGraph[getIndexFromJoinGraph(JoinGraph,FromTable[i])] do
         for j := Low(adjacents) to High(adjacents) do
           for k := Low(ToTable) to High(ToTable) do
@@ -387,6 +434,9 @@ var
   i, j: Integer;
 begin
   for i := Low(FromTable) to High(FromTable) do
+    FromTable[i] := LowerCase(FromTable[i]);
+  ToTable := LowerCase(ToTable);
+  for i := Low(FromTable) to High(FromTable) do
     with JoinGraph[getIndexFromJoinGraph(JoinGraph,FromTable[i])] do
       for j := Low(adjacents) to High(adjacents) do
         if adjacents[j].Link = ToTable then
@@ -401,6 +451,9 @@ procedure BJoinTreeClass.getFirstAdjacentListKey(JoinGraph: GraphStructure; From
 var
   j, k: Integer;
 begin
+  FromTable := LowerCase(FromTable);
+  for j := Low(ToTable) to High(ToTable) do
+    ToTable[j] := LowerCase(ToTable[j]);
   with JoinGraph[getIndexFromJoinGraph(JoinGraph,FromTable)] do
     for j := Low(adjacents) to High(adjacents) do
       for k := Low(ToTable) to High(ToTable) do
@@ -432,6 +485,10 @@ var
   FromTable: string;
   KeyName: string;
 begin
+  for i := Low(JoinBaseTables) to High(JoinBaseTables) do
+    JoinBaseTables[i] := LowerCase(JoinBaseTables[i]);
+  for i := Low(TheKeys) to High(TheKeys) do
+    TheKeys[i] := LowerCase(TheKeys[i]);
   queue := nil;
   SetLength(queue,Length(queue)+1);
   queue[High(queue)] := JoinBaseTables[0];
@@ -557,6 +614,7 @@ begin
               end
           end
       end;
+
 end;
 
 procedure BJoinTreeClass.createBTrees(IsOpen: Boolean; TheKeys: array of string);
@@ -567,6 +625,8 @@ var
   FInheritedKeys: array of string;
   JoinBaseTables: array of string = nil;
 begin
+  for i := Low(TheKeys) to High(TheKeys) do
+    TheKeys[i] := LowerCase(TheKeys[i]);
   generateJoinGraph(FBaseTables,FJoinGraph);
   setlength(JoinBaseTables,length(FJoinGraph));
   for i := low(FJoinGraph) to High(FJoinGraph) do
@@ -621,6 +681,7 @@ var
   i:integer;
 begin
   result := -1;
+  BaseTable := Lowercase(BaseTable);
   for i := low(BaseTables) to High(BaseTables) do
     if lowerCase(BaseTables[i]) = lowerCase(BaseTable) then
       break;
@@ -645,9 +706,10 @@ var
   ConcatenateInheritedKeys: array of variant;
   ConcatenateDataRef: array of DataPointerType;
   TNIndex, ATIndex: Integer;
-
-
 begin
+  for i := Low(TableName) to High(TableName) do
+    TableName[i] := LowerCase(TableName[i]);
+
   BTreeIndex := getIndexFromJoinPathList(FJoinPathList,TableName);
   FBTrees[BtreeIndex].AddKey(Keys,InheritedKeys,DataRef);
 
@@ -846,6 +908,7 @@ var
   InheritedKeys: array of variant;
   virtualTableName: virtualTableStructure;
 begin
+  TableName := LowerCase(TableName);
   with FJoinPathList[getIndexFromJoinPathList(FJoinPathList,TableName)] do
     begin
       SetLength(Keys,Length(adjacent.Keys));
@@ -887,6 +950,8 @@ var
   TNIndex, ATIndex: Integer;
   index: Integer;
 begin
+  for i := Low(TableName) to High(TableName) do
+    TableName[i] := LowerCase(TableName[i]);
   BTreeIndex := getIndexFromJoinPathList(FJoinPathList,TableName);
   FBTrees[BtreeIndex].DeleteKey(Keys,DataRef);
   AdjacentTable := FJoinPathList[BTreeIndex].adjacent.link;
@@ -1062,6 +1127,8 @@ var
   InheritedKeys: array of variant;
   virtualTableName: virtualTableStructure;
 begin
+  TableName := LowerCase(TableName);
+
   with FJoinPathList[getIndexFromJoinPathList(FJoinPathList,TableName)] do
     begin
       SetLength(Keys,Length(adjacent.Keys));

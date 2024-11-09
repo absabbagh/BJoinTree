@@ -411,6 +411,7 @@ begin
   jdx.AddJoin('JOB_HISTORY','JOBS','JOB_ID');
   jdx.AddJoin('EMPLOYEES','DEPARTMENTS','DEPARTMENT_ID');
   jdx.AddJoin('DEPARTMENTS','EMPLOYEES','DEPARTMENT_ID');
+
   jdx.AddJoin('DEPARTMENTS','LOCATIONS','LOCATION_ID');
   jdx.AddJoin('LOCATIONS','DEPARTMENTS','LOCATION_ID');
   jdx.AddJoin('LOCATIONS','COUNTRIES','COUNTRY_ID');
@@ -531,6 +532,66 @@ begin
   jdx.Free;
 
   EraseBJoinTree('jdx2_test',4);
+
+  // Self Join
+  EraseBJoinTree('jdx3_test',2);
+
+  jdx := BJoinTreeClass.Create('jdx3_test', ['A','B']);
+
+  jdx.AddTableToDictionary('EMPLOYEES');
+  jdx.AddAliasToDictionary('A','EMPLOYEES');
+  jdx.AddAliasToDictionary('B','EMPLOYEES');
+  jdx.AddColumnToDictionary('EMPLOYEE_ID','INTEGER','EMPLOYEES');
+  jdx.AddColumnToDictionary('NAME','STRING[35]','EMPLOYEES');
+  jdx.AddColumnToDictionary('SUPERVISOR_ID','INTEGER','EMPLOYEES');
+
+  jdx.AddJoin('A','B','EMPLOYEE_ID');
+  jdx.AddJoin('B','A','SUPERVISOR_ID');
+
+  jdx.createBTrees(false,['']);
+
+  jdx.AddKey('A',[101, 'ALAN1', 106],1);
+  jdx.AddKey('B',[101, 'ALAN6', 106],1);
+  jdx.AddKey('A',[102, 'ALAN2', 106],2);
+  jdx.AddKey('B',[102, 'ALAN6', 106],2);
+  jdx.AddKey('A',[103, 'ALAN3', 106],3);
+  jdx.AddKey('B',[103, 'ALAN6', 106],3);
+  jdx.AddKey('A',[104, 'ALAN4', 102],4);
+  jdx.AddKey('B',[104, 'ALAN2', 102],4);
+  jdx.AddKey('A',[105, 'ALAN5', 103],5);
+  jdx.AddKey('B',[105, 'ALAN3', 103],5);
+  jdx.AddKey('A',[106, 'ALAN6', NULL],6);
+
+  BT := jdx.BaseTables;
+  st := '';
+  for i := low(BT) to High(BT) do
+    begin
+      st += BT[i] + ' '
+    end;
+  memo4.Lines.Add(st);
+  memo4.Lines.Add('');
+
+  Keys := nil;
+  setlength(Keys,1);
+  DataRef := nil;
+  setlength(DataRef,2);
+  jdx.ClearKey;
+  repeat
+    jdx.NextKey(Keys,DataRef);
+    if dataref[0] <> -1 then
+      begin
+        st := 'Employee: ' + intToStr(jdx.GetDataRefByTableName('A',dataref));
+        st += ' is a Supervisor of Employee: ' + intToStr(jdx.GetDataRefByTableName('B',dataref));
+        memo4.Lines.Add(st);
+        memo4.Lines.Add('--------------------------------');
+      end
+
+  until DataRef[0] = -1;
+  memo4.Lines.Add('--------------------------------');
+
+  jdx.Free;
+
+  EraseBJoinTree('jdx3_test',2);
 
   {$ELSE}
   thekeys := nil;
