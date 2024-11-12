@@ -339,6 +339,13 @@ const Path: string = '';
 type
     DataPointerType =  Integer; //string[24];
 
+
+{ #todo : Automatically check for an alias if a table have 1 alias
+          BPlusTree know the key from which alias is coming
+}
+
+{$Define useAliases}
+
 procedure TForm1.Button5Click(Sender: TObject);
 var
   {$IFDEF joinindex}
@@ -372,9 +379,16 @@ begin
 
   EraseBJoinTree('jdx1_test',6);
 
+  {$IFDEF useAliases}
+  jdx := BJoinTreeClass.Create('jdx1_test', ['d','e','c','j','l','jh']);
+  {$ELSE}
   jdx := BJoinTreeClass.Create('jdx1_test', ['DEPARTMENTS','EMPLOYEES','COUNTRIES','JOBS','LOCATIONS','JOB_HISTORY']);
+  {$ENDIF}
 
   jdx.AddTableToDictionary('EMPLOYEES');
+  {$IFDEF useAliases}
+  jdx.AddAliasToDictionary('e','EMPLOYEES');
+  {$ENDIF}
   jdx.AddColumnToDictionary('EMPLOYEE_ID','INTEGER','EMPLOYEES');
   jdx.AddColumnToDictionary('NAME','STRING[35]','EMPLOYEES');
   jdx.AddColumnToDictionary('MANAGER_ID','INTEGER','EMPLOYEES');
@@ -382,49 +396,87 @@ begin
   jdx.AddColumnToDictionary('JOB_ID','STRING[10]','EMPLOYEES');
 
   jdx.AddTableToDictionary('JOBS');
+  {$IFDEF useAliases}
+  jdx.AddAliasToDictionary('j','JOBS');
+  {$ENDIF}
   jdx.AddColumnToDictionary('JOB_ID','STRING[10]','JOBS');
   jdx.AddColumnToDictionary('JOB_TITTLE','STRING[35]','JOBS');
 
   jdx.AddTableToDictionary('JOB_HISTORY');
+  {$IFDEF useAliases}
+  jdx.AddAliasToDictionary('jh','JOB_HISTORY');
+  {$ENDIF}
   jdx.AddColumnToDictionary('EMPLOYEE_ID','INTEGER','JOB_HISTORY');
   jdx.AddColumnToDictionary('DEPARTMENT_ID','STRING[10]','JOB_HISTORY');
   jdx.AddColumnToDictionary('JOB_ID','STRING[10]','JOB_HISTORY');
 
   jdx.AddTableToDictionary('DEPARTMENTS');
+  {$IFDEF useAliases}
+  jdx.AddAliasToDictionary('d','DEPARTMENTS');
+  {$ENDIF}
   jdx.AddColumnToDictionary('DEPARTMENT_ID','STRING[10]','DEPARTMENTS');
   jdx.AddColumnToDictionary('DEPARTMENT_NAME','STRING[35]','DEPARTMENTS');
   jdx.AddColumnToDictionary('MANAGER_ID','INTEGER','DEPARTMENTS');
   jdx.AddColumnToDictionary('LOCATION_ID','INTEGER','DEPARTMENTS');
 
   jdx.AddTableToDictionary('LOCATIONS');
+  {$IFDEF useAliases}
+  jdx.AddAliasToDictionary('l','LOCATIONS');
+  {$ENDIF}
   jdx.AddColumnToDictionary('LOCATION_ID','INTEGER','LOCATIONS');
   jdx.AddColumnToDictionary('ADDRESS','STRING[40]','LOCATIONS');
   jdx.AddColumnToDictionary('COUNTRY_ID','STRING[2]','LOCATIONS');
 
   jdx.AddTableToDictionary('COUNTRIES');
+  {$IFDEF useAliases}
+  jdx.AddAliasToDictionary('c','COUNTRIES');
+  {$ENDIF}
   jdx.AddColumnToDictionary('COUNTRY_ID','STRING[2]','COUNTRIES');
   jdx.AddColumnToDictionary('COUNTRY_NAME','STRING[40]','COUNTRIES');
 
+  {$IFDEF useAliases}
+  jdx.AddJoin('e','jh','EMPLOYEE_ID');
+  jdx.AddJoin('jh','e','EMPLOYEE_ID');
+  jdx.AddJoin('j','jh','JOB_ID');
+  jdx.AddJoin('jh','j','JOB_ID');
+  jdx.AddJoin('e','d','DEPARTMENT_ID');
+  jdx.AddJoin('d','e','DEPARTMENT_ID');
+  jdx.AddJoin('d','l','LOCATION_ID');
+  jdx.AddJoin('l','d','LOCATION_ID');
+  jdx.AddJoin('l','c','COUNTRY_ID');
+  jdx.AddJoin('c','l','COUNTRY_ID');
+  {$ELSE}
   jdx.AddJoin('EMPLOYEES','JOB_HISTORY','EMPLOYEE_ID');
   jdx.AddJoin('JOB_HISTORY','EMPLOYEES','EMPLOYEE_ID');
   jdx.AddJoin('JOBS','JOB_HISTORY','JOB_ID');
   jdx.AddJoin('JOB_HISTORY','JOBS','JOB_ID');
   jdx.AddJoin('EMPLOYEES','DEPARTMENTS','DEPARTMENT_ID');
   jdx.AddJoin('DEPARTMENTS','EMPLOYEES','DEPARTMENT_ID');
-
   jdx.AddJoin('DEPARTMENTS','LOCATIONS','LOCATION_ID');
   jdx.AddJoin('LOCATIONS','DEPARTMENTS','LOCATION_ID');
   jdx.AddJoin('LOCATIONS','COUNTRIES','COUNTRY_ID');
   jdx.AddJoin('COUNTRIES','LOCATIONS','COUNTRY_ID');
+  {$ENDIF}
 
-  jdx.createBTrees(false,['EMPLOYEES.NAME']);
 
+  {$IFDEF useAliases}
+  jdx.createBTrees(false,['e.NAME','d.LOCATION_ID']);
+  jdx.AddKey('j',['CLEANING','CLEANNER'],21);
+  jdx.AddKey('jh',[1016, 'JANITOR', 'CLEANING'],31);
+  jdx.AddKey('e',[1016, 'ALAN', 1001, 'JANITOR', 'CLEANING'],11);
+  jdx.AddKey('d',['JANITOR', 'JANITOR CLEANING', 1001, 1266],41);
+  jdx.AddKey('c',['CA', 'CANADA'],61);
+  jdx.AddKey('l',[1266, 'RICHMOND','CA'],51);
+  {$ELSE}
+  jdx.createBTrees(false,['EMPLOYEES.NAME','DEPARTMENTS.LOCATION_ID']);
   jdx.AddKey('JOBS',['CLEANING','CLEANNER'],21);
   jdx.AddKey('JOB_HISTORY',[1016, 'JANITOR', 'CLEANING'],31);
   jdx.AddKey('EMPLOYEES',[1016, 'ALAN', 1001, 'JANITOR', 'CLEANING'],11);
   jdx.AddKey('DEPARTMENTS',['JANITOR', 'JANITOR CLEANING', 1001, 1266],41);
   jdx.AddKey('COUNTRIES',['CA', 'CANADA'],61);
   jdx.AddKey('LOCATIONS',[1266, 'RICHMOND','CA'],51);
+  {$ENDIF}
+
 
   BT := jdx.BaseTables;
   st := '';
@@ -435,14 +487,14 @@ begin
   memo4.Lines.Add(st);
   memo4.Lines.Add('');
 
-  setlength(Keys,1);
+  setlength(Keys,2);
   setlength(DataRef,6);
   jdx.ClearKey;
   repeat
     jdx.NextKey(Keys,DataRef);
     if dataref[0] <> -1 then
       begin
-        st := 'NAME: ' + keys[0];
+        st := 'NAME: ' + keys[0] +  ' works at: ' + INTTOSTR(keys[1]);
         memo4.Lines.Add(st);
         st :=  'Departments: ' + intToStr(jdx.GetDataRefByTableName('Departments',dataref));
         st += ' EMPLOYEES: ' + intToStr(jdx.GetDataRefByTableName('EMPLOYEES',dataref));
@@ -463,7 +515,7 @@ begin
 
 
   EraseBJoinTree('jdx2_test',4);
-
+  jdx := nil;
   jdx := BJoinTreeClass.Create('jdx2_test',['u','t','s','v']);
   jdx.AddTableToDictionary('t');
   jdx.AddColumnToDictionary('a1','INTEGER','t');
@@ -548,7 +600,7 @@ begin
   jdx.AddJoin('A','B','EMPLOYEE_ID');
   jdx.AddJoin('B','A','SUPERVISOR_ID');
 
-  jdx.createBTrees(false,['']);
+  jdx.createBTrees(false,['B.NAME']);
 
   jdx.AddKey('A',[101, 'ALAN1', 106],1);
   jdx.AddKey('B',[101, 'ALAN6', 106],1);
@@ -580,6 +632,8 @@ begin
     jdx.NextKey(Keys,DataRef);
     if dataref[0] <> -1 then
       begin
+        st := 'NAME: ' + keys[0];
+        memo4.Lines.Add(st);
         st := 'Employee: ' + intToStr(jdx.GetDataRefByTableName('A',dataref));
         st += ' is a Supervisor of Employee: ' + intToStr(jdx.GetDataRefByTableName('B',dataref));
         memo4.Lines.Add(st);

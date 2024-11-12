@@ -10,7 +10,7 @@ type
              keys and inherited keys when needed, not necessary to have all the
              columns of a table. }
   keysDataDictionaryStructure = array of record
-    case byte of
+    case kind: byte of
       0: (TableName: string[60]);
       1: (ColumnName: string[60];
           ColumnType: string[60];
@@ -179,11 +179,12 @@ begin
   result := '';
   for i := Low(FDataDictionary) to High(FDataDictionary) do
     with FDataDictionary[i]do
-      if (ColumnName = TheColumnName) and (TableNameRef = TheTableNameRef) then
-        begin
-          result := ColumnType;
-          Exit
-        end
+      if kind = 1 then
+        if (ColumnName = TheColumnName) and (TableNameRef = TheTableNameRef) then
+          begin
+            result := ColumnType;
+            Exit
+          end
 end;
 
 function BJoinTreeClass.getPositionFromDataDictionary(TheColumnName: string; TheTableNameRef: string): Integer;
@@ -195,21 +196,24 @@ begin
   result := 0;
   for i := Low(FDataDictionary) to High(FDataDictionary) do
     with FDataDictionary[i] do
-      if (TheTableNameRef = AliasName) then
-        begin
-          TheTableNameRef := TableRef;
-          Break;
-        end;
+      if kind = 2 then
+        if (TheTableNameRef = AliasName) then
+          begin
+            TheTableNameRef := TableRef;
+            Break;
+          end;
   for i := Low(FDataDictionary) to High(FDataDictionary) do
     with FDataDictionary[i] do
-      if (TheTableNameRef = TableNameRef) then
-        if (TheColumnName = ColumnName) then Exit else Inc(result);
+      if Kind = 1 then
+        if (TheTableNameRef = TableNameRef) then
+          if (TheColumnName = ColumnName) then Exit else Inc(result);
 end;
 
 procedure BJoinTreeClass.AddTableToDictionary(TableName: string);
 begin
   TableName := lowercase(trim(TableName));
   SetLength(FDataDictionary,Length(FDataDictionary)+1);
+  FDataDictionary[High(FDataDictionary)].kind := 0;
   FDataDictionary[High(FDataDictionary)].TableName := TableName
 end;
 
@@ -218,6 +222,7 @@ begin
   AliasName := lowercase(trim(AliasName));
   TableName := lowercase(trim(TableName));
   SetLength(FDataDictionary,Length(FDataDictionary)+1);
+  FDataDictionary[High(FDataDictionary)].kind := 2;
   FDataDictionary[High(FDataDictionary)].AliasName := AliasName;
   FDataDictionary[High(FDataDictionary)].TableRef := TableName
 end;
@@ -228,6 +233,7 @@ begin
   ColumnType := lowercase(trim(ColumnType));
   TableNameRef := lowercase(trim(TableNameRef));
   SetLength(FDataDictionary,Length(FDataDictionary)+1);
+  FDataDictionary[High(FDataDictionary)].kind := 1;
   FDataDictionary[High(FDataDictionary)].ColumnName := ColumnName;
   FDataDictionary[High(FDataDictionary)].ColumnType := ColumnType;
   FDataDictionary[High(FDataDictionary)].TableNameRef := TableNameRef
@@ -621,6 +627,7 @@ procedure BJoinTreeClass.createBTrees(IsOpen: Boolean; TheKeys: array of string)
 var
   FBTreeName: string;
   i, j: Integer;
+  z: integer;
   FKeys: array of string;
   FInheritedKeys: array of string;
   JoinBaseTables: array of string = nil;
@@ -645,6 +652,17 @@ begin
           FKeys := nil;
           for j := Low(adjacent.Keys) to High(adjacent.Keys) do
             begin
+
+              for z := Low(FDataDictionary) to High(FDataDictionary) do
+                with FDataDictionary[z] do
+                if kind = 2 then
+                  with adjacent.Keys[j] do
+                    if (FromTable = AliasName) then
+                      begin
+                        FromTable := TableRef;
+                        Break;
+                      end;
+
               SetLength(FKeys,Length(FKeys)+1);
               with adjacent.Keys[j] do
                 FKeys[High(FKeys)] := FromTable + '_' + KeyName + ':' + getTypeFromDataDictionary(KeyName,FromTable)
@@ -652,6 +670,17 @@ begin
           FInheritedKeys := nil;
           for j := Low(adjacent.InheritedKeys) to High(adjacent.InheritedKeys) do
             begin
+
+              for z := Low(FDataDictionary) to High(FDataDictionary) do
+                with FDataDictionary[z] do
+                  if kind = 2 then
+                  with adjacent.InheritedKeys[j] do
+                    if (FromTable = AliasName) then
+                      begin
+                        FromTable := TableRef;
+                        Break;
+                      end;
+
               SetLength(FInheritedKeys,Length(FInheritedKeys)+1);
               with adjacent.InheritedKeys[j] do
                 FInheritedKeys[High(FInheritedKeys)] := FromTable + '_' + KeyName + ':' + getTypeFromDataDictionary(KeyName,FromTable)
