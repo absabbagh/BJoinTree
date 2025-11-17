@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buttons Click</title>
+</head>
+<body>
+
+
+
+
+<!-- <p id="message">No click yet.</p> -->
+
+
+<p style="position: absolute; top: 0px; margin-left: 15px;" id="previous">PREVIOUS NUMBERS</p>
+<button style="font-size: 15px; position: absolute; top: 10px; margin-left: 335px; font-weight: bold; width: 50px; height: 20px;" id="prvcounter">0</button>
+<button style="font-size: 15px; position: absolute; top: 35px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn1"> </button>
+<button style="font-size: 15px; position: absolute; top: 35px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn2"> </button>
+<button style="font-size: 15px; position: absolute; top: 35px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn3"> </button>
+<button style="font-size: 15px; position: absolute; top: 35px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn4"> </button>
+<button style="font-size: 15px; position: absolute; top: 35px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn5"> </button>
+<button style="font-size: 15px; position: absolute; top: 35px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn6"> </button>
+<button style="font-size: 15px; position: absolute; top: 90px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn7"> </button>
+<button style="font-size: 15px; position: absolute; top: 90px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn8"> </button>
+<button style="font-size: 15px; position: absolute; top: 90px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn9"> </button>
+<button style="font-size: 15px; position: absolute; top: 90px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn10"> </button>
+<button style="font-size: 15px; position: absolute; top: 90px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn11"> </button>
+<button style="font-size: 15px; position: absolute; top: 90px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="prvbtn12"> </button>
+
+
+<p style="position: absolute; top: 140px; margin-left: 15px;" id="uniques">PLAY AREA</p>
+<p style="position: absolute; top: 140px; margin-left: 183px; font-weight: bold; color: red;" id="win">WIN</p>
+<button style="font-size: 15px; position: absolute; top: 150px; margin-left: 335px; font-weight: bold; width: 50px; height: 20px;" id="unqcounter"> </button>
+<button style="font-size: 15px; position: absolute; top: 175px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn1"> </button>
+<button style="font-size: 15px; position: absolute; top: 175px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn2"> </button>
+<button style="font-size: 15px; position: absolute; top: 175px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn3"> </button>
+<button style="font-size: 15px; position: absolute; top: 175px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn4"> </button>
+<button style="font-size: 15px; position: absolute; top: 175px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn5"> </button>
+<button style="font-size: 15px; position: absolute; top: 175px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn6"> </button>
+<button style="font-size: 15px; position: absolute; top: 230px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn7"> </button>
+<button style="font-size: 15px; position: absolute; top: 230px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn8"> </button>
+<button style="font-size: 15px; position: absolute; top: 230px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn9"> </button>
+<button style="font-size: 15px; position: absolute; top: 230px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn10"> </button>
+<button style="font-size: 15px; position: absolute; top: 230px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn11"> </button>
+<button style="font-size: 15px; position: absolute; top: 230px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn12"> </button>
+<button style="font-size: 15px; position: absolute; top: 285px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn13"> </button>
+<button style="font-size: 15px; position: absolute; top: 285px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn14"> </button>
+<button style="font-size: 15px; position: absolute; top: 285px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn15"> </button>
+<button style="font-size: 15px; position: absolute; top: 285px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn16"> </button>
+<button style="font-size: 15px; position: absolute; top: 285px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn17"> </button>
+<button style="font-size: 15px; position: absolute; top: 285px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="unqbtn18"> </button>
+
+<button style="font-size: 15px; position: absolute; top: 347px; margin-left: 309px; font-weight: bold; width: 75px; height: 50px;" id="btn38" ><--</button>
+<button style="font-size: 15px; color: green; position: absolute; top: 347px; margin-left: 183px; font-weight: bold; width: 50px; height: 50px;" id="btn0" > 0 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 402px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="btn1" > 1 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 402px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="btn2" > 2 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 402px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="btn3" > 3 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 402px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="btn4" > 4 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 402px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="btn5" > 5 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 402px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="btn6" > 6 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 457px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="btn7" > 7 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 457px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="btn8" > 8 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 457px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="btn9" > 9 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 457px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="btn10"> 10 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 457px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="btn11"> 11 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 457px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="btn12"> 12 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 512px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="btn13"> 13 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 512px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="btn14"> 14 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 512px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="btn15"> 15 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 512px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="btn16"> 16 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 512px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="btn17"> 17 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 512px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="btn18"> 18 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 567px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="btn19"> 19 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 567px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="btn20"> 20 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 567px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="btn21"> 21 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 567px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="btn22"> 22 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 567px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="btn23"> 23 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 567px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="btn24"> 24 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 622px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="btn25"> 25 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 622px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="btn26"> 26 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 622px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="btn27"> 27 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 622px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="btn28"> 28 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 622px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="btn29"> 29 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 622px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="btn30"> 30 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 677px; margin-left: 15px; font-weight: bold; width: 50px; height: 50px;" id="btn31"> 31 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 677px; margin-left: 79px; font-weight: bold; width: 50px; height: 50px;" id="btn32"> 32 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 677px; margin-left: 143px; font-weight: bold; width: 50px; height: 50px;" id="btn33"> 33 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 677px; margin-left: 207px; font-weight: bold; width: 50px; height: 50px;" id="btn34"> 34 </button>
+<button style="font-size: 15px; color: black; position: absolute; top: 677px; margin-left: 271px; font-weight: bold; width: 50px; height: 50px;" id="btn35"> 35 </button>
+<button style="font-size: 15px; color: red; position: absolute; top: 677px; margin-left: 335px; font-weight: bold; width: 50px; height: 50px;" id="btn36"> 36 </button>
+
+<script>
+
+// Get a reference to the previous buttons
+const prvcounter = document.getElementById("prvcounter");
+const prvbtn1 = document.getElementById("prvbtn1");
+const prvbtn2 = document.getElementById("prvbtn2");
+const prvbtn3 = document.getElementById("prvbtn3");
+const prvbtn4 = document.getElementById("prvbtn4");
+const prvbtn5 = document.getElementById("prvbtn5");
+const prvbtn6 = document.getElementById("prvbtn6");
+const prvbtn7 = document.getElementById("prvbtn7");
+const prvbtn8 = document.getElementById("prvbtn8");
+const prvbtn9 = document.getElementById("prvbtn9");
+const prvbtn10 = document.getElementById("prvbtn10");
+const prvbtn11 = document.getElementById("prvbtn11");
+const prvbtn12 = document.getElementById("prvbtn12");
+
+// Get a reference to the unique buttons
+const msgwin = document.getElementById("win");
+const unqcounter = document.getElementById("unqcounter");
+const unqbtn1 = document.getElementById("unqbtn1");
+const unqbtn2 = document.getElementById("unqbtn2");
+const unqbtn3 = document.getElementById("unqbtn3");
+const unqbtn4 = document.getElementById("unqbtn4");
+const unqbtn5 = document.getElementById("unqbtn5");
+const unqbtn6 = document.getElementById("unqbtn6");
+const unqbtn7 = document.getElementById("unqbtn7");
+const unqbtn8 = document.getElementById("unqbtn8");
+const unqbtn9 = document.getElementById("unqbtn9");
+const unqbtn10 = document.getElementById("unqbtn10");
+const unqbtn11 = document.getElementById("unqbtn11");
+const unqbtn12 = document.getElementById("unqbtn12");
+const unqbtn13 = document.getElementById("unqbtn13");
+const unqbtn14 = document.getElementById("unqbtn14");
+const unqbtn15 = document.getElementById("unqbtn15");
+const unqbtn16 = document.getElementById("unqbtn16");
+const unqbtn17 = document.getElementById("unqbtn17");
+const unqbtn18 = document.getElementById("unqbtn18");
+
+// Get a reference to the buttons
+const btn38 = document.getElementById("btn38");
+const btn0 = document.getElementById("btn0");
+const btn1 = document.getElementById("btn1");
+const btn2 = document.getElementById("btn2");
+const btn3 = document.getElementById("btn3");
+const btn4 = document.getElementById("btn4");
+const btn5 = document.getElementById("btn5");
+const btn6 = document.getElementById("btn6");
+const btn7 = document.getElementById("btn7");
+const btn8 = document.getElementById("btn8");
+const btn9 = document.getElementById("btn9");
+const btn10 = document.getElementById("btn10");
+const btn11 = document.getElementById("btn11");
+const btn12 = document.getElementById("btn12");
+const btn13 = document.getElementById("btn13");
+const btn14 = document.getElementById("btn14");
+const btn15 = document.getElementById("btn15");
+const btn16 = document.getElementById("btn16");
+const btn17 = document.getElementById("btn17");
+const btn18 = document.getElementById("btn18");
+const btn19 = document.getElementById("btn19");
+const btn20 = document.getElementById("btn20");
+const btn21 = document.getElementById("btn21");
+const btn22 = document.getElementById("btn22");
+const btn23 = document.getElementById("btn23");
+const btn24 = document.getElementById("btn24");
+const btn25 = document.getElementById("btn25");
+const btn26 = document.getElementById("btn26");
+const btn27 = document.getElementById("btn27");
+const btn28 = document.getElementById("btn28");
+const btn29 = document.getElementById("btn29");
+const btn30 = document.getElementById("btn30");
+const btn31 = document.getElementById("btn31");
+const btn32 = document.getElementById("btn32");
+const btn33 = document.getElementById("btn33");
+const btn34 = document.getElementById("btn34");
+const btn35 = document.getElementById("btn35");
+const btn36 = document.getElementById("btn36");
+
+
+const cntNumsize = 37;
+let cntNum = new Array(cntNumsize).fill(0); // Fills with 0
+
+let cntPA = 0;
+const PAsize = 999;
+let PA = new Array(PAsize).fill(-1); // Fills with -1
+
+const maxunq = 18;
+let cntunq = 0;
+const unqNumsize = 37;
+let unqNum = new Array(unqNumsize).fill(-1); // Fills with -1
+let unqvalue = -1;
+
+let playCounter = 0;
+
+function firstSingleNumber() {
+  if (cntPA <= 36) {
+    for (let i = 1; i <= cntPA; i++) {
+      if (cntNum[PA[i]] == 1) {
+        return(PA[i]);
+        break;
+      }
+    }
+    return(-1);
+  } else
+  {
+    for (let i = cntPA - 36; i <= cntPA; i++) {
+      if (cntNum[PA[i]] == 1) {
+        return(PA[i]);
+        break;
+      }
+    }
+    return(-1);
+  }
+}
+
+const noplayandnowin = 0;
+const noplayandwin = 1;
+const playandnowin = 2;
+const playandwin = 3;
+const nowin = 4;
+const win = 5;
+
+function getUniqueNumbers(FSN,btnID) {
+  let result = noplayandnowin;
+  if (cntPA <= 36) {
+    if (cntunq != 0)  
+      if ((btnID == unqNum[1]) ||
+          (btnID == unqNum[1] - 100)) {
+        result = noplayandwin;
+      }
+    if (FSN != -1) {
+      cntunq = 1;
+      unqNum[1] = FSN + 100;
+    } else cntunq = 0;
+    return(result);
+  } else
+  {
+    if (cntPA > 37) cntNum[PA[cntPA - 37]] -= 1;
+    result = nowin;
+    for (let j = 1; j <= cntunq; j++) {
+      if ((btnID == unqNum[j]) ||
+          (btnID == unqNum[j] - 100)) {
+        switch (playCounter) {
+          case 1: case 2: case 3:
+            if (cntunq > maxunq) {
+              if (unqNum[j] >= 100) result = win;
+            } else      
+              result = win;
+            break;
+          default:
+            if (unqNum[j] >= 100) result = win;
+            break;
+        }
+        playCounter = 0;
+        break;
+      }
+    }
+    switch (playCounter) {
+      case 0:
+        if (PA[cntPA - 36] != FSN) {
+          if (result == win) result = noplayandwin; else result = noplayandnowin;
+          if (FSN != -1) {
+            cntunq = 1;
+            unqNum[1] = FSN + 100;
+          }
+          break;
+        }
+      case 1: case 2:  
+        playCounter += 1;
+        cntunq = 0;
+        for (let j = 0; j <= 36; j++) {
+          if ((cntNum[j] == 0) || (j == FSN)) {
+            cntunq += 1;
+            if (j == FSN)
+              unqNum[cntunq] = j + 100; else
+              unqNum[cntunq] = j;
+          }
+        }
+        if (result == win) playCounter = 0;
+        if (cntunq > maxunq) {
+          if (result == win) result = noplayandwin; else result = noplayandnowin;
+        } else
+        {
+          if (result == win) result = playandwin; else result = playandnowin;
+        }
+        break;
+      default:
+        playCounter += 1;
+        cntunq = 0;
+        for (let j = 0; j <= 36; j++) {
+          if ((cntNum[j] == 0) || (j == FSN)) {
+            cntunq += 1;
+            if (j == FSN)
+              unqNum[cntunq] = j + 100; else
+              unqNum[cntunq] = j;
+          }
+        }      
+        if (result == win) result = noplayandwin; else result = noplayandnowin;
+
+    }
+    //unqcounter.textContent =  playCounter + '-' + result;
+    return(result);
+  }
+}
+
+
+function writeUniqueNumbers(FSN,btnID) {
+
+  for (let j = 1; j <= 18; j++) {
+    if (j == 1) unqbtn1.textContent = " ";
+    if (j == 2) unqbtn2.textContent = " ";
+    if (j == 3) unqbtn3.textContent = " ";
+    if (j == 4) unqbtn4.textContent = " ";
+    if (j == 5) unqbtn5.textContent = " ";
+    if (j == 6) unqbtn6.textContent = " ";
+    if (j == 7) unqbtn7.textContent = " ";
+    if (j == 8) unqbtn8.textContent = " ";
+    if (j == 9) unqbtn9.textContent = " ";
+    if (j == 10) unqbtn10.textContent = " ";
+    if (j == 11) unqbtn11.textContent = " ";
+    if (j == 12) unqbtn12.textContent = " ";
+    if (j == 13) unqbtn13.textContent = " ";
+    if (j == 14) unqbtn14.textContent = " ";
+    if (j == 15) unqbtn15.textContent = " ";
+    if (j == 16) unqbtn16.textContent = " ";
+    if (j == 17) unqbtn17.textContent = " ";
+    if (j == 18) unqbtn18.textContent = " ";
+  }
+
+  let result =  getUniqueNumbers(FSN,btnID);
+  if ((result == noplayandwin) || (result == playandwin))
+    msgwin.textContent = 'WIN'; else
+    msgwin.textContent = ' ';
+ 
+  unqcounter.textContent = cntunq;
+  let tmpcntunq = cntunq;
+  if (cntunq > maxunq) cntunq = 1;
+  if ((result == noplayandnowin) || (result == noplayandwin)) 
+    if (cntunq != 0) cntunq = 1;
+  for (let j = 1; j <= cntunq; j++) {
+    if (unqNum[j] >= 100) unqvalue = unqNum[j] - 100; else
+      unqvalue = unqNum[j];
+    if (j == 1) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn1.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn1.style.color = 'red';
+          break;
+        default:
+          unqbtn1.style.color = 'black';
+          break;
+      }
+      unqbtn1.textContent = unqvalue;
+    }
+    if (j == 2) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn2.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn2.style.color = 'red';
+          break;
+        default:
+          unqbtn2.style.color = 'black';
+          break;
+      }
+      unqbtn2.textContent = unqvalue;
+    }
+    if (j == 3) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn3.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn3.style.color = 'red';
+          break;
+        default:
+          unqbtn3.style.color = 'black';
+          break;
+      }
+      unqbtn3.textContent = unqvalue;
+    }
+    if (j == 4) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn4.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn4.style.color = 'red';
+          break;
+        default:
+          unqbtn4.style.color = 'black';
+          break;
+      }
+      unqbtn4.textContent = unqvalue;
+    }
+    if (j == 5) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn5.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn5.style.color = 'red';
+          break;
+        default:
+          unqbtn5.style.color = 'black';
+          break;
+      }
+      unqbtn5.textContent = unqvalue;
+    }
+    if (j == 6) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn6.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn6.style.color = 'red';
+          break;
+        default:
+          unqbtn6.style.color = 'black';
+          break;
+      }
+      unqbtn6.textContent = unqvalue;
+    }
+    if (j == 7) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn7.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn7.style.color = 'red';
+          break;
+        default:
+          unqbtn7.style.color = 'black';
+          break;
+      }
+      unqbtn7.textContent = unqvalue;
+    }
+    if (j == 8) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn8.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn8.style.color = 'red';
+          break;
+        default:
+          unqbtn8.style.color = 'black';
+          break;
+      }
+      unqbtn8.textContent = unqvalue;
+    }
+    if (j == 9) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn9.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn9.style.color = 'red';
+          break;
+        default:
+          unqbtn9.style.color = 'black';
+          break;
+      }
+      unqbtn9.textContent = unqvalue;
+    }
+    if (j == 10) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn10.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn10.style.color = 'red';
+          break;
+        default:
+          unqbtn10.style.color = 'black';
+          break;
+      }
+      unqbtn10.textContent = unqvalue;
+    }
+    if (j == 11) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn11.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn11.style.color = 'red';
+          break;
+        default:
+          unqbtn11.style.color = 'black';
+          break;
+      }
+      unqbtn11.textContent = unqvalue;
+    }
+    if (j == 12) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn12.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn12.style.color = 'red';
+          break;
+        default:
+          unqbtn12.style.color = 'black';
+          break;
+      }
+      unqbtn12.textContent = unqvalue;
+    }
+    if (j == 13) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn13.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn13.style.color = 'red';
+          break;
+        default:
+          unqbtn13.style.color = 'black';
+          break;
+      }
+      unqbtn13.textContent = unqvalue;
+    }
+    if (j == 14) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn14.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn14.style.color = 'red';
+          break;
+        default:
+          unqbtn14.style.color = 'black';
+          break;
+      }
+      unqbtn14.textContent = unqvalue;
+    }
+    if (j == 15) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn15.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn15.style.color = 'red';
+          break;
+        default:
+          unqbtn15.style.color = 'black';
+          break;
+      }
+      unqbtn15.textContent = unqvalue;
+    }
+    if (j == 16) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn16.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn16.style.color = 'red';
+          break;
+        default:
+          unqbtn16.style.color = 'black';
+          break;
+      }
+      unqbtn16.textContent = unqvalue;
+    }
+    if (j == 17) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn17.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn17.style.color = 'red';
+          break;
+        default:
+          unqbtn17.style.color = 'black';
+          break;
+      }
+      unqbtn17.textContent = unqvalue;
+    }
+    if (j == 18) {
+      switch (unqvalue) {
+        case 0:
+          unqbtn18.style.color = 'green';
+          break;
+        case 1: case 3: case 5: case 7: case 9: case 12:
+        case 14: case 16: case 18: case 19: case 21: case 23:
+        case 25: case 27: case 30: case 32: case 34: case 36:
+          unqbtn18.style.color = 'red';
+          break;
+        default:
+          unqbtn18.style.color = 'black';
+          break;
+      }
+      unqbtn18.textContent = unqvalue;
+    }
+  }
+  cntunq = tmpcntunq;
+}
+
+function writePreviousNumbers(btnID) {
+  // Code to be executed
+  cntNum[btnID] += 1;
+  cntPA += 1;
+  PA[cntPA] =  btnID;
+ 
+  prvcounter.textContent = cntPA;
+     
+  if (cntPA <= 12) {
+    for (let i = 1; i <= cntPA; i++) {
+      if ( i == 1 ) {      
+        switch (PA[i]) {
+          case 0:
+            prvbtn1.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn1.style.color = 'red';
+            break;
+          default:
+            prvbtn1.style.color = 'black';
+            break;
+        }  
+       prvbtn1.textContent = PA[i];
+      }
+      if ( i == 2 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn2.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn2.style.color = 'red';
+            break;
+          default:
+            prvbtn2.style.color = 'black';
+            break;
+        }  
+        prvbtn2.textContent = PA[i];
+      }  
+      if ( i == 3 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn3.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn3.style.color = 'red';
+            break;
+          default:
+            prvbtn3.style.color = 'black';
+            break;
+        }  
+        prvbtn3.textContent = PA[i];
+      }
+      if ( i == 4 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn4.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn4.style.color = 'red';
+            break;
+          default:
+            prvbtn4.style.color = 'black';
+            break;
+        }  
+        prvbtn4.textContent = PA[i];
+      }
+      if ( i == 5 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn5.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn5.style.color = 'red';
+            break;
+          default:
+            prvbtn5.style.color = 'black';
+            break;
+        }  
+        prvbtn5.textContent = PA[i];
+      }
+      if ( i == 6 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn6.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn6.style.color = 'red';
+            break;
+          default:
+            prvbtn6.style.color = 'black';
+            break;
+        }  
+        prvbtn6.textContent = PA[i];
+      }
+      if ( i == 7 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn7.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn7.style.color = 'red';
+            break;
+          default:
+            prvbtn7.style.color = 'black';
+            break;
+        }  
+        prvbtn7.textContent = PA[i];
+      }
+      if ( i == 8 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn8.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn8.style.color = 'red';
+            break;
+          default:
+            prvbtn8.style.color = 'black';
+            break;
+        }  
+        prvbtn8.textContent = PA[i];
+      }
+      if ( i == 9 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn9.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn9.style.color = 'red';
+            break;
+          default:
+            prvbtn9.style.color = 'black';
+            break;
+        }  
+        prvbtn9.textContent = PA[i];
+      }
+      if ( i == 10 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn10.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn10.style.color = 'red';
+            break;
+          default:
+            prvbtn10.style.color = 'black';
+            break;
+        }  
+        prvbtn10.textContent = PA[i];
+      }
+      if ( i == 11 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn11.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn11.style.color = 'red';
+            break;
+          default:
+            prvbtn11.style.color = 'black';
+            break;
+        }  
+        prvbtn11.textContent = PA[i];
+      }
+      if ( i == 12 ) {
+        switch (PA[i]) {
+          case 0:
+            prvbtn12.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn12.style.color = 'red';
+            break;
+          default:
+            prvbtn12.style.color = 'black';
+            break;
+        }  
+        prvbtn12.textContent = PA[i];
+      }
+  }
+ } else {
+   for (let i = 1; i <= 12; i++) {
+      if ( i == 1 ) {      
+        switch (PA[cntPA - 11]) {
+          case 0:
+            prvbtn1.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn1.style.color = 'red';
+            break;
+          default:
+            prvbtn1.style.color = 'black';
+            break;
+        }  
+     
+       prvbtn1.textContent = PA[cntPA - 11];
+      }
+      if ( i == 2 ) {
+        switch (PA[cntPA - 10]) {
+          case 0:
+            prvbtn2.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn2.style.color = 'red';
+            break;
+          default:
+            prvbtn2.style.color = 'black';
+            break;
+        }  
+        prvbtn2.textContent = PA[cntPA - 10];
+      }  
+      if ( i == 3 ) {
+        switch (PA[cntPA - 9]) {
+          case 0:
+            prvbtn3.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn3.style.color = 'red';
+            break;
+          default:
+            prvbtn3.style.color = 'black';
+            break;
+        }  
+        prvbtn3.textContent = PA[cntPA - 9];
+      }
+      if ( i == 4 ) {
+        switch (PA[cntPA - 8]) {
+          case 0:
+            prvbtn4.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn4.style.color = 'red';
+            break;
+          default:
+            prvbtn4.style.color = 'black';
+            break;
+        }  
+        prvbtn4.textContent = PA[cntPA - 8];
+      }
+      if ( i == 5 ) {
+        switch (PA[cntPA - 7]) {
+          case 0:
+            prvbtn5.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn5.style.color = 'red';
+            break;
+          default:
+            prvbtn5.style.color = 'black';
+            break;
+        }  
+        prvbtn5.textContent = PA[cntPA - 7];
+      }
+      if ( i == 6 ) {
+        switch (PA[cntPA - 6]) {
+          case 0:
+            prvbtn6.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn6.style.color = 'red';
+            break;
+          default:
+            prvbtn6.style.color = 'black';
+            break;
+        }  
+        prvbtn6.textContent = PA[cntPA - 6];
+      }
+      if ( i == 7 ) {
+        switch (PA[cntPA - 5]) {
+          case 0:
+            prvbtn7.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn7.style.color = 'red';
+            break;
+          default:
+            prvbtn7.style.color = 'black';
+            break;
+        }  
+        prvbtn7.textContent = PA[cntPA - 5];
+      }
+      if ( i == 8 ) {
+        switch (PA[cntPA - 4]) {
+          case 0:
+            prvbtn8.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn8.style.color = 'red';
+            break;
+          default:
+            prvbtn8.style.color = 'black';
+            break;
+        }  
+        prvbtn8.textContent = PA[cntPA - 4];
+      }
+      if ( i == 9 ) {
+        switch (PA[cntPA - 3]) {
+          case 0:
+            prvbtn9.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn9.style.color = 'red';
+            break;
+          default:
+            prvbtn9.style.color = 'black';
+            break;
+        }  
+        prvbtn9.textContent = PA[cntPA - 3];
+      }
+      if ( i == 10 ) {
+        switch (PA[cntPA - 2]) {
+          case 0:
+            prvbtn10.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn10.style.color = 'red';
+            break;
+          default:
+            prvbtn10.style.color = 'black';
+            break;
+        }  
+        prvbtn10.textContent = PA[cntPA - 2];
+      }
+      if ( i == 11 ) {
+        switch (PA[cntPA - 1]) {
+          case 0:
+            prvbtn11.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn11.style.color = 'red';
+            break;
+          default:
+            prvbtn11.style.color = 'black';
+            break;
+        }  
+        prvbtn11.textContent = PA[cntPA - 1];
+      }
+      if ( i == 12 ) {
+        switch (PA[cntPA]) {
+          case 0:
+            prvbtn12.style.color = 'green';
+            break;
+          case 1: case 3: case 5: case 7: case 9: case 12:
+          case 14: case 16: case 18: case 19: case 21: case 23:
+          case 25: case 27: case 30: case 32: case 34: case 36:
+            prvbtn12.style.color = 'red';
+            break;
+          default:
+            prvbtn12.style.color = 'black';
+            break;
+        }  
+        prvbtn12.textContent = PA[cntPA];
+      }
+   }  
+  }
+  writeUniqueNumbers(firstSingleNumber(),btnID);
+  return(cntPA <= 36); // Optional: returns a value
+}
+
+
+// Add an event listener to the buttons
+
+btn38.addEventListener("click", function() {
+// This function will execute when the button is clicked
+  let tmpcntPA = cntPA;
+  if (cntPA > 0) {
+    cntNum[PA[cntPA]] -= 1;
+    PA[cntPA] = -1;
+    cntPA -= 1;
+    if (cntPA == 0) {
+      prvbtn1.textContent = " ";
+      unqcounter.textContent = " ";
+      unqbtn1.textContent = " ";
+    }
+    tmpcntPA = cntPA;
+    cntPA = 0;
+    cntunq = 0;
+    playCounter = 0;
+    cntNum.fill(0);    
+    for (let j = 1; j <= 18; j++) {
+      if (j == 1) prvbtn1.textContent = " ";
+      if (j == 2) prvbtn2.textContent = " ";
+      if (j == 3) prvbtn3.textContent = " ";
+      if (j == 4) prvbtn4.textContent = " ";
+      if (j == 5) prvbtn5.textContent = " ";
+      if (j == 6) prvbtn6.textContent = " ";
+      if (j == 7) prvbtn7.textContent = " ";
+      if (j == 8) prvbtn8.textContent = " ";
+      if (j == 9) prvbtn9.textContent = " ";
+      if (j == 10) prvbtn10.textContent = " ";
+      if (j == 11) prvbtn11.textContent = " ";
+      if (j == 12) prvbtn12.textContent = " ";
+    }      
+    for (let i = 1; i <= tmpcntPA; i++) {
+      writePreviousNumbers(PA[i]); 
+    }
+  }
+  prvcounter.textContent = cntPA;
+});
+ 
+btn0.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(0);
+});
+
+btn1.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+//prvbtn1.style.color = 'red';
+//prvbtn1.textContent = "9";
+   
+  writePreviousNumbers(1);
+
+});
+
+btn2.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(2);
+});
+ 
+btn3.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(3);
+});
+   
+btn4.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(4);
+});
+ 
+btn5.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(5);
+});
+ 
+btn6.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(6);
+});
+
+btn7.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(7);
+});
+ 
+btn8.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(8);
+});
+   
+btn9.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(9);
+});
+ 
+btn10.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(10);
+});
+ 
+btn11.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(11);
+});
+ 
+btn12.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(12);
+});
+
+ 
+btn13.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(13);
+});
+ 
+btn14.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(14);
+});
+ 
+btn15.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(15);
+});
+ 
+btn16.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(16);
+});
+ 
+btn17.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(17);
+});
+ 
+btn18.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(18);
+});
+ 
+btn19.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(19);
+});
+ 
+btn20.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(20);
+});
+   
+btn21.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(21);
+});
+ 
+btn22.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(22);
+});
+ 
+btn23.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(23);
+});
+
+btn24.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(24);
+});
+ 
+btn25.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(25);
+});
+ 
+btn26.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(26);
+});
+ 
+btn27.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(27);
+});
+ 
+btn28.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(28);
+});
+ 
+btn29.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(29);
+});
+
+btn30.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(30);
+});
+ 
+btn31.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(31);
+});
+ 
+btn32.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(32);
+});
+ 
+btn33.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(33);
+});
+ 
+btn34.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(34);
+});
+   
+btn35.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+ writePreviousNumbers(35);
+});
+ 
+btn36.addEventListener("click", function() {
+// This function will execute when the button is clicked
+
+  writePreviousNumbers(36);
+});
+
+ 
+ 
+</script>
+
+
+
+
+
+</body>
+</html>
